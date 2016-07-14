@@ -51,7 +51,6 @@ currPosX = -1
 currPosY = -1
 countx = 0
 
-# Reset the game state
 def reset():
     global currLevel
     global currCount
@@ -70,16 +69,13 @@ def reset():
     click_point_y = -1
     showBegin = False
 
-# Put text on screen
 def addText(frame,text,origin,size = 1.0,color = (255,255,255),thickness=1):
     cv2.putText(frame,text,origin,cv2.FONT_HERSHEY_SIMPLEX, size, color, 2)
-
-# Put game title on screen
+    
 def presentation(frame):
     addText(frame,"PartyPi v0.0.1",((screenwidth/5)*4, screenheight/7),color=(68,54,66),size=0.5, thickness=0.5)
     cv2.imshow('PartyPi',frame)
 
-# Check for most recent image number
 def get_last_image_nr():
     nr = 0
     for file in os.listdir(os.getcwd()+'/img'):
@@ -93,7 +89,6 @@ def get_last_image_nr():
 
 img_nr=get_last_image_nr()
 
-# Mouse click and position
 def mouse(event, x, y, flags, param):
     global click_point
     global click_point_x
@@ -108,7 +103,6 @@ def mouse(event, x, y, flags, param):
         click_point_x,click_point_y = x,y
         # print x,y
 
-# Capture and save photo
 def takephoto(frame):
     global img_nr
     global imagepath
@@ -121,7 +115,6 @@ def takephoto(frame):
     upload_img(photo)
     return photo
 
-# Pick a random emotion
 def randomemotion(easymode):
     global static
     global currEmotion
@@ -141,7 +134,6 @@ def randomemotion(easymode):
         else: 
             return currEmotion + '+' + secCurrEmotion
 
-# Display game
 def showgame(frame):
     global currCount
     global flashon
