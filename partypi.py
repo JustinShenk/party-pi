@@ -1,7 +1,7 @@
 #!/ usr/bin/python
 import cv2
 import uuid
-from emotionpy2 import emotion_api
+from emotionpi import emotion_api
 import pyimgur
 import numpy as np
 import operator
