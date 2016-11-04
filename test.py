@@ -109,7 +109,7 @@ class PartyPi():
             # self.photoMode = True
             # self.photo = takeself.photo()
 
-            if keypress == 113 or 27:  # 'q' pressed to quit
+            if keypress == 113 or keypress == 27:  # 'q' pressed to quit
                 print "Escape key entered"
                 self.looping = False
                 self.endGame()
