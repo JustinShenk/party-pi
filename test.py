@@ -46,7 +46,7 @@ class PartyPi():
         # self.piCamera.resolution = (640, 480)
         self.piCamera.resolution = (1280 / 2, 1024 / 2)
         self.piCamera.framerate = 16
-        self.rawCapture = PiRGBArray(self.piCamera, size=(640, 480))
+        self.rawCapture = PiRGBArray(self.piCamera, size=(1280 / 2, 1024 / 2))
         time.sleep(0.1)
 
     def setupGame(self):
