@@ -186,7 +186,7 @@ class PartyPi():
             self.countx = self.screenwidth - (self.screenwidth / 5) * 2
 
         # Flash, and then show analyzing
-        elif timer >= 130 and timer < 135:
+        elif timer >= 130 and timer < 136:
             self.flashon = True
             self.currCount = None
             self.countx = -100  # make it disappear
