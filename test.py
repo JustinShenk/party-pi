@@ -76,7 +76,8 @@ class PartyPi():
             for _frame in self.piCamera.capture_continuous(self.rawCapture, format="bgr", use_video_port=True):
                 # grab the raw NumPy array representing the image, then initialize the timestamp
                 # and occupied/unoccupied text
-                self.frame = _frame.array
+                self.frame = cv2.flip(_frame.array, 1)
+
                 self.gameLoop()
         else:
             while self.looping:
