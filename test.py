@@ -8,6 +8,8 @@ import operator
 import random
 import os
 import sys
+from picamera.array import PiRGBArray
+from picamera import PiCamera
 
 
 class PartyPi():
@@ -20,6 +22,10 @@ class PartyPi():
         self.emotions = ['anger', 'contempt', 'disgust',
                          'fear', 'happiness', 'neutral', 'sadness', 'surprise']
         self.photo = cv2.imread('image.png')
+        # initialize the camera and grab a reference to the raw camera capture
+        self.raspberry = True
+        if self.raspberry:
+            self.pyIt()
         self.currEmotion = 'anger'
         self.screenwidth = 1280 / 2
         self.screenheight = 1024 / 2
@@ -32,6 +38,12 @@ class PartyPi():
         self.tickcount = 0
         self.initPyimgur()
         self.setupGame()
+
+    def pyIt(self):
+        self.piCamera = PiCamera()
+        self.piCamera.resolution = (640, 480)
+        self.piCamera.framerate = 32
+        self.rawCapture = PiRGBArray(self.piCamera, size=(640, 480))
 
     def setupGame(self):
         # cascPath = "face.xml"
@@ -72,6 +84,11 @@ class PartyPi():
 
         # Catch escape key
         keypress = cv2.waitKey(1) & 0xFF
+
+        # clear the stream in preparation for the next frame
+        if self.raspberry:
+            self.rawCapture.truncate(0)
+
         if keypress != 255:
             print(keypress)
             # if keypress == 32:
@@ -237,9 +254,17 @@ class PartyPi():
 
     def captureFrame(self):
         # Capture frame-by-frame
-        ret, frame = self.cam.read()
-        self.frame = cv2.flip(frame, 1)
-        self.overlay = self.frame.copy()
+
+        if self.raspberry:
+            # capture frames from the camera
+            for _frame in camera.capture_continuous(self.rawCapture, format="bgr", use_video_port=True):
+                # grab the raw NumPy array representing the image, then initialize the timestamp
+                # and occupied/unoccupied text
+                self.frame = _frame.array
+        else:
+            ret, frame = self.cam.read()
+            self.frame = cv2.flip(frame, 1)
+            self.overlay = self.frame.copy()
 
     def takePhoto(self):
         img_nr = self.get_last_image_nr()
