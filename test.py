@@ -43,8 +43,9 @@ class PartyPi():
 
     def pyIt(self):
         self.piCamera = PiCamera()
-        self.piCamera.resolution = (640, 480)
-        self.piCamera.framerate = 32
+        # self.piCamera.resolution = (640, 480)
+        self.piCamera.resolution = (1280 / 2, 1024 / 2)
+        self.piCamera.framerate = 16
         self.rawCapture = PiRGBArray(self.piCamera, size=(640, 480))
         time.sleep(0.1)
 
@@ -112,6 +113,14 @@ class PartyPi():
                 print "Escape key entered"
                 self.looping = False
                 self.endGame()
+            elif keypress == 83 and self.level == 0:  # left
+                self.easyMode = True
+                self.tickcount = 0
+                self.level = 1
+            elif keypress == 81 and self.level == 0:  # right
+                self.easyMode = False
+                self.tickcount = 0
+                self.level = 1
             if self.level == 2:
                 self.reset()
 
