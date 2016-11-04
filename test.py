@@ -63,7 +63,9 @@ class PartyPi():
         self.currCount = None
         self.static = False
         self.photoMode = False
-        cv2.namedWindow('PartyPi', 0)
+        cv2.namedWindow('PartyPi', cv2.WND_PROP_FULLSCREEN)
+        cv2.setWindowProperty(
+            "PartyPi", cv2.WND_PROP_FULLSCREEN, cv2.cv.CV_WINDOW_FULLSCREEN)
         # cv2.setWindowProperty('PartyPi', cv2.WND_PROP_FULLSCREEN,
         # cv2.cv.CV_WINDOW_FULLSCREEN)
         if not self.raspberry:
