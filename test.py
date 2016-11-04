@@ -22,7 +22,7 @@ class PartyPi():
         self.font = cv2.FONT_HERSHEY_SIMPLEX
         self.emotions = ['anger', 'contempt', 'disgust',
                          'fear', 'happiness', 'neutral', 'sadness', 'surprise']
-        self.photo = cv2.imread('image.png')
+        self.photo = cv2.imread('img_1.png')
         # initialize the camera and grab a reference to the raw camera capture
         self.raspberry = True
         if self.raspberry:
