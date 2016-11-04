@@ -7,6 +7,7 @@ import numpy as np
 import operator
 import random
 import os
+import time
 import sys
 from picamera.array import PiRGBArray
 from picamera import PiCamera
@@ -44,6 +45,7 @@ class PartyPi():
         self.piCamera.resolution = (640, 480)
         self.piCamera.framerate = 32
         self.rawCapture = PiRGBArray(self.piCamera, size=(640, 480))
+        time.sleep(0.1)
 
     def setupGame(self):
         # cascPath = "face.xml"
@@ -63,8 +65,16 @@ class PartyPi():
         # cv2.cv.CV_WINDOW_FULLSCREEN)
         cv2.setMouseCallback('PartyPi', self.mouse)
         self.redfactor = 1.
-        while self.looping:
-            self.gameLoop()
+        if self.raspberry:
+            # capture frames from the camera
+            for _frame in self.piCamera.capture_continuous(self.rawCapture, format="bgr", use_video_port=True):
+                # grab the raw NumPy array representing the image, then initialize the timestamp
+                # and occupied/unoccupied text
+                self.frame = _frame.array
+                self.gameLoop()
+        else:
+            while self.looping:
+                self.gameLoop()
 
     def initPyimgur(self):
         # Initialize variables and parameters
@@ -105,7 +115,8 @@ class PartyPi():
 
     def level0(self):
         self.tickcount += 1
-        self.captureFrame()
+        if not self.raspberry:
+            self.captureFrame()
         self.addText(self.frame, "Easy", (self.screenwidth / 8,
                                           (self.screenheight * 3) / 4), size=3)
         self.addText(self.frame, "Hard", (self.screenwidth / 2,
@@ -255,16 +266,9 @@ class PartyPi():
     def captureFrame(self):
         # Capture frame-by-frame
 
-        if self.raspberry:
-            # capture frames from the camera
-            for _frame in self.piCamera.capture_continuous(self.rawCapture, format="bgr", use_video_port=True):
-                # grab the raw NumPy array representing the image, then initialize the timestamp
-                # and occupied/unoccupied text
-                self.frame = _frame.array
-        else:
-            ret, frame = self.cam.read()
-            self.frame = cv2.flip(frame, 1)
-            self.overlay = self.frame.copy()
+        ret, frame = self.cam.read()
+        self.frame = cv2.flip(frame, 1)
+        self.overlay = self.frame.copy()
 
     def takePhoto(self):
         img_nr = self.get_last_image_nr()
