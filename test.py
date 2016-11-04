@@ -126,6 +126,8 @@ class PartyPi():
 
     def level0(self):
         self.tickcount += 1
+        if self.raspberry:
+            self.tickcount += 2
         self.captureFrame()
         self.addText(self.frame, "Easy", (self.screenwidth / 8,
                                           (self.screenheight * 3) / 4), size=3)
@@ -156,6 +158,8 @@ class PartyPi():
         self.showBegin = False
         self.captureFrame()
         self.tickcount += 1
+        if self.raspberry:
+            self.tickcount += 2
         timer = int(self.tickcount * self.redfactor)
         print "tickcount:", self.tickcount, timer
 
@@ -233,6 +237,8 @@ class PartyPi():
 
     def level2(self):
         self.tickcount += 1
+        if self.raspberry:
+            self.tickcount += 2
         overlay = self.photo.copy()
         if self.currPosY >= self.screenheight * (4. / 5) and self.currPosY < self.screenheight:
             cv2.rectangle(overlay, (0, int(self.screenheight * (3. / 4))),
