@@ -207,8 +207,9 @@ class PartyPi():
                     self.startProcess = False
                     self.showAnalyzing = True
 
-        # Else take photo
+        # Else take photo at timer == 136
         else:
+            self.startProcess = False
             self.flashon = False
             self.showAnalyzing = False
             self.level = 2
