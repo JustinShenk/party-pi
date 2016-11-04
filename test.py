@@ -257,7 +257,7 @@ class PartyPi():
 
         if self.raspberry:
             # capture frames from the camera
-            for _frame in camera.capture_continuous(self.rawCapture, format="bgr", use_video_port=True):
+            for _frame in self.piCamera.capture_continuous(self.rawCapture, format="bgr", use_video_port=True):
                 # grab the raw NumPy array representing the image, then initialize the timestamp
                 # and occupied/unoccupied text
                 self.frame = _frame.array
