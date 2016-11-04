@@ -30,7 +30,8 @@ class PartyPi():
         self.currEmotion = 'anger'
         self.screenwidth = 1280 / 2
         self.screenheight = 1024 / 2
-        self.cam = cv2.VideoCapture(0)
+        if not self.raspberry:
+            self.cam = cv2.VideoCapture(0)
         self.countx = None
         self.currPosX = None
         self.currPosY = None
@@ -51,8 +52,9 @@ class PartyPi():
         # cascPath = "face.xml"
         # self.faceCascade = cv2.CascadeClassifier(cascPath)
         print "Camera initialize"
-        self.cam.set(3, self.screenwidth)
-        self.cam.set(4, self.screenheight)
+        if not self.raspberry:
+            self.cam.set(3, self.screenwidth)
+            self.cam.set(4, self.screenheight)
         self.flashon = False
         self.showAnalyzing = False
         scale = 0.5  # font scale
@@ -115,8 +117,7 @@ class PartyPi():
 
     def level0(self):
         self.tickcount += 1
-        if not self.raspberry:
-            self.captureFrame()
+        self.captureFrame()
         self.addText(self.frame, "Easy", (self.screenwidth / 8,
                                           (self.screenheight * 3) / 4), size=3)
         self.addText(self.frame, "Hard", (self.screenwidth / 2,
@@ -265,9 +266,9 @@ class PartyPi():
 
     def captureFrame(self):
         # Capture frame-by-frame
-
-        ret, frame = self.cam.read()
-        self.frame = cv2.flip(frame, 1)
+        if not self.raspberry:
+            ret, frame = self.cam.read()
+            self.frame = cv2.flip(frame, 1)
         self.overlay = self.frame.copy()
 
     def takePhoto(self):
@@ -403,7 +404,8 @@ class PartyPi():
 
     def endGame(self):
         # When everything is done, release the capture
-        self.cam.release()
+        if not self.raspberry:
+            self.cam.release()
         if self.photoMode:
             self.addText(self.photo, "PartyPi v0.0.2", ((self.screenwidth / 5) * 4,
                                                         self.screenheight / 7), color=(68, 54, 66), size=0.5, thickness=0.5)
