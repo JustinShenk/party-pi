@@ -113,11 +113,11 @@ class PartyPi():
                 print "Escape key entered"
                 self.looping = False
                 self.endGame()
-            elif keypress == 83 and self.level == 0:  # left
+            elif keypress == 81 and self.level == 0:  # left
                 self.easyMode = True
                 self.tickcount = 0
                 self.level = 1
-            elif keypress == 81 and self.level == 0:  # right
+            elif keypress == 83 and self.level == 0:  # right
                 self.easyMode = False
                 self.tickcount = 0
                 self.level = 1
