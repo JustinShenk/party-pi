@@ -190,13 +190,22 @@ class PartyPi():
             self.flashon = True
             self.currCount = None
             self.countx = -100  # make it disappear
-            if timer >= 133 and timer < 134:
-                self.photoMode = True
-                self.photo = self.frame.copy()
-                self.startProcess = True
+            if not self.raspberry:
+                if timer >= 133 and timer < 134:
+                    self.photoMode = True
+                    self.photo = self.frame.copy()
+                    self.startProcess = True
+                else:
+                    self.startProcess = False
+                    self.showAnalyzing = True
             else:
-                self.startProcess = False
-                self.showAnalyzing = True
+                if timer >= 133 and timer <= 134:
+                    self.photoMode = True
+                    self.photo = self.frame.copy()
+                    self.startProcess = True
+                else:
+                    self.startProcess = False
+                    self.showAnalyzing = True
 
         # Else take photo
         else:
