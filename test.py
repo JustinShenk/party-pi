@@ -5,7 +5,6 @@ from emotionpi import emotion_api
 import pyimgur
 import numpy as np
 import operator
-from Tkinter import *
 import random
 import os
 import sys
@@ -37,7 +36,6 @@ class PartyPi():
     def setupGame(self):
         # cascPath = "face.xml"
         # self.faceCascade = cv2.CascadeClassifier(cascPath)
-        self.flags = cv2.cv.CV_HAAR_SCALE_IMAGE
         print "Camera initialize"
         self.cam.set(3, self.screenwidth)
         self.cam.set(4, self.screenheight)
