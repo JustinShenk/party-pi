@@ -9,8 +9,6 @@ import random
 import os
 import time
 import sys
-from picamera.array import PiRGBArray
-from picamera import PiCamera
 
 
 class PartyPi():
@@ -25,13 +23,15 @@ class PartyPi():
         self.photo = cv2.imread('img_1.png')
         # initialize the camera and grab a reference to the raw camera capture
         self.raspberry = True
-        if self.raspberry:
+        if 'raspberry' in os.uname():
+            self.raspberry = True
             self.pyIt()
+        else:
+            self.raspberry = False
+            self.cam = cv2.VideoCapture(0)
         self.currEmotion = 'anger'
         self.screenwidth = 1280 / 2
         self.screenheight = 1024 / 2
-        if not self.raspberry:
-            self.cam = cv2.VideoCapture(0)
         self.countx = None
         self.currPosX = None
         self.currPosY = None
@@ -63,13 +63,13 @@ class PartyPi():
         self.currCount = None
         self.static = False
         self.photoMode = False
-        cv2.namedWindow('PartyPi', 0)
+        cv2.namedWindow("PartyPi", cv2.WND_PROP_AUTOSIZE)
         # cv2.setWindowProperty(
         #     "PartyPi", cv2.WND_PROP_FULLSCREEN)
-        # cv2.setWindowProperty('PartyPi', cv2.WND_PROP_FULLSCREEN,
-        # cv2.cv.CV_WINDOW_FULLSCREEN)
+        cv2.setWindowProperty("PartyPi", cv2.WND_PROP_AUTOSIZE,
+                              cv2.WINDOW_AUTOSIZE)
         if not self.raspberry:
-            cv2.setMouseCallback('PartyPi', self.mouse)
+            cv2.setMouseCallback("PartyPi", self.mouse)
         self.redfactor = 1.
         if self.raspberry:
             # capture frames from the camera
@@ -452,6 +452,10 @@ class PartyPi():
 
 
 def main():
+    import os
+    if 'raspberry' in os.uname():
+        from picamera.array import PiRGBArray
+        from picamera import PiCamera
     application = PartyPi()
 
 
