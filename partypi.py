@@ -160,7 +160,7 @@ class PartyPi():
             if not self.pretimer:
                 for (x, y, w, h) in faces:
                     cv2.rectangle(self.frame, (x, y),
-                                  (x + w, y + h), (0, 255, 0), 2)
+                                  (x + w, y + h), (0, 0, 255), 2)
                     if x + w < self.easySize[1] and y > self.screenheight - self.easySize[0]:
                         self.easyMode = True
                         self.level = 1
@@ -410,7 +410,7 @@ class PartyPi():
                 faceRectangle = currFace['faceRectangle']
                 cv2.rectangle(self.photo, (faceRectangle['left'], faceRectangle['top']),
                               (faceRectangle['left'] + faceRectangle['width'], faceRectangle['top'] +
-                               faceRectangle['height']), color=(255, 255, 0), thickness=5)
+                               faceRectangle['height']), color=(255, 255, 0), thickness=4)
                 # self.currEmotion = max(currFace['scores'].items(),
                 # key=operator.itemgetter(1))[0]
                 firstEmotion = currFace['scores'][self.currEmotion] * 100
