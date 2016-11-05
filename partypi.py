@@ -76,7 +76,7 @@ class PartyPi():
         self.redfactor = 1.
         if self.raspberry:
             # capture frames from the camera
-            for _frame in self.piCamera.capture_continuous(self.rawCapture, format="bgr", use_video_port=True):
+            with self.piCamera.capture_continuous(self.rawCapture, format="bgr", use_video_port=True) as _frame:
                 # grab the raw NumPy array representing the image, then initialize the timestamp
                 # and occupied/unoccupied text
                 self.frame = cv2.flip(_frame.array, 1)
@@ -120,18 +120,20 @@ class PartyPi():
                 print "Escape key entered"
                 self.looping = False
                 self.endGame()
-            elif keypress == 81 and self.level == 0:  # left
-                self.easyMode = True
-                self.tickcount = 0
-                self.level = 1
-            elif keypress == 83 and self.level == 0:  # right
-                self.easyMode = False
-                self.tickcount = 0
-                self.level = 1
-            if self.level == 2:
+            elif self.level == 0:
+                if keypress == 81 or keypress == 2:  # left
+                    self.easyMode = True
+                    self.tickcount = 0
+                    self.level = 1
+                elif keypress == 83 or keypress == 3:  # right
+                    self.easyMode = False
+                    self.tickcount = 0
+                    self.level = 1
+            elif self.level == 2:
                 self.reset()
 
     def level0(self):
+        # Mode selection
         self.tickcount += 1
         if self.raspberry:
             self.tickcount += 1
@@ -203,6 +205,7 @@ class PartyPi():
                     self.startProcess = False
                     self.showAnalyzing = True
             else:
+                # Raspberry-specific timing
                 if timer >= 133 and timer <= 134:
                     self.photoMode = True
                     self.photo = self.frame.copy()
@@ -236,7 +239,6 @@ class PartyPi():
         elif self.flashon:
             cv2.rectangle(self.frame, (0, 0), (self.screenwidth,
                                                self.screenheight), (255, 255, 255), -1)
-
         if self.showAnalyzing:
             self.addText(self.frame, "Analyzing...", (self.screenwidth / 5,
                                                       self.screenheight / 4), size=2.2, color=(224, 23, 101))
@@ -304,7 +306,8 @@ class PartyPi():
         img_nr = self.get_last_image_nr()
         self.imagepath = 'img/' + str(self.img_name) + \
             str(img_nr) + str(self.img_end)
-        cv2.imwrite(self.imagepath, self.photo)
+        bwphoto = cv2.cvtColor(self.photo, cv2.COLOR_BGR2GRAY)
+        cv2.imwrite(self.imagepath, bwphoto)
         img_nr += 1
         self.upload_img()
 
