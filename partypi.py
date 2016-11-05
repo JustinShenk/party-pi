@@ -9,7 +9,7 @@ import numpy as np
 import operator
 import random
 import time
-if 'raspberry' in os.uname():
+if 'raspberrypi' in os.uname():
     from picamera.array import PiRGBArray
     from picamera import PiCamera
 
@@ -24,12 +24,11 @@ class PartyPi():
         self.emotions = ['anger', 'contempt', 'disgust',
                          'fear', 'happiness', 'neutral', 'sadness', 'surprise']
         self.photo = cv2.imread('img_1.png')
-        if 'raspberry' in os.uname():
-            print "Raspberry pi detected"
+        if 'raspberrypi' in os.uname():
+            print "PartyPi v0.0.2 for Raspberry Pi"
             self.raspberry = True
             self.pyIt()
         else:
-            print "no raspberry detected"
             self.raspberry = False
             self.cam = cv2.VideoCapture(0)
         self.currEmotion = 'anger'
@@ -76,12 +75,10 @@ class PartyPi():
             cv2.setMouseCallback("PartyPi", self.mouse)
         self.redfactor = 1.
         if self.raspberry:
-            print "rasp"
             # capture frames from the camera
             for _frame in self.piCamera.capture_continuous(self.rawCapture, format="bgr", use_video_port=True):
                 # grab the raw NumPy array representing the image, then initialize the timestamp
                 # and occupied/unoccupied text
-                print "frame", self.frame
                 self.frame = cv2.flip(_frame.array, 1)
 
                 self.gameLoop()
