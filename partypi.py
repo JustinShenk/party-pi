@@ -29,6 +29,7 @@ class PartyPi():
             self.raspberry = True
             self.pyIt()
         else:
+            print "no raspberry detected"
             self.raspberry = False
             self.cam = cv2.VideoCapture(0)
         self.currEmotion = 'anger'
@@ -56,6 +57,7 @@ class PartyPi():
         # self.faceCascade = cv2.CascadeClassifier(cascPath)
         print "Camera initialize"
         if not self.raspberry:
+            print "MAC or PC initialize"
             self.cam.set(3, self.screenwidth)
             self.cam.set(4, self.screenheight)
         self.flashon = False
