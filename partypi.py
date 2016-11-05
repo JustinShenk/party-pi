@@ -25,6 +25,7 @@ class PartyPi():
                          'fear', 'happiness', 'neutral', 'sadness', 'surprise']
         self.photo = cv2.imread('img_1.png')
         if 'raspberry' in os.uname():
+            print "Raspberry pi detected"
             self.raspberry = True
             self.pyIt()
         else:
