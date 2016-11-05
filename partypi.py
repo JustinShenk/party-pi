@@ -37,8 +37,8 @@ class PartyPi():
         self.countx = None
         self.currPosX = None
         self.currPosY = None
-        self.click_point_x = -1
-        self.click_point_y = -1
+        self.click_point_x = None
+        self.click_point_y = None
         self.tickcount = 0
         self.initPyimgur()
         self.setupGame()
@@ -52,8 +52,15 @@ class PartyPi():
         time.sleep(0.1)
 
     def setupGame(self):
-        # cascPath = "face.xml"
-        # self.faceCascade = cv2.CascadeClassifier(cascPath)
+        self.easyIcon = cv2.imread('easy.png')
+        self.hardIcon = cv2.imread('hard.png')
+        self.playIcon = cv2.imread('playagain.png')
+        self.easySize = self.hardSize = self.easyIcon.shape[:2]
+        self.playSize = self.playIcon.shape[:2]
+        cascPath = "face.xml"
+        self.faceCascade = cv2.CascadeClassifier(cascPath)
+        self.pretimer = None
+
         print "Camera initialize"
         if not self.raspberry:
             print "MAC or PC initialize"
@@ -61,7 +68,6 @@ class PartyPi():
             self.cam.set(4, self.screenheight)
         self.flashon = False
         self.showAnalyzing = False
-        scale = 0.5  # font scale
         self.opacity = 0.4
         self.currCount = None
         self.static = False
@@ -88,7 +94,6 @@ class PartyPi():
 
     def initPyimgur(self):
         # Initialize variables and parameters
-
         self._url = 'https://api.projectoxford.ai/emotion/v1.0/recognize'
         self._key = '1cc9418279ff4b2683b5050cfa6f3785'
         self._maxNumRetries = 10
@@ -109,28 +114,7 @@ class PartyPi():
         if self.raspberry:
             self.rawCapture.truncate(0)
 
-        if keypress != 255:
-            print(keypress)
-            # if keypress == 32:
-            # self.tickcount = 0
-            # self.photoMode = True
-            # self.photo = takeself.photo()
-
-            if keypress == 113 or keypress == 27:  # 'q' pressed to quit
-                print "Escape key entered"
-                self.looping = False
-                self.endGame()
-            elif self.level == 0:
-                if keypress == 81 or keypress == 2:  # left
-                    self.easyMode = True
-                    self.tickcount = 0
-                    self.level = 1
-                elif keypress == 83 or keypress == 3:  # right
-                    self.easyMode = False
-                    self.tickcount = 0
-                    self.level = 1
-            elif self.level == 2:
-                self.reset()
+        self.listenForEnd(keypress)
 
     def level0(self):
         # Mode selection
@@ -138,23 +122,65 @@ class PartyPi():
         if self.raspberry:
             self.tickcount += 1
         self.captureFrame()
-        self.addText(self.frame, "Easy", (self.screenwidth / 8,
-                                          (self.screenheight * 3) / 4), size=3)
-        self.addText(self.frame, "Hard", (self.screenwidth / 2,
-                                          (self.screenheight * 3) / 4), size=3)
+
+        # self.addText(self.frame, "Easy", (self.screenwidth / 8,
+        #                                   (self.screenheight * 3) / 4), size=3)
+        # self.addText(self.frame, "Hard", (self.screenwidth / 2,
+        #                                   (self.screenheight * 3) / 4), size=3)
         if self.currPosX and self.currPosX < self.screenwidth / 2:
             cv2.rectangle(self.overlay, (0, 0), (self.screenwidth / 2,
                                                  self.screenheight), (211, 211, 211), -1)
         else:
             cv2.rectangle(self.overlay, (self.screenwidth / 2, 0),
                           (self.screenwidth, self.screenheight), (211, 211, 211), -1)
-        if self.click_point_x >= 0:
+        if self.click_point_x:
             if self.click_point_x < self.screenwidth / 2:
                 self.easyMode = True  # Easy mode selected
             else:
                 self.easyMode = False  # Hard mode selected
             self.tickcount = 0
             self.level = 1
+            self.click_point_x = None
+
+        # Draw faces
+        if True:
+
+            frame_gray = cv2.cvtColor(self.frame, cv2.COLOR_BGR2GRAY)
+
+            faces = self.faceCascade.detectMultiScale(
+                frame_gray,
+                scaleFactor=1.1,
+                minNeighbors=5,
+                minSize=(30, 30),
+                #         flags=cv2.cv.CV_HAAR_SCALE_IMAGE
+                flags=0
+            )
+
+            # Draw a rectangle around the faces
+            if not self.pretimer:
+                for (x, y, w, h) in faces:
+                    cv2.rectangle(self.frame, (x, y),
+                                  (x + w, y + h), (0, 255, 0), 2)
+                    if x + w < self.easySize[1] and y > self.screenheight - self.easySize[0]:
+                        self.easyMode = True
+                        self.level = 1
+                        self.tickcount = 0
+                    if x + w > (self.screenwidth - self.hardSize[1]) and y > (self.screenheight - self.hardSize[0]):
+                        self.easyMode = False
+                        self.level = 1
+                        self.tickcount = 0
+            else:
+                self.pretimer -= 1
+
+            # roi_gray = gray[y:y + h, x:x + w]
+            # roi_color = img[y:y + h, x:x + w]
+
+        # Draw easy mode selection box
+        self.overlay[self.screenheight - self.easySize[0]:self.screenheight,
+                     0:self.easySize[1]] = self.easyIcon
+
+        self.overlay[self.screenheight - self.hardSize[0]:self.screenheight,
+                     self.screenwidth - self.hardSize[1]:self.screenwidth] = self.hardIcon
         cv2.addWeighted(self.overlay, self.opacity, self.frame,
                         1 - self.opacity, 0, self.frame)
         # Display frame
@@ -220,7 +246,7 @@ class PartyPi():
             self.flashon = False
             self.showAnalyzing = False
             self.level = 2
-            self.click_point_y = -1
+            self.click_point_y = None
 
         # Draw the count "3.."
         if self.currCount:
@@ -253,19 +279,49 @@ class PartyPi():
 
     def level2(self):
         self.tickcount += 1
+        self.captureFrame()
         if self.raspberry:
             self.tickcount += 1
-        overlay = self.photo.copy()
-        if self.currPosY >= self.screenheight * (4. / 5) and self.currPosY < self.screenheight:
-            cv2.rectangle(overlay, (0, int(self.screenheight * (3. / 4))),
-                          (self.screenwidth, self.screenheight), (224, 23, 101), -1)
-            cv2.addWeighted(overlay, self.opacity, self.photo,
-                            1 - self.opacity, 0, self.frame)
-        if self.click_point_y >= self.screenheight * (4. / 5) and self.click_point_y < self.screenheight:
+        # overlay = self.photo.copy()
+        # if self.currPosY >= self.screenheight * (4. / 5) and self.currPosY < self.screenheight:
+        #     cv2.rectangle(overlay, (0, int(self.screenheight * (3. / 4))),
+        #                   (self.screenwidth, self.screenheight), (224, 23, 101), -1)
+        #     cv2.addWeighted(overlay, self.opacity, self.photo,
+        #                     1 - self.opacity, 0, self.frame)
+        if self.click_point_y > self.screenheight - self.playSize[0] and self.click_point_x > self.screenwidth - self.playSize[1]:
             self.reset()
-        cv2.putText(self.photo, "[Click to play again]", (self.screenwidth / 2, int(
-            self.screenheight * (6. / 7))), self.font, 0.7, (62, 184, 144), 2)
 
+        # cv2.putText(self.photo, "[Click to play again]", (self.screenwidth / 2, int(
+        # self.screenheight * (6. / 7))), self.font, 0.7, (62, 184, 144), 2)
+
+        frame_gray = cv2.cvtColor(self.frame, cv2.COLOR_BGR2GRAY)
+
+        faces = self.faceCascade.detectMultiScale(
+            frame_gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30),
+            #         flags=cv2.cv.CV_HAAR_SCALE_IMAGE
+            flags=0
+        )
+
+        # Draw a rectangle around the faces
+        for (x, y, w, h) in faces:
+            if x > self.screenwidth - self.playSize[1]:
+                cv2.rectangle(self.frame, (x, y),
+                              (x + w, y + h), (0, 255, 0), 2)
+                if x + w > (self.screenwidth - self.playSize[1]) and y > (self.screenheight - self.playSize[0]):
+                    self.pretimer = 30
+                    self.reset()
+
+        # Show live image
+        self.photo[self.screenheight - self.easySize[0]:self.screenheight, self.screenwidth - self.easySize[0]:self.screenwidth] = self.frame[
+            self.screenheight - self.easySize[1]:self.screenheight, self.screenwidth - self.easySize[1]:self.screenwidth]
+
+        self.overlay = self.photo.copy()
+        # Show 'Play Again'
+        self.overlay[self.screenheight - self.playSize[1]:self.screenheight, self.screenwidth - self.playSize[1]:self.screenwidth] = self.playIcon[
+            0:self.playSize[1], 0:self.playSize[0]]
+
+        cv2.addWeighted(self.overlay, self.opacity, self.photo,
+                        1 - self.opacity, 0, self.photo)
         self.addText(self.photo, "PartyPi v0.0.2", ((self.screenwidth / 5) * 4,
                                                     self.screenheight / 7), color=(68, 54, 66), size=0.5, thickness=0.5)
         cv2.imshow('PartyPi', self.photo)
@@ -350,16 +406,13 @@ class PartyPi():
         if self.tickcount % 20 == 0:
             print "Load Display ", self.tickcount
         if self.result:  # if faces present
-
-            for currFace in self.result:
+            for idx, currFace in enumerate(self.result):
                 faceRectangle = currFace['faceRectangle']
                 cv2.rectangle(self.photo, (faceRectangle['left'], faceRectangle['top']),
                               (faceRectangle['left'] + faceRectangle['width'], faceRectangle['top'] +
                                faceRectangle['height']), color=(255, 255, 0), thickness=5)
-
-            for idx, currFace in enumerate(self.result):
-                faceRectangle = currFace['faceRectangle']
-                # self.currEmotion = max(currFace['scores'].items(), key=operator.itemgetter(1))[0]
+                # self.currEmotion = max(currFace['scores'].items(),
+                # key=operator.itemgetter(1))[0]
                 firstEmotion = currFace['scores'][self.currEmotion] * 100
                 secEmotion = currFace['scores'][self.secCurrEmotion] * 100
                 # scores.append((firstEmotion+1)+(secEmotion+1))
@@ -402,8 +455,8 @@ class PartyPi():
 
             # if self.currPosY >= self.screenheight*(4./5) and self.currPosY < self.screenheight:
             ##
-            ##        cv2.rectangle(overlay,(0,int(self.screenheight*(4./5))),(self.screenwidth,self.screenheight),(224,23,101), -1)
-            ##        cv2.addWeighted(overlay,self.opacity,self.photo,1-self.opacity, 0, self.frame)
+            # cv2.rectangle(overlay,(0,int(self.screenheight*(4./5))),(self.screenwidth,self.screenheight),(224,23,101), -1)
+            # cv2.addWeighted(overlay,self.opacity,self.photo,1-self.opacity, 0, self.frame)
             # else:
             # pass
         else:
@@ -433,6 +486,25 @@ class PartyPi():
                 return self.currEmotion
             else:
                 return self.currEmotion + '+' + self.secCurrEmotion
+
+    def listenForEnd(self, keypress):
+        if keypress != 255:
+            print(keypress)
+            if keypress == 113 or keypress == 27:  # 'q' pressed to quit
+                print "Escape key entered"
+                self.looping = False
+                self.endGame()
+            elif self.level == 0:
+                if keypress == 81 or keypress == 2:  # left
+                    self.easyMode = True
+                    self.tickcount = 0
+                    self.level = 1
+                elif keypress == 83 or keypress == 3:  # right
+                    self.easyMode = False
+                    self.tickcount = 0
+                    self.level = 1
+            elif self.level == 2:
+                self.reset()
 
     def endGame(self):
         # When everything is done, release the capture
