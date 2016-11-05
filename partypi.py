@@ -308,7 +308,7 @@ class PartyPi():
                 cv2.rectangle(self.frame, (x, y),
                               (x + w, y + h), (0, 255, 0), 2)
                 if x + w > (self.screenwidth - self.playSize[1]) and y > (self.screenheight - self.playSize[0]):
-                    self.pretimer = 30
+                    self.pretimer = 10
                     self.reset()
 
         # Show live image
