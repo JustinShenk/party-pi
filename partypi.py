@@ -175,6 +175,8 @@ class PartyPi():
                         self.tickcount = 0
             else:
                 self.pretimer -= 1
+                if self.raspberry:
+                    self.pretimer -= 1
 
             # roi_gray = gray[y:y + h, x:x + w]
             # roi_color = img[y:y + h, x:x + w]
