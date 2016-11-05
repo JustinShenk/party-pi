@@ -76,7 +76,7 @@ class PartyPi():
         self.redfactor = 1.
         if self.raspberry:
             # capture frames from the camera
-            with self.piCamera.capture_continuous(self.rawCapture, format="bgr", use_video_port=True) as _frame:
+            for _frame in self.piCamera.capture_continuous(self.rawCapture, format="bgr", use_video_port=True):
                 # grab the raw NumPy array representing the image, then initialize the timestamp
                 # and occupied/unoccupied text
                 self.frame = cv2.flip(_frame.array, 1)
