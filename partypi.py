@@ -55,6 +55,10 @@ class PartyPi():
         self.easyIcon = cv2.imread('easy.png')
         self.hardIcon = cv2.imread('hard.png')
         self.playIcon = cv2.imread('playagain.png')
+        self.playIconOriginal = self.playIcon.copy()
+        self.playIcon1 = cv2.imread('playagain1.png')
+        self.playIcon2 = cv2.imread('playagain2.png')
+        self.playIcon3 = cv2.imread('playagain3.png')
         self.easySize = self.hardSize = self.easyIcon.shape[:2]
         self.playSize = self.playIcon.shape[:2]
         cascPath = "face.xml"
@@ -301,15 +305,26 @@ class PartyPi():
             #         flags=cv2.cv.CV_HAAR_SCALE_IMAGE
             flags=0
         )
+        if len(faces):
+            rightFace = max([x for x, y, w, h in faces])
+            bottomFace = max([y for x, y, w, h in faces])
+            if rightFace > self.screenwidth - self.playSize[1] * 1.2:
+                self.playIcon = self.playIcon1.copy()
+                if bottomFace > self.screenheight * 3 / 4:
+                    self.playIcon = self.playIcon2.copy()
+            else:
+                self.playIcon = self.playIconOriginal.copy()
+        else:
+            self.playIcon = self.playIconOriginal.copy()
 
         # Draw a rectangle around the faces
         for (x, y, w, h) in faces:
-            if x > self.screenwidth - self.playSize[1]:
-                cv2.rectangle(self.frame, (x, y),
-                              (x + w, y + h), (0, 255, 0), 2)
-                if x + w > (self.screenwidth - self.playSize[1]) and y > (self.screenheight - self.playSize[0]):
-                    self.pretimer = 10
-                    self.reset()
+            cv2.rectangle(self.frame, (x, y),
+                          (x + w, y + h), (0, 255, 0), 2)
+            if x > (self.screenwidth - self.playSize[1]) and y > (self.screenheight - self.playSize[0]):
+                self.playIcon = self.playIcon3.copy()
+                self.pretimer = 10
+                self.reset()
 
         # Show live image
         self.photo[self.screenheight - self.easySize[0]:self.screenheight, self.screenwidth - self.easySize[0]:self.screenwidth] = self.frame[
@@ -346,6 +361,7 @@ class PartyPi():
         self.result = []
         self.tickcount = 0
         self.static = False
+        self.playIcon = self.playIconOriginal
 
     def addText(self, frame, text, origin, size=1.0, color=(255, 255, 255), thickness=1):
         cv2.putText(frame, text, origin,
