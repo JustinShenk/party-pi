@@ -310,7 +310,7 @@ class PartyPi():
             bottomFace = max([y for x, y, w, h in faces])
             if rightFace > self.screenwidth - self.playSize[1] * 1.2:
                 self.playIcon = self.playIcon1.copy()
-                if bottomFace > self.screenheight * 3 / 4:
+                if bottomFace > self.screenheight / 2:
                     self.playIcon = self.playIcon2.copy()
             else:
                 self.playIcon = self.playIconOriginal.copy()
