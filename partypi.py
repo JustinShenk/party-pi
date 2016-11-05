@@ -526,11 +526,6 @@ class PartyPi():
         # When everything is done, release the capture
         if not self.raspberry:
             self.cam.release()
-        if self.photoMode:
-            self.addText(self.photo, "PartyPi v0.0.2", ((self.screenwidth / 5) * 4,
-                                                        self.screenheight / 7), color=(68, 54, 66), size=0.5, thickness=0.5)
-            cv2.imshow("PartyPi", self.photo)
-        else:
             self.addText(self.frame, "Press any key to quit_",
                          (self.screenwidth / 4, self.screenheight / 3))
             # self.presentation(self.frame)
