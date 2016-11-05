@@ -1,4 +1,6 @@
 #!/usr/lib/env python
+import os
+import sys
 import cv2
 import uuid
 from emotionpi import emotion_api
@@ -6,9 +8,10 @@ import pyimgur
 import numpy as np
 import operator
 import random
-import os
 import time
-import sys
+if 'raspberry' in os.uname():
+    from picamera.array import PiRGBArray
+    from picamera import PiCamera
 
 
 class PartyPi():
@@ -21,8 +24,6 @@ class PartyPi():
         self.emotions = ['anger', 'contempt', 'disgust',
                          'fear', 'happiness', 'neutral', 'sadness', 'surprise']
         self.photo = cv2.imread('img_1.png')
-        # initialize the camera and grab a reference to the raw camera capture
-        self.raspberry = True
         if 'raspberry' in os.uname():
             self.raspberry = True
             self.pyIt()
@@ -72,10 +73,12 @@ class PartyPi():
             cv2.setMouseCallback("PartyPi", self.mouse)
         self.redfactor = 1.
         if self.raspberry:
+            print "rasp"
             # capture frames from the camera
             for _frame in self.piCamera.capture_continuous(self.rawCapture, format="bgr", use_video_port=True):
                 # grab the raw NumPy array representing the image, then initialize the timestamp
                 # and occupied/unoccupied text
+                print "frame", self.frame
                 self.frame = cv2.flip(_frame.array, 1)
 
                 self.gameLoop()
@@ -144,7 +147,6 @@ class PartyPi():
             cv2.rectangle(self.overlay, (self.screenwidth / 2, 0),
                           (self.screenwidth, self.screenheight), (211, 211, 211), -1)
         if self.click_point_x >= 0:
-            print "click point x is greater than 0"
             if self.click_point_x < self.screenwidth / 2:
                 self.easyMode = True  # Easy mode selected
             else:
@@ -165,8 +167,6 @@ class PartyPi():
         if self.raspberry:
             self.tickcount += 1
         timer = int(self.tickcount * self.redfactor)
-        print "tickcount:", self.tickcount, timer
-
         self.promptEmotion()
 
         # Show 'Begin' after some time
@@ -452,10 +452,6 @@ class PartyPi():
 
 
 def main():
-    import os
-    if 'raspberry' in os.uname():
-        from picamera.array import PiRGBArray
-        from picamera import PiCamera
     application = PartyPi()
 
 
