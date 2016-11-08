@@ -39,6 +39,7 @@ class PartyPi():
         self.currPosY = None
         self.click_point_x = None
         self.click_point_y = None
+        self.calibrated = False
         self.tickcount = 0
         self.initPyimgur()
         self.setupGame()
@@ -123,6 +124,9 @@ class PartyPi():
     def level0(self):
         # Mode selection
         self.tickcount += 1
+        if not self.calibrated and self.tickcount == 10:
+            t0 = time.clock()
+
         if self.raspberry:
             self.tickcount += 1
         self.captureFrame()
@@ -148,7 +152,6 @@ class PartyPi():
 
         # Draw faces
         if True:
-
             frame_gray = cv2.cvtColor(self.frame, cv2.COLOR_BGR2GRAY)
 
             faces = self.faceCascade.detectMultiScale(
@@ -195,6 +198,11 @@ class PartyPi():
         self.addText(self.frame, "PartyPi v0.0.2", ((self.screenwidth / 5) * 4,
                                                     self.screenheight / 7), color=(68, 54, 66), size=0.5, thickness=0.5)
         cv2.imshow('PartyPi', self.frame)
+
+        if not self.calibrated and self.tickcount == 10:
+            self.t1 = time.clock() - t0
+            print "t1", self.t1
+            self.calibrated = True
 
     def level1(self):
         self.showBegin = False
