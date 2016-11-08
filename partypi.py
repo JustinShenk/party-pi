@@ -1,12 +1,8 @@
 #!/usr/lib/env python
 import os
-import sys
 import cv2
-import uuid
 from emotionpi import emotion_api
 import pyimgur
-import numpy as np
-import operator
 import random
 import time
 if 'raspberrypi' in os.uname():
@@ -45,6 +41,9 @@ class PartyPi():
         self.setupGame()
 
     def pyIt(self):
+        """
+        Set up piCamera for rasbperry pi camera module.
+        """
         self.piCamera = PiCamera()
         # self.piCamera.resolution = (640, 480)
         self.piCamera.resolution = (1280 / 2, 1024 / 2)
@@ -53,6 +52,9 @@ class PartyPi():
         time.sleep(0.1)
 
     def setupGame(self):
+        """
+        Set up icons and face cascade.
+        """
         self.easyIcon = cv2.imread('easy.png')
         self.hardIcon = cv2.imread('hard.png')
         self.playIcon = cv2.imread('playagain.png')
@@ -98,13 +100,18 @@ class PartyPi():
                 self.gameLoop()
 
     def initPyimgur(self):
-        # Initialize variables and parameters
+        """
+        Initialize variables and parameters for PyImgur.
+        """
         self._url = 'https://api.projectoxford.ai/emotion/v1.0/recognize'
         self._key = '1cc9418279ff4b2683b5050cfa6f3785'
         self._maxNumRetries = 10
         self.result = []
 
     def gameLoop(self):
+        """
+        Start the game loop. Listen for escape key.
+        """
         if self.level == 0:
             self.level0()
         elif self.level == 1:
@@ -112,17 +119,19 @@ class PartyPi():
         elif self.level == 2:
             self.level2()
 
-        # Catch escape key
+        # Catch escape key 'q'.
         keypress = cv2.waitKey(1) & 0xFF
 
-        # clear the stream in preparation for the next frame
+        # Clear the stream in preparation for the next frame.
         if self.raspberry:
             self.rawCapture.truncate(0)
 
         self.listenForEnd(keypress)
 
     def level0(self):
-        # Mode selection
+        """
+        Select a mode: Easy or Hard.
+        """
         self.tickcount += 1
         if not self.calibrated and self.tickcount == 10:
             t0 = time.clock()
@@ -186,7 +195,7 @@ class PartyPi():
             # roi_gray = gray[y:y + h, x:x + w]
             # roi_color = img[y:y + h, x:x + w]
 
-        # Draw easy mode selection box
+        # Draw easy mode selection box.
         self.overlay[self.screenheight - self.easySize[0]:self.screenheight,
                      0:self.easySize[1]] = self.easyIcon
 
@@ -205,6 +214,9 @@ class PartyPi():
             self.calibrated = True
 
     def level1(self):
+        """
+        Display emotion prompts, upload image, and display results.
+        """
         self.showBegin = False
         self.captureFrame()
         self.tickcount += 1
@@ -256,7 +268,7 @@ class PartyPi():
                     self.startProcess = False
                     self.showAnalyzing = True
 
-        # Else take photo at timer == 136
+        # Else take photo at timer == 136.
         else:
             self.startProcess = False
             self.flashon = False
@@ -264,7 +276,7 @@ class PartyPi():
             self.level = 2
             self.click_point_y = None
 
-        # Draw the count "3.."
+        # Draw the count "3..".
         if self.currCount:
             self.overlay = self.frame.copy()
             cv2.rectangle(self.overlay, (0, int(self.screenheight * (4. / 5))),
@@ -274,7 +286,7 @@ class PartyPi():
             cv2.putText(self.frame, str(self.currCount), (int(self.countx), int(
                 self.screenheight * (7. / 8))), self.font, 1.0, (255, 255, 255), 2)
 
-        # Draw other text and flash on screen
+        # Draw other text and flash on screen.
         if self.showBegin:
             cv2.putText(self.frame, "Begin!", (self.screenwidth / 3, self.screenheight / 2),
                         self.font, 2.0, (255, 255, 255), 2)
@@ -284,7 +296,7 @@ class PartyPi():
         if self.showAnalyzing:
             self.addText(self.frame, "Analyzing...", (self.screenwidth / 5,
                                                       self.screenheight / 4), size=2.2, color=(224, 23, 101))
-        # Display image
+        # Display image.
         self.addText(self.frame, "PartyPi v0.0.2", ((self.screenwidth / 5) * 4,
                                                     self.screenheight / 7), color=(68, 54, 66), size=0.5, thickness=0.5)
         cv2.imshow('PartyPi', self.frame)
@@ -294,6 +306,9 @@ class PartyPi():
             self.takePhoto()
 
     def level2(self):
+        """
+        Reset game with face detection.
+        """
         self.tickcount += 1
         self.captureFrame()
         if self.raspberry:
@@ -329,7 +344,7 @@ class PartyPi():
         else:
             self.playIcon = self.playIconOriginal.copy()
 
-        # Draw a rectangle around the faces
+        # Draw a rectangle around the faces.
         for (x, y, w, h) in faces:
             cv2.rectangle(self.frame, (x, y),
                           (x + w, y + h), (0, 255, 0), 2)
@@ -360,6 +375,9 @@ class PartyPi():
         cv2.imshow('PartyPi', self.photo)
 
     def mouse(self, event, x, y, flags, param):
+        """
+        Listen for mouse.
+        """
 
         if event == cv2.EVENT_MOUSEMOVE:
             self.currPosX, self.currPosY = x, y
@@ -370,6 +388,9 @@ class PartyPi():
             # print "x,y", x, y
 
     def reset(self):
+        """
+        Reset to beginning.
+        """
         self.level = 0
         self.currPosX = None
         self.currPosY = None
@@ -382,17 +403,26 @@ class PartyPi():
         self.playIcon = self.playIconOriginal
 
     def addText(self, frame, text, origin, size=1.0, color=(255, 255, 255), thickness=1):
+        """
+        Put text on current frame.
+        """
         cv2.putText(frame, text, origin,
                     self.font, size, color, 2)
 
     def captureFrame(self):
-        # Capture frame-by-frame
+        """
+        Capture frame-by-frame.
+        """
+
         if not self.raspberry:
             ret, frame = self.cam.read()
             self.frame = cv2.flip(frame, 1)
         self.overlay = self.frame.copy()
 
     def takePhoto(self):
+        """
+        Take photo and prepare to write, then send to PyImgur.
+        """
         img_nr = self.get_last_image_nr()
         self.imagepath = 'img/' + str(self.img_name) + \
             str(img_nr) + str(self.img_end)
@@ -402,6 +432,9 @@ class PartyPi():
         self.upload_img()
 
     def upload_img(self):
+        """
+        Send image to PyImgur.
+        """
         print "Initate upload"
         CLIENT_ID = "525d3ebc1147459"
 
@@ -433,6 +466,9 @@ class PartyPi():
         return nr + 1
 
     def display(self):
+        """
+        Display results of game on screen, with winner and scores for emotions.
+        """
         scores = []
         maxfirstemo = None
         maxsecondemo = None
@@ -497,6 +533,9 @@ class PartyPi():
             print "no results found"
 
     def promptEmotion(self):
+        """
+        Display prompt for emotion on screen.
+        """
         if self.easyMode:
             cv2.putText(self.frame, "Show " + self.randomEmotion() + '_',
                         (self.screenwidth / 5, 3 * (self.screenheight / 4)), self.font, 1.0, (255, 255, 255), 2)
@@ -505,6 +544,9 @@ class PartyPi():
                          '_', (10, 3 * self.screenheight / 4))
 
     def randomEmotion(self):
+        """
+        Pick a random emotion from list of emotions.
+        """
         if self.tickcount * self.redfactor > 30 or self.static:
             self.static = True
             if self.easyMode:
@@ -522,6 +564,9 @@ class PartyPi():
                 return self.currEmotion + '+' + self.secCurrEmotion
 
     def listenForEnd(self, keypress):
+        """
+        Listen for 'q', left, or right keys to end game.
+        """
         if keypress != 255:
             print(keypress)
             if keypress == 113 or keypress == 27:  # 'q' pressed to quit
@@ -541,7 +586,9 @@ class PartyPi():
                 self.reset()
 
     def endGame(self):
-        # When everything is done, release the capture
+        """
+        When everything is done, release the capture
+        """
         if not self.raspberry:
             self.cam.release()
             self.addText(self.frame, "Press any key to quit_",
@@ -556,6 +603,9 @@ class PartyPi():
 
 
 def main():
+    """
+    Load application.
+    """
     application = PartyPi()
 
 
