@@ -165,10 +165,12 @@ class PartyPi():
                 for (x, y, w, h) in faces:
                     cv2.rectangle(self.frame, (x, y),
                                   (x + w, y + h), (0, 0, 255), 2)
+                    # Select easy mode with face
                     if x + w < self.easySize[1] and y > self.screenheight - self.easySize[0]:
                         self.easyMode = True
                         self.level = 1
                         self.tickcount = 0
+                    # Select hard mode with face
                     if x + w > (self.screenwidth - self.hardSize[1]) and y > (self.screenheight - self.hardSize[0]):
                         self.easyMode = False
                         self.level = 1
@@ -325,8 +327,14 @@ class PartyPi():
                           (x + w, y + h), (0, 255, 0), 2)
             if x > (self.screenwidth - self.playSize[1]) and y > (self.screenheight - self.playSize[0]):
                 self.playIcon = self.playIcon3.copy()
-                self.pretimer = 10
-                self.reset()
+                if self.raspberry:
+                    self.pretimer = 10
+                else:
+                    self.pretimer = 100
+                if not self.pretimer:
+                    self.reset()
+                else:
+                    self.pretimer -= 1
 
         # Show live image
         self.photo[self.screenheight - self.easySize[0]:self.screenheight, self.screenwidth - self.easySize[0]:self.screenwidth] = self.frame[
