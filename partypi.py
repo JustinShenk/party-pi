@@ -37,6 +37,7 @@ class PartyPi():
         self.click_point_y = None
         self.calibrated = False
         self.tickcount = 0
+        self.modeLoadCount = 0
         self.initPyimgur()
         self.setupGame()
 
@@ -106,6 +107,18 @@ class PartyPi():
         self._url = 'https://api.projectoxford.ai/emotion/v1.0/recognize'
         self._key = '1cc9418279ff4b2683b5050cfa6f3785'
         self._maxNumRetries = 10
+        CLIENT_ID = "525d3ebc1147459"
+        CLIENT_SECRET = "75b8f9b449462150f374ae68f10154f2f392aa9b"
+        ALBUM_ID = "3mdlF"
+        self.im = pyimgur.Imgur(CLIENT_ID)
+
+        # TODO: Turn on album uploading.
+        # self.im = pyimgur.Imgur(CLIENT_ID, CLIENT_SECRET)
+        # self.im.change_authentication(
+        # refresh_token="814bed15fbea91dbc6131205f881fc45f8ee0715")
+        # self.im.refresh_access_token()
+        # user = im.get_user(spacemaker)
+        # self.album = self.im.get_album(ALBUM_ID)
         self.result = []
 
     def gameLoop(self):
@@ -172,25 +185,27 @@ class PartyPi():
                 flags=0
             )
 
-            # Draw a rectangle around the faces
-            if not self.pretimer:
-                for (x, y, w, h) in faces:
-                    cv2.rectangle(self.frame, (x, y),
-                                  (x + w, y + h), (0, 0, 255), 2)
-                    # Select easy mode with face
-                    if x + w < self.easySize[1] and y > self.screenheight - self.easySize[0]:
-                        self.easyMode = True
-                        self.level = 1
-                        self.tickcount = 0
-                    # Select hard mode with face
-                    if x + w > (self.screenwidth - self.hardSize[1]) and y > (self.screenheight - self.hardSize[0]):
-                        self.easyMode = False
-                        self.level = 1
-                        self.tickcount = 0
-            else:
-                self.pretimer -= 1
-                if self.raspberry:
-                    self.pretimer -= 1
+        # Draw a rectangle around the faces
+
+        for (x, y, w, h) in faces:
+            cv2.rectangle(self.frame, (x, y),
+                          (x + w, y + h), (0, 0, 255), 2)
+            # Select easy mode with face
+            if x + w < self.easySize[1] and y > self.screenheight - self.easySize[0]:
+                self.modeLoadCount += 1
+                if self.modeLoadCount is 20:
+                    self.easyMode = True
+                    self.modeLoadCount = 0
+                    self.level = 1
+                    self.tickcount = 0
+            # Select hard mode with face
+            elif x + w > (self.screenwidth - self.hardSize[1]) and y > (self.screenheight - self.hardSize[0]):
+                self.modeLoadCount += 1
+                if self.modeLoadCount is 20:
+                    self.easyMode = False
+                    self.modeLoadCount = 0
+                    self.level = 1
+                    self.tickcount = 0
 
             # roi_gray = gray[y:y + h, x:x + w]
             # roi_color = img[y:y + h, x:x + w]
@@ -436,11 +451,21 @@ class PartyPi():
         Send image to PyImgur.
         """
         print "Initate upload"
-        CLIENT_ID = "525d3ebc1147459"
 
-        im = pyimgur.Imgur(CLIENT_ID)
-        uploaded_image = im.upload_image(
+        # try:
+        #     pass
+        # except Exception as e:
+        #     raise
+        # else:
+        #     pass
+        # finally:
+        #     pass
+        uploaded_image = self.im.upload_image(
             self.imagepath, title="Uploaded with PyImgur")
+
+        # TODO: Turn on album uploading
+        # uploaded_image = self.im.upload_image(
+        #     self.imagepath, title="Uploaded with PyImgur", album=self.album)
         print(uploaded_image.title)
         print(uploaded_image.link)
         print(uploaded_image.size)
