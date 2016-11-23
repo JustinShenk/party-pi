@@ -187,7 +187,7 @@ class PartyPi(object):
             self.click_point_x = None
 
         # Draw faces
-        if True:
+        if self.tickCount % 5 == 0:
             frame_gray = cv2.cvtColor(self.frame, cv2.COLOR_BGR2GRAY)
 
             faces = self.faceCascade.detectMultiScale(
@@ -198,7 +198,8 @@ class PartyPi(object):
                 #         flags=cv2.cv.CV_HAAR_SCALE_IMAGE
                 flags=0
             )
-
+        else:
+            faces = None
         # Draw a rectangle around the faces
 
         for (x, y, w, h) in faces:
@@ -227,11 +228,12 @@ class PartyPi(object):
         # Draw easy mode selection box.
 
         # FIXME: Uncomment following lines
-        # self.overlay[self.screenheight - self.easySize[0]:self.screenheight,
-        #              0:self.easySize[1]] = self.easyIcon
+        if not self.raspberry:
+            self.overlay[self.screenheight - self.easySize[0]:self.screenheight,
+                         0:self.easySize[1]] = self.easyIcon
 
-        # self.overlay[self.screenheight - self.hardSize[0]:self.screenheight,
-        # self.screenwidth - self.hardSize[1]:self.screenwidth] = self.hardIcon
+            self.overlay[self.screenheight - self.hardSize[0]:self.screenheight,
+                         self.screenwidth - self.hardSize[1]:self.screenwidth] = self.hardIcon
         cv2.addWeighted(self.overlay, self.opacity, self.frame,
                         1 - self.opacity, 0, self.frame)
         # Display frame
@@ -358,11 +360,14 @@ class PartyPi(object):
 
         frame_gray = cv2.cvtColor(self.frame, cv2.COLOR_BGR2GRAY)
 
-        faces = self.faceCascade.detectMultiScale(
-            frame_gray, scaleFactor=1.1, minNeighbors=15, minSize=(70, 70),
-            #         flags=cv2.cv.CV_HAAR_SCALE_IMAGE
-            flags=0
-        )
+        if self.tickcount % 5 == 0:
+            faces = self.faceCascade.detectMultiScale(
+                frame_gray, scaleFactor=1.1, minNeighbors=15, minSize=(70, 70),
+                #         flags=cv2.cv.CV_HAAR_SCALE_IMAGE
+                flags=0
+            )
+        else:
+            faces = None
         if len(faces):
             rightFace = max([x for x, y, w, h in faces])
             bottomFace = max([y for x, y, w, h in faces])
@@ -396,10 +401,8 @@ class PartyPi(object):
 
         self.overlay = self.photo.copy()
         # Show 'Play Again'
-        # self.overlay[self.screenheight - self.playSize[1]:self.screenheight,
-        # self.screenwidth - self.playSize[1]:self.screenwidth] =
-        # self.playIcon[
-        # 0: self.playSize[1], 0: self.playSize[0]]
+        self.overlay[self.screenheight - self.playSize[1]:self.screenheight, self.screenwidth - self.playSize[1]:self.screenwidth] = self.playIcon[
+            0:self.playSize[1], 0:self.playSize[0]]
 
         cv2.addWeighted(self.overlay, self.opacity, self.photo,
                         1 - self.opacity, 0, self.photo)
