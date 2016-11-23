@@ -225,11 +225,13 @@ class PartyPi(object):
             # roi_color = img[y:y + h, x:x + w]
 
         # Draw easy mode selection box.
-        self.overlay[self.screenheight - self.easySize[0]:self.screenheight,
-                     0:self.easySize[1]] = self.easyIcon
 
-        self.overlay[self.screenheight - self.hardSize[0]:self.screenheight,
-                     self.screenwidth - self.hardSize[1]:self.screenwidth] = self.hardIcon
+        # FIXME: Uncomment following lines
+        # self.overlay[self.screenheight - self.easySize[0]:self.screenheight,
+        #              0:self.easySize[1]] = self.easyIcon
+
+        # self.overlay[self.screenheight - self.hardSize[0]:self.screenheight,
+        # self.screenwidth - self.hardSize[1]:self.screenwidth] = self.hardIcon
         cv2.addWeighted(self.overlay, self.opacity, self.frame,
                         1 - self.opacity, 0, self.frame)
         # Display frame
@@ -394,8 +396,10 @@ class PartyPi(object):
 
         self.overlay = self.photo.copy()
         # Show 'Play Again'
-        self.overlay[self.screenheight - self.playSize[1]:self.screenheight, self.screenwidth - self.playSize[1]:self.screenwidth] = self.playIcon[
-            0:self.playSize[1], 0:self.playSize[0]]
+        # self.overlay[self.screenheight - self.playSize[1]:self.screenheight,
+        # self.screenwidth - self.playSize[1]:self.screenwidth] =
+        # self.playIcon[
+        # 0: self.playSize[1], 0: self.playSize[0]]
 
         cv2.addWeighted(self.overlay, self.opacity, self.photo,
                         1 - self.opacity, 0, self.photo)
