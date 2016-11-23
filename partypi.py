@@ -187,7 +187,7 @@ class PartyPi(object):
             self.click_point_x = None
 
         # Draw faces
-        if self.tickCount % 5 == 0:
+        if self.tickcount % 5 == 0:
             frame_gray = cv2.cvtColor(self.frame, cv2.COLOR_BGR2GRAY)
 
             faces = self.faceCascade.detectMultiScale(
