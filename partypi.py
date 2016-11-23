@@ -20,6 +20,8 @@ class PartyPi():
         self.emotions = ['anger', 'contempt', 'disgust',
                          'fear', 'happiness', 'neutral', 'sadness', 'surprise']
         self.photo = cv2.imread('img_1.png')
+        self.screenwidth = 640
+        self.screenheight = 480
         if 'raspberrypi' in os.uname():
             print "PartyPi v0.0.2 for Raspberry Pi"
             self.raspberry = True
@@ -27,9 +29,11 @@ class PartyPi():
         else:
             self.raspberry = False
             self.cam = cv2.VideoCapture(0)
+            self.cam.set(3, self.screenwidth)
+            self.cam.set(4, self.screenheight)
+            _, self.frame = self.cam.read()
+            print "first sh:", self.screenheight, self.screenwidth, self.frame.shape
         self.currEmotion = 'anger'
-        self.screenwidth = 1280 / 2
-        self.screenheight = 1024 / 2
         self.countx = None
         self.currPosX = None
         self.currPosY = None
@@ -70,10 +74,10 @@ class PartyPi():
         self.pretimer = None
 
         print "Camera initialize"
-        if not self.raspberry:
-            print "MAC or PC initialize"
-            self.cam.set(3, self.screenwidth)
-            self.cam.set(4, self.screenheight)
+        # if not self.raspberry:
+        #     print "MAC or PC initialize"
+        #     self.cam.set(3, self.screenwidth)
+        #     self.cam.set(4, self.screenheight)
         self.flashon = False
         self.showAnalyzing = False
         self.opacity = 0.4
@@ -81,6 +85,7 @@ class PartyPi():
         self.static = False
         self.photoMode = False
         cv2.namedWindow("PartyPi", 0)
+        # Returns - TypeError: Required argument 'prop_value' (pos 3) not found
         # cv2.setWindowProperty(
         #     "PartyPi", cv2.WND_PROP_FULLSCREEN)
         # cv2.setWindowProperty("PartyPi", cv2.WND_PROP_AUTOSIZE,
@@ -94,7 +99,6 @@ class PartyPi():
                 # grab the raw NumPy array representing the image, then initialize the timestamp
                 # and occupied/unoccupied text
                 self.frame = cv2.flip(_frame.array, 1)
-
                 self.gameLoop()
         else:
             while self.looping:
@@ -125,6 +129,7 @@ class PartyPi():
         """
         Start the game loop. Listen for escape key.
         """
+        self.screenheight, self.screenwidth = self.frame.shape[:2]
         if self.level == 0:
             self.level0()
         elif self.level == 1:
@@ -145,9 +150,9 @@ class PartyPi():
         """
         Select a mode: Easy or Hard.
         """
-        self.tickcount += 1
-        if not self.calibrated and self.tickcount == 10:
-            t0 = time.clock()
+        # self.tickcount += 1
+        # if not self.calibrated and self.tickcount == 10:
+        #     t0 = time.clock()
 
         if self.raspberry:
             self.tickcount += 1
@@ -211,6 +216,7 @@ class PartyPi():
             # roi_color = img[y:y + h, x:x + w]
 
         # Draw easy mode selection box.
+        print "screenheight:", self.screenheight, self.overlay.shape
         self.overlay[self.screenheight - self.easySize[0]:self.screenheight,
                      0:self.easySize[1]] = self.easyIcon
 
@@ -223,10 +229,10 @@ class PartyPi():
                                                     self.screenheight / 7), color=(68, 54, 66), size=0.5, thickness=0.5)
         cv2.imshow('PartyPi', self.frame)
 
-        if not self.calibrated and self.tickcount == 10:
-            self.t1 = time.clock() - t0
-            print "t1", self.t1
-            self.calibrated = True
+        # if not self.calibrated and self.tickcount == 10:
+        #     self.t1 = time.clock() - t0
+        #     print "t1", self.t1
+        #     self.calibrated = True
 
     def level1(self):
         """
@@ -432,7 +438,9 @@ class PartyPi():
         if not self.raspberry:
             ret, frame = self.cam.read()
             self.frame = cv2.flip(frame, 1)
+
         self.overlay = self.frame.copy()
+        print "check:", self.overlay.shape, self.frame.shape
 
     def takePhoto(self):
         """
