@@ -385,15 +385,17 @@ class PartyPi(object):
             cv2.rectangle(self.frame, (x, y),
                           (x + w, y + h), (0, 255, 0), 2)
             if x > (self.screenwidth - self.playSize[1]) and y > (self.screenheight - self.playSize[0]):
-                self.playIcon = self.playIcon3.copy()
-                if self.raspberry:
-                    self.pretimer = 1
-                else:
-                    self.pretimer = 100
-                if not self.pretimer:
-                    self.reset()
-                else:
-                    self.pretimer -= 1
+                # self.playIcon = self.playIcon3.copy()
+                # Timer function useful when checking for faces in every frame
+                # if self.raspberry:
+                #     self.pretimer = 10
+                # else:
+                #     self.pretimer = 100
+                # if not self.pretimer:
+                #     self.reset()
+                # else:
+                #     self.pretimer -= 1
+                self.reset()
 
         # Show live image
         self.photo[self.screenheight - self.easySize[0]:self.screenheight, self.screenwidth - self.easySize[0]:self.screenwidth] = self.frame[
