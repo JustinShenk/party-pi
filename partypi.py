@@ -199,7 +199,7 @@ class PartyPi(object):
                 flags=0
             )
         else:
-            faces = None
+            faces = []
         # Draw a rectangle around the faces
 
         for (x, y, w, h) in faces:
@@ -367,7 +367,7 @@ class PartyPi(object):
                 flags=0
             )
         else:
-            faces = None
+            faces = []
         if len(faces):
             rightFace = max([x for x, y, w, h in faces])
             bottomFace = max([y for x, y, w, h in faces])
@@ -387,7 +387,7 @@ class PartyPi(object):
             if x > (self.screenwidth - self.playSize[1]) and y > (self.screenheight - self.playSize[0]):
                 self.playIcon = self.playIcon3.copy()
                 if self.raspberry:
-                    self.pretimer = 10
+                    self.pretimer = 1
                 else:
                     self.pretimer = 100
                 if not self.pretimer:
