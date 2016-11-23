@@ -1,37 +1,42 @@
 #!/usr/lib/env python
+import sys
 import os
 import cv2
 from emotionpi import emotion_api
 import pyimgur
 import random
 import time
-if 'raspberrypi' in os.uname():
-    from picamera.array import PiRGBArray
-    from picamera import PiCamera
 
 
-class PartyPi():
+class PartyPi(object):
 
-    def __init__(self):
-
+    def __init__(self, piCam=False):
+        self.piCam = piCam
+        print self.piCam
         self.level = 0
         self.looping = True
         self.font = cv2.FONT_HERSHEY_SIMPLEX
         self.emotions = ['anger', 'contempt', 'disgust',
                          'fear', 'happiness', 'neutral', 'sadness', 'surprise']
         self.photo = cv2.imread('img_1.png')
-        self.screenwidth = 640
-        self.screenheight = 480
+        self.screenwidth = 1280 / 2
+        self.screenheight = 1024 / 2
         if 'raspberrypi' in os.uname():
             print "PartyPi v0.0.2 for Raspberry Pi"
             self.raspberry = True
-            self.pyIt()
+            if self.piCam:
+                self.pyIt()
+            else:
+                self.cam = cv2.VideoCapture(0)
+                # self.cam.set(3, self.screenwidth)
+                # self.cam.set(4, self.screenheight)
         else:
             self.raspberry = False
             self.cam = cv2.VideoCapture(0)
-            self.cam.set(3, self.screenwidth)
-            self.cam.set(4, self.screenheight)
+            # self.cam.set(3, self.screenwidth)
+            # self.cam.set(4, self.screenheight)
             _, self.frame = self.cam.read()
+            self.screenwidth, self.screenheight = self.frame.shape[:2]
             print "first sh:", self.screenheight, self.screenwidth, self.frame.shape
         self.currEmotion = 'anger'
         self.countx = None
@@ -93,7 +98,9 @@ class PartyPi():
         if not self.raspberry:
             cv2.setMouseCallback("PartyPi", self.mouse)
         self.redfactor = 1.
-        if self.raspberry:
+        print "self.piCam:", self.piCam
+        if self.piCam == True:
+            print "self.piCam:", self.piCam
             # capture frames from the camera
             for _frame in self.piCamera.capture_continuous(self.rawCapture, format="bgr", use_video_port=True):
                 # grab the raw NumPy array representing the image, then initialize the timestamp
@@ -141,7 +148,7 @@ class PartyPi():
         keypress = cv2.waitKey(1) & 0xFF
 
         # Clear the stream in preparation for the next frame.
-        if self.raspberry:
+        if self.piCam == True:
             self.rawCapture.truncate(0)
 
         self.listenForEnd(keypress)
@@ -150,7 +157,7 @@ class PartyPi():
         """
         Select a mode: Easy or Hard.
         """
-        # self.tickcount += 1
+        self.tickcount += 1
         # if not self.calibrated and self.tickcount == 10:
         #     t0 = time.clock()
 
@@ -185,7 +192,7 @@ class PartyPi():
                 frame_gray,
                 scaleFactor=1.1,
                 minNeighbors=5,
-                minSize=(30, 30),
+                minSize=(70, 70),
                 #         flags=cv2.cv.CV_HAAR_SCALE_IMAGE
                 flags=0
             )
@@ -435,7 +442,7 @@ class PartyPi():
         Capture frame-by-frame.
         """
 
-        if not self.raspberry:
+        if not self.piCam:
             ret, frame = self.cam.read()
             self.frame = cv2.flip(frame, 1)
 
@@ -622,7 +629,7 @@ class PartyPi():
         """
         When everything is done, release the capture
         """
-        if not self.raspberry:
+        if not self.piCam:
             self.cam.release()
             self.addText(self.frame, "Press any key to quit_",
                          (self.screenwidth / 4, self.screenheight / 3))
@@ -639,7 +646,17 @@ def main():
     """
     Load application.
     """
-    application = PartyPi()
+    # sys.argv[1] = Using piCamera module
+    if len(sys.argv) > 1:
+        if sys.argv[1] == '--picam':
+            from picamera.array import PiRGBArray
+            from picamera import PiCamera
+            application = PartyPi(True)
+        else:
+            print "No argument found"
+            application = PartyPi()
+    else:
+        application = PartyPi()
 
 
 if __name__ == '__main__':
