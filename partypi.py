@@ -28,6 +28,7 @@ class PartyPi(object):
                 self.pyIt()
             else:
                 self.cam = cv2.VideoCapture(0)
+                _, self.frame = self.cam.read()
                 # self.cam.set(3, self.screenwidth)
                 # self.cam.set(4, self.screenheight)
         else:
@@ -36,8 +37,9 @@ class PartyPi(object):
             # self.cam.set(3, self.screenwidth)
             # self.cam.set(4, self.screenheight)
             _, self.frame = self.cam.read()
-            self.screenwidth, self.screenheight = self.frame.shape[:2]
-            print "first sh:", self.screenheight, self.screenwidth, self.frame.shape
+
+        self.screenwidth, self.screenheight = self.frame.shape[:2]
+        print "first screenheight:", self.screenheight, self.screenwidth, self.frame.shape
         self.currEmotion = 'anger'
         self.countx = None
         self.currPosX = None
