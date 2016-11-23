@@ -193,7 +193,7 @@ class PartyPi(object):
             faces = self.faceCascade.detectMultiScale(
                 frame_gray,
                 scaleFactor=1.1,
-                minNeighbors=5,
+                minNeighbors=15,
                 minSize=(70, 70),
                 #         flags=cv2.cv.CV_HAAR_SCALE_IMAGE
                 flags=0
@@ -225,7 +225,6 @@ class PartyPi(object):
             # roi_color = img[y:y + h, x:x + w]
 
         # Draw easy mode selection box.
-        print "screenheight:", self.screenheight, self.overlay.shape
         self.overlay[self.screenheight - self.easySize[0]:self.screenheight,
                      0:self.easySize[1]] = self.easyIcon
 
@@ -358,7 +357,7 @@ class PartyPi(object):
         frame_gray = cv2.cvtColor(self.frame, cv2.COLOR_BGR2GRAY)
 
         faces = self.faceCascade.detectMultiScale(
-            frame_gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30),
+            frame_gray, scaleFactor=1.1, minNeighbors=15, minSize=(70, 70),
             #         flags=cv2.cv.CV_HAAR_SCALE_IMAGE
             flags=0
         )
@@ -449,7 +448,6 @@ class PartyPi(object):
             self.frame = cv2.flip(frame, 1)
 
         self.overlay = self.frame.copy()
-        print "check:", self.overlay.shape, self.frame.shape
 
     def takePhoto(self):
         """
