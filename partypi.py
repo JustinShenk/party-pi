@@ -67,7 +67,6 @@ class PartyPi(object):
 
         self.frame = np.empty(
             (self.screenheight, self.screenwidth, 3), dtype=np.uint8)
-        print "output:shape:", output.shape
         time.sleep(0.1)
 
     def setupGame(self):
