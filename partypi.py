@@ -8,6 +8,7 @@ import random
 import time
 from picamera import PiCamera
 from picamera.array import PiRGBArray
+import numpy as np
 
 
 class PartyPi(object):
