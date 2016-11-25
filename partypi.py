@@ -67,7 +67,6 @@ class PartyPi(object):
 
         self.frame = np.empty(
             (self.screenheight, self.screenwidth, 3), dtype=np.uint8)
-        self.piCamera.capture(self.frame, 'rgb')
         print "output:shape:", output.shape
         time.sleep(0.1)
 
