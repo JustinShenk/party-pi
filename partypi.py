@@ -59,8 +59,13 @@ class PartyPi(object):
         self.piCamera = PiCamera()
         # self.piCamera.resolution = (640, 480)
         self.piCamera.resolution = (1280 / 2, 1024 / 2)
-        self.piCamera.framerate = 30
+        self.piCamera.framerate = 24
         self.rawCapture = PiRGBArray(self.piCamera, size=(1280 / 2, 1024 / 2))
+
+        self.frame = np.empty(
+            (self.screenheight, self.screenwidth, 3), dtype=np.uint8)
+        self.piCamera.capture(self.frame, 'rgb')
+        print "output:shape:", output.shape
         time.sleep(0.1)
 
     def setupGame(self):
