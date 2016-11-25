@@ -6,6 +6,7 @@ from emotionpi import emotion_api
 import pyimgur
 import random
 import time
+import picamera
 
 
 class PartyPi(object):
