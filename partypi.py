@@ -6,7 +6,8 @@ from emotionpi import emotion_api
 import pyimgur
 import random
 import time
-import picamera
+from picamera import PiCamera
+from picamera.array import PiRGBArray
 
 
 class PartyPi(object):
@@ -664,8 +665,6 @@ def main():
     # sys.argv[1] = Using piCamera module
     if len(sys.argv) > 1:
         if sys.argv[1] == '--picam':
-            from picamera.array import PiRGBArray
-            from picamera import PiCamera
             application = PartyPi(True)
         else:
             print "No argument found"
