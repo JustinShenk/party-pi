@@ -118,7 +118,7 @@ class PartyPi(object):
         if self.piCam == True:
             print "self.piCam:", self.piCam
             # capture frames from the camera
-            for _frame in self.piCamera.capture_continuous(self.rawCapture, format="bgr", use_video_port=True):
+            for _frame in self.piCamera.capture_continuous(self.rawCapture, format="rgb", use_video_port=True):
                 # grab the raw NumPy array representing the image, then initialize the timestamp
                 # and occupied/unoccupied text
                 self.frame = cv2.flip(_frame.array, 1)
