@@ -11,7 +11,7 @@ import numpy as np
 
 class PartyPi(object):
 
-    def __init__(self, piCam=False):
+    def __init__(self, piCam=False, windowSize=(1280 / 2, 1024 / 2)):
         self.piCam = piCam
         print self.piCam
         self.level = 0
@@ -20,11 +20,15 @@ class PartyPi(object):
         self.emotions = ['anger', 'contempt', 'disgust',
                          'fear', 'happiness', 'neutral', 'sadness', 'surprise']
         self.photo = cv2.imread('img_1.png')
-        self.screenwidth = 1280 / 2
-        self.screenheight = 1024 / 2
+        self.windowSize = windowSize
+        self.screenwidth, self.screenheight = self.windowSize
+
+        # Setup for Raspberry Pi.
         if 'raspberrypi' in os.uname():
             print "PartyPi v0.0.2 for Raspberry Pi"
             self.raspberry = True
+
+            # Set up picamera module.
             if self.piCam:
                 self.pyIt()
             else:
@@ -61,9 +65,10 @@ class PartyPi(object):
         from picamera.array import PiRGBArray
         self.piCamera = PiCamera()
         # self.piCamera.resolution = (640, 480)
-        self.piCamera.resolution = (1280 / 2, 1024 / 2)
+        self.piCamera.resolution = (self.screenwidth, self.screenheight)
         self.piCamera.framerate = 24
-        self.rawCapture = PiRGBArray(self.piCamera, size=(1280 / 2, 1024 / 2))
+        self.rawCapture = PiRGBArray(
+            self.piCamera, size=self.piCamera.resolution)
 
         self.frame = np.empty(
             (self.screenheight, self.screenwidth, 3), dtype=np.uint8)
@@ -98,9 +103,7 @@ class PartyPi(object):
         self.static = False
         self.photoMode = False
         cv2.namedWindow("PartyPi", cv2.WINDOW_NORMAL)
-        cv2.resizeWindow("PartyPi", 800, 600)
-        cv2.setWindowProperty(
-            "PartyPi", cv2.WND_PROP_FULLSCREEN, cv2.cv.CV_WINDOW_FULLSCREEN)
+        cv2.resizeWindow("PartyPi", self.windowSize[0], self.windowSize[1])
         # Returns - TypeError: Required argument 'prop_value' (pos 3) not found
         # cv2.setWindowProperty(
         #     "PartyPi", cv2.WND_PROP_FULLSCREEN)
@@ -665,11 +668,20 @@ def main():
     Load application.
     """
     # sys.argv[1] = Using piCamera module
-    if len(sys.argv) > 1:
+    if len(sys.argv) == 1:
         if 'picam' or '-p' in sys.argv[1]:
             application = PartyPi(True)
         else:
-            print "No argument found"
+            print "Load default settings"
+            application = PartyPi()
+    elif len(sys.argv) == 2:
+        if 'x' in sys.argv[2]:
+            res = sys.argv[2]
+            w = res.split('x')[0]
+            h = res.split('x')[1]
+            application = PartyPi(True, w, h)
+        else:
+            print "Load default settings"
             application = PartyPi()
     else:
         application = PartyPi()
