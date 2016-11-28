@@ -478,7 +478,7 @@ class PartyPi(object):
             str(img_nr) + str(self.img_end)
         # bwphoto = cv2.cvtColor(self.photo, cv2.COLOR_BGR2GRAY)
         # cv2.imwrite(self.imagepath, bwphoto)
-        cv2.imwrite(self.imagepath, self.phto)
+        cv2.imwrite(self.imagepath, self.photo)
         img_nr += 1
         self.upload_img()
 
