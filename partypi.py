@@ -399,11 +399,9 @@ class PartyPi(object):
                 self.reset()
 
         # Show live image
-<< << << < HEAD
+
         self.photo[self.screenheight - self.easySize[0]:self.screenheight, self.screenwidth - self.easySize[0]:self.screenwidth] = self.frame[
-== == == =
         self.photo[self.screenheight - self.easySize[0]:self.screenheight, self.screenwidth - self.easySize[0]:self.screenwidth] = self.frame[
->>>>>> > 09c5ebf0ac9375756b548afeba3e7a9d3bf93209
             self.screenheight - self.easySize[1]: self.screenheight, self.screenwidth - self.easySize[1]: self.screenwidth]
 
         self.overlay = self.photo.copy()
