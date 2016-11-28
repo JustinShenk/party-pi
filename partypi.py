@@ -206,8 +206,8 @@ class PartyPi(object):
 
             faces = self.faceCascade.detectMultiScale(
                 frame_gray,
-                scaleFactor=1.1,
-                minNeighbors=15,
+                scaleFactor=1.4,
+                minNeighbors=6,
                 minSize=(70, 70),
                 #         flags=cv2.cv.CV_HAAR_SCALE_IMAGE
                 flags=0
@@ -630,9 +630,9 @@ class PartyPi(object):
         """
         Listen for 'q', left, or right keys to end game.
         """
-        if keypress != 255:
+        if keypress != 255 and keypress != 2 and keypress != 3:
             print(keypress)
-            if keypress == 113 or keypress == 27:  # 'q' pressed to quit
+            if keypress == ord('q'):  # 'q' pressed to quit
                 print "Escape key entered"
                 self.looping = False
                 self.endGame()
@@ -650,7 +650,7 @@ class PartyPi(object):
 
     def endGame(self):
         """
-        When everything is done, release the capture
+        When everything is done, release the capture.
         """
         if not self.piCam:
             self.cam.release()
@@ -659,7 +659,10 @@ class PartyPi(object):
             # self.presentation(self.frame)
             self.addText(self.frame, "PartyPi v0.0.2", ((self.screenwidth / 5) * 4,
                                                         self.screenheight / 7), color=(68, 54, 66), size=0.5, thickness=0.5)
-            cv2.imshow("PartyPi", self.frame)
+        else:
+            self.piCamera.close()
+
+        cv2.imshow("PartyPi", self.frame)
 
         cv2.waitKey(0)
         cv2.destroyAllWindows()
