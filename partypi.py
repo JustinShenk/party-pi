@@ -14,7 +14,6 @@ class PartyPi(object):
     def __init__(self, piCam=False, resolution=(1280 / 2, 1024 / 2), windowSize=(1200, 1024)):
         self.piCam = piCam
         self.windowSize = windowSize
-        print self.piCam
         self.level = 0
         self.looping = True
         self.font = cv2.FONT_HERSHEY_SIMPLEX
@@ -23,10 +22,11 @@ class PartyPi(object):
         self.photo = cv2.imread('img_1.png')
         self.resolution = resolution
         self.screenwidth, self.screenheight = self.windowSize
-
+        self.colors = [(255, 255, 0), (238, 130, 238), (255, 0, 255),
+                       (0, 100, 0), (70, 130, 180), (25, 25, 112), (255, 20, 147), (244, 164, 96)]
         # Setup for Raspberry Pi.
         if 'raspberrypi' in os.uname():
-            print "PartyPi v0.0.2 for Raspberry Pi"
+            print "PartyPi v0.0.2 for Raspberry Pi, Coxi Christmas Party Edition"
             self.raspberry = True
 
             # Set up picamera module.
@@ -68,7 +68,8 @@ class PartyPi(object):
         # self.piCamera.resolution = (640, 480)
         self.piCamera.resolution = self.resolution[0], self.resolution[1]
         self.screenwidth, self.screenheight = self.piCamera.resolution
-        self.piCamera.framerate = 24
+        self.piCamera.framerate = 10
+        self.piCamera.brightness = 65
         self.rawCapture = PiRGBArray(
             self.piCamera, size=(self.screenwidth, self.screenheight))
 
@@ -114,7 +115,6 @@ class PartyPi(object):
         if not self.raspberry:
             cv2.setMouseCallback("PartyPi", self.mouse)
         self.redfactor = 1.
-        print "self.piCam:", self.piCam
         if self.piCam == True:
             print "self.piCam:", self.piCam
             # capture frames from the camera
@@ -476,8 +476,9 @@ class PartyPi(object):
         img_nr = self.get_last_image_nr()
         self.imagepath = 'img/' + str(self.img_name) + \
             str(img_nr) + str(self.img_end)
-        bwphoto = cv2.cvtColor(self.photo, cv2.COLOR_BGR2GRAY)
-        cv2.imwrite(self.imagepath, bwphoto)
+        # bwphoto = cv2.cvtColor(self.photo, cv2.COLOR_BGR2GRAY)
+        # cv2.imwrite(self.imagepath, bwphoto)
+        cv2.imwrite(self.imagepath, self.phto)
         img_nr += 1
         self.upload_img()
 
@@ -533,36 +534,53 @@ class PartyPi(object):
         maxfirstemo = None
         maxsecondemo = None
         firstEmotion = None
-        if self.tickcount % 20 == 0:
-            print "Load Display ", self.tickcount
+
         if self.result:  # if faces present
+
+            # Get lists of player points.
+            firstEmoList = [
+                (round(x['scores'][self.currEmotion] * 100)) for x in self.result]
+            secondEmoList = [(round(
+                x['scores'][self.secCurrEmotion] * 100)) for x in self.result]
+
+            # Compute the scores into `scoresList`
+            scoresList = []
+            if self.easyMode:  # Easy mode is points for first emotion.
+                scoresList = firstEmoList  # playerNumber, scores
+            # Hard mode scores are product of points of both emotions.
+            else:
+                for i in range(len(firstEmoList)):
+                    scoresList.append(
+                        (firstEmoList[i] + 1) * (secondEmoList[i] + 1))
+
+            # Draw the scores for the faces
             for idx, currFace in enumerate(self.result):
                 faceRectangle = currFace['faceRectangle']
+
+                # Draw rectangles over all faces
                 cv2.rectangle(self.photo, (faceRectangle['left'], faceRectangle['top']),
                               (faceRectangle['left'] + faceRectangle['width'], faceRectangle['top'] +
-                               faceRectangle['height']), color=(255, 255, 0), thickness=4)
-                # self.currEmotion = max(currFace['scores'].items(),
-                # key=operator.itemgetter(1))[0]
-                firstEmotion = currFace['scores'][self.currEmotion] * 100
-                secEmotion = currFace['scores'][self.secCurrEmotion] * 100
-                # scores.append((firstEmotion+1)+(secEmotion+1))
-                scores.append((firstEmotion + 1) * (secEmotion + 1) * 400)
-                # if firstEmotion > maxfirstemo:
-                #   maxfirstemo = idx
-                # if secEmotion > maxsecondemo:
-                #   maxsecondemo = idx
-                if firstEmotion > 0:
-                    textToWrite = "%i points: %s" % (
-                        firstEmotion, self.currEmotion)
-                else:
+                               faceRectangle['height']), color=random.choice(self.colors), thickness=4)
+
+                # Get points for first emotion
+                firstEmotion = firstEmoList[idx]
+                secEmotion = secondEmoList[idx]
+
+                # Format points.
+                if firstEmotion == 1:
                     textToWrite = "%i point: %s" % (
                         firstEmotion, self.currEmotion)
-                if secEmotion > 0:
-                    secondLine = "%i points: %s" % (
-                        secEmotion, self.secCurrEmotion)
                 else:
+                    textToWrite = "%i points: %s" % (
+                        firstEmotion, self.currEmotion)
+                if secEmotion == 1:
                     secondLine = "%i point: %s" % (
                         secEmotion, self.secCurrEmotion)
+                else:
+                    secondLine = "%i points: %s" % (
+                        secEmotion, self.secCurrEmotion)
+
+                # Display points.
                 if self.easyMode:
                     cv2.putText(self.photo, textToWrite, (faceRectangle['left'], faceRectangle[
                                 'top'] - 10), self.font, 0.8, (232, 167, 35), 2)
@@ -572,25 +590,50 @@ class PartyPi(object):
                     cv2.putText(self.photo, secondLine, (faceRectangle['left'], faceRectangle[
                                 'top'] - 10), self.font, 0.8, (232, 167, 35), 2)
 
-            if firstEmotion:
-                winner = scores.index(max(scores))
-                firstRectLeft = self.result[winner]['faceRectangle']['left']
-                firstRectTop = self.result[winner]['faceRectangle']['top']
+            # Display 'Winner: ' above player with highest score.
+            oneWinner = True
+            finalScores = scoresList
+            winner = finalScores.index(max(finalScores))
+            maxScore = max(finalScores)
+
+            # Multiple winners - tie breaker
+            if finalScores.count(maxScore) > 1:
+                print "Multiple winners!"
+                oneWinner = False
+                tiedWinners = []
+                for i in finalScores:
+                    if i == maxScore:
+                        tiedWinners.append(i)
+
+            print "Scores:", finalScores, "Winner:", winner
+
+            # Identify winner's face.
+            firstRectLeft = self.result[winner]['faceRectangle']['left']
+            firstRectTop = self.result[winner]['faceRectangle']['top']
+
+            if oneWinner:
                 if self.easyMode:
                     cv2.putText(self.photo, "Winner: ", (firstRectLeft, firstRectTop - 40),
                                 self.font, 0.8, (232, 167, 35), 2)
                 else:
                     cv2.putText(self.photo, "Winner: ", (firstRectLeft, firstRectTop - 70),
                                 self.font, 0.8, (232, 167, 35), 2)
+            else:
+                if self.easyMode:
+                    for winner in tiedWinners:
+                        rectL = self.result[winner]['faceRectangle']['left']
+                        rectT = self.result[winner]['faceRectangle']['top']
+                        cv2.putText(self.photo, "Tied: ", (rectL, rectT - 40),
+                                    self.font, 0.8, (232, 167, 35), 2)
+                else:
+                    for winner in tiedWinners:
+                        rectL = self.result[winner]['faceRectangle']['left']
+                        rectT = self.result[winner]['faceRectangle']['top']
+                        cv2.putText(self.photo, "Tied: ", (rectL, rectT - 70),
+                                    self.font, 0.8, (232, 167, 35), 2)
 
-            # if self.currPosY >= self.screenheight*(4./5) and self.currPosY < self.screenheight:
-            ##
-            # cv2.rectangle(overlay,(0,int(self.screenheight*(4./5))),(self.screenwidth,self.screenheight),(224,23,101), -1)
-            # cv2.addWeighted(overlay,self.opacity,self.photo,1-self.opacity, 0, self.frame)
-            # else:
-            # pass
         else:
-            print "no results found"
+            print "No results found."
 
     def promptEmotion(self):
         """
@@ -627,7 +670,7 @@ class PartyPi(object):
         """
         Listen for 'q', left, or right keys to end game.
         """
-        if keypress != 255 and keypress != 2 and keypress != 3:
+        if keypress != 255:
             print(keypress)
             if keypress == ord('q'):  # 'q' pressed to quit
                 print "Escape key entered"
