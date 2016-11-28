@@ -72,7 +72,6 @@ class PartyPi(object):
         self.piCamera.brightness = 55
         self.rawCapture = PiRGBArray(
             self.piCamera, size=(self.screenwidth, self.screenheight))
-
         self.frame = np.empty(
             (self.screenheight, self.screenwidth, 3), dtype=np.uint8)
         time.sleep(0.1)
@@ -123,6 +122,8 @@ class PartyPi(object):
                 # grab the raw NumPy array representing the image, then initialize the timestamp
                 # and occupied/unoccupied text
                 self.frame = cv2.flip(_frame.array, 1)
+                self.screenheight, self.screenwidth = self.frame.shape[:2]
+                print "second screenheight, screenwidth:", self.screenheight, self.screenwidth
                 self.gameLoop()
         else:
             while self.looping:
@@ -442,7 +443,7 @@ class PartyPi(object):
     def drawChristmasLogo(self):
         y0 = (self.screenheight / 7) + 0
         y1 = y0 + self.christmas.shape[0]
-        x0 = (self.screenwidth / 5) * 4 - 75
+        x0 = (self.screenwidth / 10) * 8 - 75
         x1 = x0 + self.christmas.shape[1]
 
         for c in range(0, 3):
