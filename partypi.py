@@ -97,7 +97,7 @@ class PartyPi(object):
         self.currCount = None
         self.static = False
         self.photoMode = False
-        cv2.namedWindow("PartyPi", 0)
+        cv2.namedWindow("PartyPi", flags=CV_WINDOW_AUTOSIZE)
         # Returns - TypeError: Required argument 'prop_value' (pos 3) not found
         # cv2.setWindowProperty(
         #     "PartyPi", cv2.WND_PROP_FULLSCREEN)
@@ -110,7 +110,7 @@ class PartyPi(object):
         if self.piCam == True:
             print "self.piCam:", self.piCam
             # capture frames from the camera
-            for _frame in self.piCamera.capture_continuous(self.rawCapture, format="rgb", use_video_port=True):
+            for _frame in self.piCamera.capture_continuous(self.rawCapture, format="bgr", use_video_port=True):
                 # grab the raw NumPy array representing the image, then initialize the timestamp
                 # and occupied/unoccupied text
                 self.frame = cv2.flip(_frame.array, 1)
@@ -173,10 +173,10 @@ class PartyPi(object):
             self.tickcount += 1
         self.captureFrame()
 
-        # self.addText(self.frame, "Easy", (self.screenwidth / 8,
-        #                                   (self.screenheight * 3) / 4), size=3)
-        # self.addText(self.frame, "Hard", (self.screenwidth / 2,
-        #                                   (self.screenheight * 3) / 4), size=3)
+        self.addText(self.frame, "Easy", (self.screenwidth / 8,
+                                          (self.screenheight * 3) / 4), size=3)
+        self.addText(self.frame, "Hard", (self.screenwidth / 2,
+                                          (self.screenheight * 3) / 4), size=3)
         if self.currPosX and self.currPosX < self.screenwidth / 2:
             cv2.rectangle(self.overlay, (0, 0), (self.screenwidth / 2,
                                                  self.screenheight), (211, 211, 211), -1)
