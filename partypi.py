@@ -21,7 +21,7 @@ class PartyPi(object):
                          'fear', 'happiness', 'neutral', 'sadness', 'surprise']
         self.photo = cv2.imread('img_1.png')
         self.windowSize = windowSize
-        print "windowsize", windowSize
+        print "windowsize", self.windowSize[0], self.windowsize[1]
         self.screenwidth, self.screenheight = self.windowSize
 
         # Setup for Raspberry Pi.
