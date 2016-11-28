@@ -6,8 +6,6 @@ from emotionpi import emotion_api
 import pyimgur
 import random
 import time
-from picamera import PiCamera
-from picamera.array import PiRGBArray
 import numpy as np
 
 
@@ -37,8 +35,8 @@ class PartyPi(object):
         else:
             self.raspberry = False
             self.cam = cv2.VideoCapture(0)
-            # self.cam.set(3, self.screenwidth)
-            # self.cam.set(4, self.screenheight)
+            self.cam.set(3, self.screenwidth)
+            self.cam.set(4, self.screenheight)
             _, self.frame = self.cam.read()
 
         self.screenwidth, self.screenheight = self.frame.shape[:2]
@@ -59,6 +57,8 @@ class PartyPi(object):
         """
         Set up piCamera for rasbperry pi camera module.
         """
+        from picamera import PiCamera
+        from picamera.array import PiRGBArray
         self.piCamera = PiCamera()
         # self.piCamera.resolution = (640, 480)
         self.piCamera.resolution = (1280 / 2, 1024 / 2)
@@ -97,7 +97,7 @@ class PartyPi(object):
         self.currCount = None
         self.static = False
         self.photoMode = False
-        cv2.namedWindow("PartyPi", flags=CV_WINDOW_AUTOSIZE)
+        cv2.namedWindow("PartyPi", cv2.WINDOW_AUTOSIZE)
         # Returns - TypeError: Required argument 'prop_value' (pos 3) not found
         # cv2.setWindowProperty(
         #     "PartyPi", cv2.WND_PROP_FULLSCREEN)
@@ -663,7 +663,7 @@ def main():
     """
     # sys.argv[1] = Using piCamera module
     if len(sys.argv) > 1:
-        if sys.argv[1] == '--picam':
+        if 'picam' or '-p' in sys.argv[1]:
             application = PartyPi(True)
         else:
             print "No argument found"
