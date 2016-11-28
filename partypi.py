@@ -365,12 +365,8 @@ class PartyPi(object):
 
         frame_gray = cv2.cvtColor(self.frame, cv2.COLOR_BGR2GRAY)
 
-        if self.tickcount % 5 == 0:
-            faces = self.faceCascade.detectMultiScale(
-                frame_gray, scaleFactor=1.1, minNeighbors=15, minSize=(70, 70),
-                #         flags=cv2.cv.CV_HAAR_SCALE_IMAGE
-                flags=0
-            )
+        if self.tickcount >= 0:
+            frame = self.findFaces()
         else:
             faces = []
         if len(faces):
@@ -467,14 +463,14 @@ class PartyPi(object):
     def findFaces(self, frame):
         frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-            faces = self.faceCascade.detectMultiScale(
-                frame_gray,
-                scaleFactor=1.4,
-                minNeighbors=5,
-                minSize=(50, 50),
-                #         flags=cv2.cv.CV_HAAR_SCALE_IMAGE
-                flags=0
-            )
+        faces = self.faceCascade.detectMultiScale(
+            frame_gray,
+            scaleFactor=1.4,
+            minNeighbors=5,
+            minSize=(50, 50),
+            #         flags=cv2.cv.CV_HAAR_SCALE_IMAGE
+            flags=0
+        )
         return faces
 
     def takePhoto(self):
