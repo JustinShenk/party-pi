@@ -179,17 +179,17 @@ class PartyPi(object):
 
         if self.raspberry:
             self.tickcount += 1
-        self.captureFrame()
+        frame, overlay = self.captureFrame()
 
-        self.addText(self.frame, "Easy", (self.screenwidth / 8,
-                                          (self.screenheight * 3) / 4), size=3)
-        self.addText(self.frame, "Hard", (self.screenwidth / 2,
-                                          (self.screenheight * 3) / 4), size=3)
+        self.addText(frame, "Easy", (self.screenwidth / 8,
+                                     (self.screenheight * 3) / 4), size=3)
+        self.addText(frame, "Hard", (self.screenwidth / 2,
+                                     (self.screenheight * 3) / 4), size=3)
         if self.currPosX and self.currPosX < self.screenwidth / 2:
-            cv2.rectangle(self.overlay, (0, 0), (self.screenwidth / 2,
-                                                 self.screenheight), (211, 211, 211), -1)
+            cv2.rectangle(overlay, (0, 0), (self.screenwidth / 2,
+                                            self.screenheight), (211, 211, 211), -1)
         else:
-            cv2.rectangle(self.overlay, (self.screenwidth / 2, 0),
+            cv2.rectangle(overlay, (self.screenwidth / 2, 0),
                           (self.screenwidth, self.screenheight), (211, 211, 211), -1)
         if self.click_point_x:
             if self.click_point_x < self.screenwidth / 2:
@@ -202,22 +202,13 @@ class PartyPi(object):
 
         # Draw faces
         if self.tickcount >= 0:
-            frame_gray = cv2.cvtColor(self.frame, cv2.COLOR_BGR2GRAY)
-
-            faces = self.faceCascade.detectMultiScale(
-                frame_gray,
-                scaleFactor=1.4,
-                minNeighbors=5,
-                minSize=(50, 50),
-                #         flags=cv2.cv.CV_HAAR_SCALE_IMAGE
-                flags=0
-            )
+            faces = self.findFaces(frame)
         else:
             faces = []
         # Draw a rectangle around the faces
 
         for (x, y, w, h) in faces:
-            cv2.rectangle(self.frame, (x, y),
+            cv2.rectangle(frame, (x, y),
                           (x + w, y + h), (0, 0, 255), 2)
             # Select easy mode with face
             if x + w < self.easySize[1] and y > self.screenheight - self.easySize[0]:
@@ -243,17 +234,17 @@ class PartyPi(object):
 
         # FIXME: Uncomment following lines
         if not self.raspberry:
-            self.overlay[self.screenheight - self.easySize[0]:self.screenheight,
-                         0:self.easySize[1]] = self.easyIcon
+            overlay[self.screenheight - self.easySize[0]:self.screenheight,
+                    0:self.easySize[1]] = self.easyIcon
 
-            self.overlay[self.screenheight - self.hardSize[0]:self.screenheight,
-                         self.screenwidth - self.hardSize[1]:self.screenwidth] = self.hardIcon
-        cv2.addWeighted(self.overlay, self.opacity, self.frame,
-                        1 - self.opacity, 0, self.frame)
+            overlay[self.screenheight - self.hardSize[0]:self.screenheight,
+                    self.screenwidth - self.hardSize[1]:self.screenwidth] = self.hardIcon
+        cv2.addWeighted(overlay, self.opacity, frame,
+                        1 - self.opacity, 0, frame)
         # Display frame
-        self.addText(self.frame, "PartyPi v0.0.2", ((self.screenwidth / 5) * 4,
-                                                    self.screenheight / 7), color=(68, 54, 66), size=0.5, thickness=0.5)
-        cv2.imshow('PartyPi', self.frame)
+        self.addText(frame, "PartyPi v0.0.2", ((self.screenwidth / 5) * 4,
+                                               self.screenheight / 7), color=(68, 54, 66), size=0.5, thickness=0.5)
+        cv2.imshow('PartyPi', frame)
 
         # if not self.calibrated and self.tickcount == 10:
         #     self.t1 = time.clock() - t0
@@ -468,9 +459,23 @@ class PartyPi(object):
 
         if not self.piCam:
             ret, frame = self.cam.read()
-            self.frame = cv2.flip(frame, 1)
+            frame = cv2.flip(frame, 1)
 
-        self.overlay = self.frame.copy()
+        overlay = self.frame.copy()
+        return frame, overlay
+
+    def findFaces(self, frame):
+        frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+            faces = self.faceCascade.detectMultiScale(
+                frame_gray,
+                scaleFactor=1.4,
+                minNeighbors=5,
+                minSize=(50, 50),
+                #         flags=cv2.cv.CV_HAAR_SCALE_IMAGE
+                flags=0
+            )
+        return faces
 
     def takePhoto(self):
         """
