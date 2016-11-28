@@ -90,6 +90,7 @@ class PartyPi(object):
         self.playIcon3 = cv2.imread('playagain3.png')
         self.easySize = self.hardSize = self.easyIcon.shape[:2]
         self.playSize = self.playIcon.shape[:2]
+        self.christmas = cv2.imread('christmas.png', -1)
         cascPath = "face.xml"
         self.faceCascade = cv2.CascadeClassifier(cascPath)
         self.pretimer = None
@@ -174,17 +175,18 @@ class PartyPi(object):
         Select a mode: Easy or Hard.
         """
         self.tickcount += 1
-        # if not self.calibrated and self.tickcount == 10:
-        #     t0 = time.clock()
 
         if self.raspberry:
             self.tickcount += 1
         self.captureFrame()
 
+        # Draw "Easy" and "Hard".
         self.addText(self.frame, "Easy", (self.screenwidth / 8,
                                           (self.screenheight * 3) / 4), size=3)
         self.addText(self.frame, "Hard", (self.screenwidth / 2,
                                           (self.screenheight * 3) / 4), size=3)
+
+        # Listen for mode selection.
         if self.currPosX and self.currPosX < self.screenwidth / 2:
             cv2.rectangle(self.overlay, (0, 0), (self.screenwidth / 2,
                                                  self.screenheight), (211, 211, 211), -1)
@@ -201,49 +203,15 @@ class PartyPi(object):
             self.click_point_x = None
 
         # Draw faces
-        if self.tickcount >= 0:
-            faces = self.findFaces(self.frame)
-        else:
-            faces = []
-        # Draw a rectangle around the faces
+        faces = self.findFaces(self.frame)
+        self.selectMode(faces)
 
-        for (x, y, w, h) in faces:
-            cv2.rectangle(self.frame, (x, y),
-                          (x + w, y + h), (0, 0, 255), 2)
-            # Select easy mode with face
-            if x + w < self.easySize[1] and y > self.screenheight - self.easySize[0]:
-                self.modeLoadCount += 1
-                if self.modeLoadCount is 20:
-                    self.easyMode = True
-                    self.modeLoadCount = 0
-                    self.level = 1
-                    self.tickcount = 0
-            # Select hard mode with face
-            elif x + w > (self.screenwidth - self.hardSize[1]) and y > (self.screenheight - self.hardSize[0]):
-                self.modeLoadCount += 1
-                if self.modeLoadCount is 20:
-                    self.easyMode = False
-                    self.modeLoadCount = 0
-                    self.level = 1
-                    self.tickcount = 0
-
-            # roi_gray = gray[y:y + h, x:x + w]
-            # roi_color = img[y:y + h, x:x + w]
-
-        # Draw easy mode selection box.
-
-        # FIXME: Uncomment following lines
-        if not self.raspberry:
-            self.overlay[self.screenheight - self.easySize[0]:self.screenheight,
-                         0:self.easySize[1]] = self.easyIcon
-
-            self.overlay[self.screenheight - self.hardSize[0]:self.screenheight,
-                         self.screenwidth - self.hardSize[1]:self.screenwidth] = self.hardIcon
-        cv2.addWeighted(self.overlay, self.opacity, self.frame,
-                        1 - self.opacity, 0, self.frame)
         # Display frame
         self.addText(self.frame, "PartyPi v0.0.2", ((self.screenwidth / 5) * 4,
                                                     self.screenheight / 7), color=(68, 54, 66), size=0.5, thickness=0.5)
+        # Draw Christmas logo
+        self.drawChristmasLogo()
+
         cv2.imshow('PartyPi', self.frame)
 
         # if not self.calibrated and self.tickcount == 10:
@@ -438,6 +406,48 @@ class PartyPi(object):
         self.tickcount = 0
         self.static = False
         self.playIcon = self.playIconOriginal
+
+    def selectMode(self, faces):
+
+        # Draw a rectangle around the faces
+        for (x, y, w, h) in faces:
+            cv2.rectangle(self.frame, (x, y),
+                          (x + w, y + h), (0, 0, 255), 2)
+            # Select easy mode with face
+            if x + w < self.easySize[1] and y > self.screenheight - self.easySize[0]:
+                self.modeLoadCount += 1
+                if self.modeLoadCount is 20:
+                    self.easyMode = True
+                    self.modeLoadCount = 0
+                    self.level = 1
+                    self.tickcount = 0
+            # Select hard mode with face
+            elif x + w > (self.screenwidth - self.hardSize[1]) and y > (self.screenheight - self.hardSize[0]):
+                self.modeLoadCount += 1
+                if self.modeLoadCount is 20:
+                    self.easyMode = False
+                    self.modeLoadCount = 0
+                    self.level = 1
+                    self.tickcount = 0
+        # Draw easy mode selection box.
+        if not self.raspberry:
+            self.overlay[self.screenheight - self.easySize[0]:self.screenheight,
+                         0:self.easySize[1]] = self.easyIcon
+
+            self.overlay[self.screenheight - self.hardSize[0]:self.screenheight,
+                         self.screenwidth - self.hardSize[1]:self.screenwidth] = self.hardIcon
+        cv2.addWeighted(self.overlay, self.opacity, self.frame,
+                        1 - self.opacity, 0, self.frame)
+
+    def drawChristmasLogo(self):
+        y0 = (self.screenheight / 7) + 0
+        y1 = y0 + self.christmas.shape[0]
+        x0 = (self.screenwidth / 5) * 4 - 75
+        x1 = x0 + self.christmas.shape[1]
+
+        for c in range(0, 3):
+            self.frame[y0:y1, x0:x1, c] = self.christmas[:, :, c] * (self.christmas[:, :, 3] / 255.0) + self.frame[
+                y0:y1, x0:x1, c] * (1.0 - self.christmas[:, :, 3] / 255.0)
 
     def addText(self, frame, text, origin, size=1.0, color=(255, 255, 255), thickness=1):
         """
