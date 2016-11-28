@@ -201,14 +201,14 @@ class PartyPi(object):
             self.click_point_x = None
 
         # Draw faces
-        if self.tickcount % 5 == 0:
+        if self.tickcount >= 0:
             frame_gray = cv2.cvtColor(self.frame, cv2.COLOR_BGR2GRAY)
 
             faces = self.faceCascade.detectMultiScale(
                 frame_gray,
                 scaleFactor=1.4,
-                minNeighbors=6,
-                minSize=(70, 70),
+                minNeighbors=3,
+                minSize=(50, 50),
                 #         flags=cv2.cv.CV_HAAR_SCALE_IMAGE
                 flags=0
             )
