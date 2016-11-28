@@ -179,17 +179,17 @@ class PartyPi(object):
 
         if self.raspberry:
             self.tickcount += 1
-        frame, overlay = self.captureFrame()
+        self.captureFrame()
 
-        self.addText(frame, "Easy", (self.screenwidth / 8,
-                                     (self.screenheight * 3) / 4), size=3)
-        self.addText(frame, "Hard", (self.screenwidth / 2,
-                                     (self.screenheight * 3) / 4), size=3)
+        self.addText(self.frame, "Easy", (self.screenwidth / 8,
+                                          (self.screenheight * 3) / 4), size=3)
+        self.addText(self.frame, "Hard", (self.screenwidth / 2,
+                                          (self.screenheight * 3) / 4), size=3)
         if self.currPosX and self.currPosX < self.screenwidth / 2:
-            cv2.rectangle(overlay, (0, 0), (self.screenwidth / 2,
-                                            self.screenheight), (211, 211, 211), -1)
+            cv2.rectangle(self.overlay, (0, 0), (self.screenwidth / 2,
+                                                 self.screenheight), (211, 211, 211), -1)
         else:
-            cv2.rectangle(overlay, (self.screenwidth / 2, 0),
+            cv2.rectangle(self.overlay, (self.screenwidth / 2, 0),
                           (self.screenwidth, self.screenheight), (211, 211, 211), -1)
         if self.click_point_x:
             if self.click_point_x < self.screenwidth / 2:
@@ -202,13 +202,13 @@ class PartyPi(object):
 
         # Draw faces
         if self.tickcount >= 0:
-            faces = self.findFaces(frame)
+            faces = self.findFaces(self.frame)
         else:
             faces = []
         # Draw a rectangle around the faces
 
         for (x, y, w, h) in faces:
-            cv2.rectangle(frame, (x, y),
+            cv2.rectangle(self.frame, (x, y),
                           (x + w, y + h), (0, 0, 255), 2)
             # Select easy mode with face
             if x + w < self.easySize[1] and y > self.screenheight - self.easySize[0]:
@@ -234,17 +234,17 @@ class PartyPi(object):
 
         # FIXME: Uncomment following lines
         if not self.raspberry:
-            overlay[self.screenheight - self.easySize[0]:self.screenheight,
-                    0:self.easySize[1]] = self.easyIcon
+            self.overlay[self.screenheight - self.easySize[0]:self.screenheight,
+                         0:self.easySize[1]] = self.easyIcon
 
-            overlay[self.screenheight - self.hardSize[0]:self.screenheight,
-                    self.screenwidth - self.hardSize[1]:self.screenwidth] = self.hardIcon
-        cv2.addWeighted(overlay, self.opacity, frame,
-                        1 - self.opacity, 0, frame)
+            self.overlay[self.screenheight - self.hardSize[0]:self.screenheight,
+                         self.screenwidth - self.hardSize[1]:self.screenwidth] = self.hardIcon
+        cv2.addWeighted(self.overlay, self.opacity, self.frame,
+                        1 - self.opacity, 0, self.frame)
         # Display frame
-        self.addText(frame, "PartyPi v0.0.2", ((self.screenwidth / 5) * 4,
-                                               self.screenheight / 7), color=(68, 54, 66), size=0.5, thickness=0.5)
-        cv2.imshow('PartyPi', frame)
+        self.addText(self.frame, "PartyPi v0.0.2", ((self.screenwidth / 5) * 4,
+                                                    self.screenheight / 7), color=(68, 54, 66), size=0.5, thickness=0.5)
+        cv2.imshow('PartyPi', self.frame)
 
         # if not self.calibrated and self.tickcount == 10:
         #     self.t1 = time.clock() - t0
@@ -366,20 +366,21 @@ class PartyPi(object):
         frame_gray = cv2.cvtColor(self.frame, cv2.COLOR_BGR2GRAY)
 
         if self.tickcount >= 0:
-            frame = self.findFaces()
+            faces = self.findFaces()
+            )
         else:
-            faces = []
+            faces=[]
         if len(faces):
-            rightFace = max([x for x, y, w, h in faces])
-            bottomFace = max([y for x, y, w, h in faces])
+            rightFace=max([x for x, y, w, h in faces])
+            bottomFace=max([y for x, y, w, h in faces])
             if rightFace > self.screenwidth - self.playSize[1] * 1.2:
-                self.playIcon = self.playIcon1.copy()
+                self.playIcon=self.playIcon1.copy()
                 if bottomFace > self.screenheight / 2:
-                    self.playIcon = self.playIcon2.copy()
+                    self.playIcon=self.playIcon2.copy()
             else:
-                self.playIcon = self.playIconOriginal.copy()
+                self.playIcon=self.playIconOriginal.copy()
         else:
-            self.playIcon = self.playIconOriginal.copy()
+            self.playIcon=self.playIconOriginal.copy()
 
         # Draw a rectangle around the faces.
         for (x, y, w, h) in faces:
@@ -399,18 +400,18 @@ class PartyPi(object):
                 self.reset()
 
         # Show live image
-        self.photo[self.screenheight - self.easySize[0]:self.screenheight, self.screenwidth - self.easySize[0]:self.screenwidth] = self.frame[
-            self.screenheight - self.easySize[1]:self.screenheight, self.screenwidth - self.easySize[1]:self.screenwidth]
+        self.photo[self.screenheight - self.easySize[0]:self.screenheight, self.screenwidth - self.easySize[0]:self.screenwidth]=self.frame[
+            self.screenheight - self.easySize[1]: self.screenheight, self.screenwidth - self.easySize[1]: self.screenwidth]
 
         self.overlay = self.photo.copy()
         # Show 'Play Again'
-        self.overlay[self.screenheight - self.playSize[1]:self.screenheight, self.screenwidth - self.playSize[1]:self.screenwidth] = self.playIcon[
-            0:self.playSize[1], 0:self.playSize[0]]
+        self.overlay[self.screenheight - self.playSize[1]: self.screenheight, self.screenwidth - self.playSize[1]: self.screenwidth] = self.playIcon[
+            0: self.playSize[1], 0: self.playSize[0]]
 
         cv2.addWeighted(self.overlay, self.opacity, self.photo,
                         1 - self.opacity, 0, self.photo)
         self.addText(self.photo, "PartyPi v0.0.2", ((self.screenwidth / 5) * 4,
-                                                    self.screenheight / 7), color=(68, 54, 66), size=0.5, thickness=0.5)
+                                                    self.screenheight / 7), color = (68, 54, 66), size = 0.5, thickness = 0.5)
         cv2.imshow('PartyPi', self.photo)
 
     def mouse(self, event, x, y, flags, param):
@@ -419,29 +420,29 @@ class PartyPi(object):
         """
 
         if event == cv2.EVENT_MOUSEMOVE:
-            self.currPosX, self.currPosY = x, y
+            self.currPosX, self.currPosY=x, y
             # print "curposX,Y", x, y
 
         elif event == cv2.EVENT_LBUTTONUP:
-            self.click_point_x, self.click_point_y = x, y
+            self.click_point_x, self.click_point_y=x, y
             # print "x,y", x, y
 
     def reset(self):
         """
         Reset to beginning.
         """
-        self.level = 0
-        self.currPosX = None
-        self.currPosY = None
-        self.click_point_x = None
-        self.click_point_y = None
-        self.currEmotion = 'happiness'
-        self.result = []
-        self.tickcount = 0
-        self.static = False
-        self.playIcon = self.playIconOriginal
+        self.level=0
+        self.currPosX=None
+        self.currPosY=None
+        self.click_point_x=None
+        self.click_point_y=None
+        self.currEmotion='happiness'
+        self.result=[]
+        self.tickcount=0
+        self.static=False
+        self.playIcon=self.playIconOriginal
 
-    def addText(self, frame, text, origin, size=1.0, color=(255, 255, 255), thickness=1):
+    def addText(self, frame, text, origin, size = 1.0, color = (255, 255, 255), thickness = 1):
         """
         Put text on current frame.
         """
@@ -455,23 +456,21 @@ class PartyPi(object):
 
         if not self.piCam:
             ret, frame = self.cam.read()
-            frame = cv2.flip(frame, 1)
-            overlay = frame.copy()
-        else:
-            overlay = self.frame.copy()
-        return frame, overlay
+            self.frame = cv2.flip(frame, 1)
+
+        self.overlay = self.frame.copy()
 
     def findFaces(self, frame):
         frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-        faces = self.faceCascade.detectMultiScale(
-            frame_gray,
-            scaleFactor=1.4,
-            minNeighbors=5,
-            minSize=(50, 50),
-            #         flags=cv2.cv.CV_HAAR_SCALE_IMAGE
-            flags=0
-        )
+            faces = self.faceCascade.detectMultiScale(
+                frame_gray,
+                scaleFactor=1.4,
+                minNeighbors=5,
+                minSize=(50, 50),
+                #         flags=cv2.cv.CV_HAAR_SCALE_IMAGE
+                flags=0
+            )
         return faces
 
     def takePhoto(self):
