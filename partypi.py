@@ -21,7 +21,7 @@ class PartyPi(object):
                          'fear', 'happiness', 'neutral', 'sadness', 'surprise']
         self.photo = cv2.imread('img_1.png')
         self.windowSize = windowSize
-        print "windowsize", self.windowSize[0], self.windowsize[1]
+        print "windowsize", self.windowSize[0], self.windowSize[1]
         self.screenwidth, self.screenheight = self.windowSize
 
         # Setup for Raspberry Pi.
@@ -105,7 +105,7 @@ class PartyPi(object):
         self.static = False
         self.photoMode = False
         cv2.namedWindow("PartyPi", cv2.WINDOW_NORMAL)
-        cv2.resizeWindow("PartyPi", self.windowSize[0], self.windowSize[1])
+        # cv2.resizeWindow("PartyPi", self.windowSize[0], self.windowSize[1])
         # Returns - TypeError: Required argument 'prop_value' (pos 3) not found
         # cv2.setWindowProperty(
         #     "PartyPi", cv2.WND_PROP_FULLSCREEN)
