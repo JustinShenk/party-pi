@@ -98,6 +98,7 @@ class PartyPi(object):
         self.static = False
         self.photoMode = False
         cv2.namedWindow("PartyPi", cv2.WINDOW_NORMAL)
+        cv2.resizeWindow("PartyPi", 800, 600)
         # Returns - TypeError: Required argument 'prop_value' (pos 3) not found
         # cv2.setWindowProperty(
         #     "PartyPi", cv2.WND_PROP_FULLSCREEN)
