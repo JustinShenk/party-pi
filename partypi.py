@@ -318,8 +318,11 @@ class PartyPi(object):
         """
         self.tickcount += 1
         self.captureFrame()
+
         if self.raspberry:
             self.tickcount += 1
+
+        self.drawChristmasLogo()
         # overlay = self.photo.copy()
         # if self.currPosY >= self.screenheight * (4. / 5) and self.currPosY < self.screenheight:
         #     cv2.rectangle(overlay, (0, int(self.screenheight * (3. / 4))),
@@ -569,6 +572,7 @@ class PartyPi(object):
                 for i in range(len(firstEmoList)):
                     scoresList.append(
                         (firstEmoList[i] + 1) * (secondEmoList[i] + 1))
+            print "scoresList:", scoresList
 
             # Draw the scores for the faces
             for idx, currFace in enumerate(self.result):
@@ -637,6 +641,7 @@ class PartyPi(object):
                                 self.font, 0.8, (232, 167, 35), 2)
             else:
                 if self.easyMode:
+                    print "tiedWinners:", tiedWinners
                     for winner in tiedWinners:
                         rectL = self.result[winner]['faceRectangle']['left']
                         rectT = self.result[winner]['faceRectangle']['top']
