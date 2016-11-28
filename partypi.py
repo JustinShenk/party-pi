@@ -441,12 +441,15 @@ class PartyPi(object):
                         1 - self.opacity, 0, self.frame)
 
     def drawChristmasLogo(self):
-        y0 = (self.screenheight / 7) + 0
+        if self.screenheight < 700:
+            y0 = self.screenheight / 5
+        else:
+            y0 = (self.screenheight / 7) + 0
         y1 = y0 + self.christmas.shape[0]
         if self.screenwidth < 700:
             x0 = 2 * self.screenwidth / 3
         else:
-            x0 = (self.screenwidth / 10) * 8 - 75
+            x0 = 0
         x1 = x0 + self.christmas.shape[1]
 
         for c in range(0, 3):
