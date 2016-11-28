@@ -207,7 +207,7 @@ class PartyPi(object):
             faces = self.faceCascade.detectMultiScale(
                 frame_gray,
                 scaleFactor=1.4,
-                minNeighbors=3,
+                minNeighbors=5,
                 minSize=(50, 50),
                 #         flags=cv2.cv.CV_HAAR_SCALE_IMAGE
                 flags=0
