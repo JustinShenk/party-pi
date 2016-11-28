@@ -365,8 +365,8 @@ class PartyPi(object):
 
         frame_gray = cv2.cvtColor(self.frame, cv2.COLOR_BGR2GRAY)
 
-        if self.tickcount >= 0:
-            faces = self.findFaces()
+        if self.tickcount % 5 == 0:
+            faces = findFaces()
         else:
             faces = []
         if len(faces):
@@ -399,8 +399,6 @@ class PartyPi(object):
                 self.reset()
 
         # Show live image
-
-        self.photo[self.screenheight - self.easySize[0]:self.screenheight, self.screenwidth - self.easySize[0]:self.screenwidth] = self.frame[
         self.photo[self.screenheight - self.easySize[0]:self.screenheight, self.screenwidth - self.easySize[0]:self.screenwidth] = self.frame[
             self.screenheight - self.easySize[1]: self.screenheight, self.screenwidth - self.easySize[1]: self.screenwidth]
 
