@@ -13,6 +13,7 @@ class PartyPi(object):
 
     def __init__(self, piCam=False, resolution=(1280 / 2, 1024 / 2), windowSize=(1200, 1024)):
         self.piCam = piCam
+        self.windowSize = windowSize
         print self.piCam
         self.level = 0
         self.looping = True
