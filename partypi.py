@@ -68,8 +68,8 @@ class PartyPi(object):
         # self.piCamera.resolution = (640, 480)
         self.piCamera.resolution = self.resolution[0], self.resolution[1]
         self.screenwidth, self.screenheight = self.piCamera.resolution
-        self.piCamera.framerate = 10
-        self.piCamera.brightness = 65
+        # self.piCamera.framerate = 10
+        self.piCamera.brightness = 55
         self.rawCapture = PiRGBArray(
             self.piCamera, size=(self.screenwidth, self.screenheight))
 
@@ -478,7 +478,7 @@ class PartyPi(object):
             str(img_nr) + str(self.img_end)
         # bwphoto = cv2.cvtColor(self.photo, cv2.COLOR_BGR2GRAY)
         # cv2.imwrite(self.imagepath, bwphoto)
-        cv2.imwrite(self.imagepath, self.phto)
+        cv2.imwrite(self.imagepath, self.photo)
         img_nr += 1
         self.upload_img()
 
