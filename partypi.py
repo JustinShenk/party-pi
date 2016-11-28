@@ -668,13 +668,13 @@ def main():
     Load application.
     """
     # sys.argv[1] = Using piCamera module
-    if len(sys.argv) == 1:
+    if len(sys.argv) == 2:
         if 'picam' or '-p' in sys.argv[1]:
             application = PartyPi(True)
         else:
             print "Load default settings"
             application = PartyPi()
-    elif len(sys.argv) == 2:
+    elif len(sys.argv) == 3:
         if 'x' in sys.argv[2]:
             res = sys.argv[2]
             w = res.split('x')[0]
@@ -682,7 +682,7 @@ def main():
             application = PartyPi(True, w, h)
         else:
             print "Load default settings"
-            application = PartyPi()
+            application = PartyPi(True)
     else:
         application = PartyPi()
 
