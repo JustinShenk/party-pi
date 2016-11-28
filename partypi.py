@@ -66,11 +66,11 @@ class PartyPi(object):
         from picamera.array import PiRGBArray
         self.piCamera = PiCamera()
         # self.piCamera.resolution = (640, 480)
-        self.piCamera.resolution = (self.resolution[0], self.resolution[1])
+        self.piCamera.resolution = self.resolution[0], self.resolution[1]
         self.screenwidth, self.screenheight = self.piCamera.resolution
-        # self.piCamera.framerate = 24
+        self.piCamera.framerate = 24
         self.rawCapture = PiRGBArray(
-            self.piCamera)
+            self.piCamera, size=(self.screenwidth, self.screenheight))
 
         self.frame = np.empty(
             (self.screenheight, self.screenwidth, 3), dtype=np.uint8)
