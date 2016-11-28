@@ -456,8 +456,9 @@ class PartyPi(object):
         if not self.piCam:
             ret, frame = self.cam.read()
             frame = cv2.flip(frame, 1)
-
-        overlay = self.frame.copy()
+            overlay = frame.copy()
+        else:
+            overlay = self.frame.copy()
         return frame, overlay
 
     def findFaces(self, frame):
