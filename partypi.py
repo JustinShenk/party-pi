@@ -679,7 +679,7 @@ def main():
             res = sys.argv[2]
             w = res.split('x')[0]
             h = res.split('x')[1]
-            application = PartyPi(True, w, h)
+            application = PartyPi(True, (w, h))
         else:
             print "Load default settings"
             application = PartyPi(True)
