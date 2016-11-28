@@ -211,7 +211,7 @@ class PartyPi(object):
         self.addText(self.frame, "PartyPi v0.0.2", ((self.screenwidth / 5) * 4,
                                                     self.screenheight / 7), color=(68, 54, 66), size=0.5, thickness=0.5)
         # Draw Christmas logo
-        self.drawChristmasLogo()
+        self.drawChristmasLogo(self.frame)
 
         cv2.imshow('PartyPi', self.frame)
 
@@ -322,7 +322,6 @@ class PartyPi(object):
         if self.raspberry:
             self.tickcount += 1
 
-        self.drawChristmasLogo()
         # overlay = self.photo.copy()
         # if self.currPosY >= self.screenheight * (4. / 5) and self.currPosY < self.screenheight:
         #     cv2.rectangle(overlay, (0, int(self.screenheight * (3. / 4))),
@@ -381,6 +380,7 @@ class PartyPi(object):
                         1 - self.opacity, 0, self.photo)
         self.addText(self.photo, "PartyPi v0.0.2", ((self.screenwidth / 5) * 4,
                                                     self.screenheight / 7), color=(68, 54, 66), size=0.5, thickness=0.5)
+        self.drawChristmasLogo(self.photo)
         cv2.imshow('PartyPi', self.photo)
 
     def mouse(self, event, x, y, flags, param):
@@ -443,7 +443,7 @@ class PartyPi(object):
         cv2.addWeighted(self.overlay, self.opacity, self.frame,
                         1 - self.opacity, 0, self.frame)
 
-    def drawChristmasLogo(self):
+    def drawChristmasLogo(self, frame):
         if self.screenheight < 700:
             y0 = 0
         else:
@@ -456,7 +456,7 @@ class PartyPi(object):
         x1 = x0 + self.christmas.shape[1]
 
         for c in range(0, 3):
-            self.frame[y0:y1, x0:x1, c] = self.christmas[:, :, c] * (self.christmas[:, :, 3] / 255.0) + self.frame[
+            frame[y0:y1, x0:x1, c] = self.christmas[:, :, c] * (self.christmas[:, :, 3] / 255.0) + frame[
                 y0:y1, x0:x1, c] * (1.0 - self.christmas[:, :, 3] / 255.0)
 
     def addText(self, frame, text, origin, size=1.0, color=(255, 255, 255), thickness=1):
