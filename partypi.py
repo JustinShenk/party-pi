@@ -303,6 +303,7 @@ class PartyPi(object):
         if self.showAnalyzing:
             self.addText(self.frame, "Analyzing...", (self.screenwidth / 5,
                                                       self.screenheight / 4), size=2.2, color=(224, 23, 101))
+            self.drawChristmasLogo(self.frame)
         # Display image.
         self.addText(self.frame, "PartyPi v0.0.2", ((self.screenwidth / 5) * 4,
                                                     self.screenheight / 7), color=(68, 54, 66), size=0.5, thickness=0.5)
