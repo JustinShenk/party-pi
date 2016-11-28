@@ -363,10 +363,8 @@ class PartyPi(object):
         # cv2.putText(self.photo, "[Click to play again]", (self.screenwidth / 2, int(
         # self.screenheight * (6. / 7))), self.font, 0.7, (62, 184, 144), 2)
 
-        frame_gray = cv2.cvtColor(self.frame, cv2.COLOR_BGR2GRAY)
-
         if self.tickcount % 5 == 0:
-            faces = findFaces()
+            faces = self.findFaces(self.frame)
         else:
             faces = []
         if len(faces):
@@ -468,8 +466,7 @@ class PartyPi(object):
                 minNeighbors=5,
                 minSize=(50, 50),
                 #         flags=cv2.cv.CV_HAAR_SCALE_IMAGE
-                flags=0
-            )
+                flags=0)
         return faces
 
     def takePhoto(self):
