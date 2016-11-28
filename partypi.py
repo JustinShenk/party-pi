@@ -97,7 +97,7 @@ class PartyPi(object):
         self.currCount = None
         self.static = False
         self.photoMode = False
-        cv2.namedWindow("PartyPi", cv2.WINDOW_AUTOSIZE)
+        cv2.namedWindow("PartyPi")
         # Returns - TypeError: Required argument 'prop_value' (pos 3) not found
         # cv2.setWindowProperty(
         #     "PartyPi", cv2.WND_PROP_FULLSCREEN)
