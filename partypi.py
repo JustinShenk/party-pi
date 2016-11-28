@@ -11,7 +11,7 @@ import numpy as np
 
 class PartyPi(object):
 
-    def __init__(self, piCam=False, windowSize=(1280 / 2, 1024 / 2)):
+    def __init__(self, piCam=False, resolution=(1280 / 2, 1024 / 2), windowSize=(1200, 1024)):
         self.piCam = piCam
         print self.piCam
         self.level = 0
@@ -20,8 +20,7 @@ class PartyPi(object):
         self.emotions = ['anger', 'contempt', 'disgust',
                          'fear', 'happiness', 'neutral', 'sadness', 'surprise']
         self.photo = cv2.imread('img_1.png')
-        self.windowSize = windowSize
-        print "windowsize", self.windowSize[0], self.windowSize[1]
+        self.resolution = resolution
         self.screenwidth, self.screenheight = self.windowSize
 
         # Setup for Raspberry Pi.
@@ -66,7 +65,7 @@ class PartyPi(object):
         from picamera.array import PiRGBArray
         self.piCamera = PiCamera()
         # self.piCamera.resolution = (640, 480)
-        # self.piCamera.resolution = (self.screenwidth, self.screenheight)
+        self.piCamera.resolution = (self.resolution[0], self.resolution[1])
         self.screenwidth, self.screenheight = self.piCamera.resolution
         # self.piCamera.framerate = 24
         self.rawCapture = PiRGBArray(
@@ -105,7 +104,7 @@ class PartyPi(object):
         self.static = False
         self.photoMode = False
         cv2.namedWindow("PartyPi", cv2.WINDOW_NORMAL)
-        # cv2.resizeWindow("PartyPi", self.windowSize[0], self.windowSize[1])
+        cv2.resizeWindow("PartyPi", self.windowSize[0], self.windowSize[1])
         # Returns - TypeError: Required argument 'prop_value' (pos 3) not found
         # cv2.setWindowProperty(
         #     "PartyPi", cv2.WND_PROP_FULLSCREEN)
