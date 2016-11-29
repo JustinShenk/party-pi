@@ -2,8 +2,7 @@
 import sys
 import os
 import cv2
-from emotionpi import emotion_api
-import pyimgur
+from uploader import Uploader
 import random
 import time
 import numpy as np
@@ -11,11 +10,12 @@ import numpy as np
 
 class PartyPi(object):
 
-    def __init__(self, piCam=False, resolution=(1280 / 2, 1024 / 2), windowSize=(1200, 1024)):
+    def __init__(self, piCam=False, resolution=(1280 / 2, 1024 / 2), windowSize=(1200, 1024), blackAndWhite=False):
         self.piCam = piCam
         self.windowSize = windowSize
-        self.level = 0
+        self.blackAndWhite = blackAndWhite
         self.looping = True
+
         self.font = cv2.FONT_HERSHEY_SIMPLEX
         self.emotions = ['anger', 'contempt', 'disgust',
                          'fear', 'happiness', 'neutral', 'sadness', 'surprise']
@@ -28,37 +28,37 @@ class PartyPi(object):
         self.currentAnalLabel = 0
         # Setup for Raspberry Pi.
         if 'raspberrypi' in os.uname():
-            print "PartyPi v0.0.2 for Raspberry Pi, Coxi Christmas Party Edition"
-            self.raspberry = True
-
-            # Set up picamera module.
-            if self.piCam:
-                self.pyIt()
-            else:
-                self.cam = cv2.VideoCapture(0)
-                _, self.frame = self.cam.read()
-                # self.cam.set(3, self.screenwidth)
-                # self.cam.set(4, self.screenheight)
+            self.initRaspberryPi()
         else:
-            self.raspberry = False
-            self.cam = cv2.VideoCapture(0)
-            self.cam.set(3, self.screenwidth)
-            self.cam.set(4, self.screenheight)
-            _, self.frame = self.cam.read()
+            self.initWebcam()
+            cv2.setMouseCallback("PartyPi", self.mouse)
 
+        # Reinitialize screenwidth and height in case changed by system.
         self.screenwidth, self.screenheight = self.frame.shape[:2]
         print "first screenheight:", self.screenheight, self.screenwidth, self.frame.shape
-        self.currEmotion = 'anger'
-        self.countx = None
-        self.currPosX = None
-        self.currPosY = None
-        self.click_point_x = None
-        self.click_point_y = None
-        self.calibrated = False
-        self.tickcount = 0
-        self.modeLoadCount = 0
-        self.initPyimgur()
+
+        # Finish setup.
         self.setupGame()
+
+    def initWebcam(self):
+        self.raspberry = False
+        self.cam = cv2.VideoCapture(0)
+        self.cam.set(3, self.screenwidth)
+        self.cam.set(4, self.screenheight)
+        _, self.frame = self.cam.read()
+
+    def initRaspberryPi(self):
+        print "PartyPi v0.0.2 for Raspberry Pi, Coxi Christmas Party Edition"
+        self.raspberry = True
+
+        # Set up picamera module.
+        if self.piCam:
+            self.pyIt()
+        else:
+            self.cam = cv2.VideoCapture(0)
+            _, self.frame = self.cam.read()
+            # self.cam.set(3, self.screenwidth)
+            # self.cam.set(4, self.screenheight)
 
     def pyIt(self):
         """
@@ -72,16 +72,34 @@ class PartyPi(object):
         self.screenwidth, self.screenheight = self.piCamera.resolution
         # self.piCamera.framerate = 10
         self.piCamera.brightness = 55
+        self.camera.vflip = True
         self.rawCapture = PiRGBArray(
             self.piCamera, size=(self.screenwidth, self.screenheight))
         self.frame = np.empty(
             (self.screenheight, self.screenwidth, 3), dtype=np.uint8)
-        time.sleep(0.1)
+        time.sleep(1)
 
     def setupGame(self):
         """
-        Set up icons and face cascade.
+        Initialize variables, set up icons and face cascade.
         """
+        self.currEmotion = self.emotions[0]
+        self.countx = None
+        self.currPosX = None
+        self.currPosY = None
+        self.click_point_x = None
+        self.click_point_y = None
+        self.calibrated = False
+        self.tickcount = 0
+        self.modeLoadCount = 0
+        self.level = 0
+        self.result = []
+        self.uploader = Uploader()
+        cascPath = "face.xml"
+        self.faceCascade = cv2.CascadeClassifier(cascPath)
+        self.pretimer = None
+
+        # TODO Consider placing icons in a dictionary.
         self.easyIcon = cv2.imread('easy.png')
         self.hardIcon = cv2.imread('hard.png')
         self.playIcon = cv2.imread('playagain.png')
@@ -92,9 +110,6 @@ class PartyPi(object):
         self.easySize = self.hardSize = self.easyIcon.shape[:2]
         self.playSize = self.playIcon.shape[:2]
         self.christmas = cv2.imread('christmas.png', -1)
-        cascPath = "face.xml"
-        self.faceCascade = cv2.CascadeClassifier(cascPath)
-        self.pretimer = None
 
         print "Camera initialize"
         # if not self.raspberry:
@@ -104,7 +119,9 @@ class PartyPi(object):
         self.flashon = False
         self.showAnalyzing = False
         self.opacity = 0.4
+        self.redfactor = 1.  # Reduction factor for timing.
         self.currCount = None
+        # `self.static`: Used to indicate if emotion should stay on screen.
         self.static = False
         self.photoMode = False
         cv2.namedWindow("PartyPi", cv2.WINDOW_NORMAL)
@@ -114,48 +131,25 @@ class PartyPi(object):
         #     "PartyPi", cv2.WND_PROP_FULLSCREEN)
         # cv2.setWindowProperty("PartyPi", cv2.WND_PROP_AUTOSIZE,
         #                       cv2.WINDOW_AUTOSIZE)
-        if not self.raspberry:
-            cv2.setMouseCallback("PartyPi", self.mouse)
-        self.redfactor = 1.
+
         if self.piCam == True:
-            print "self.piCam:", self.piCam
-            # capture frames from the camera
-            for _frame in self.piCamera.capture_continuous(self.rawCapture, format="bgr", use_video_port=True):
-                # grab the raw NumPy array representing the image, then initialize the timestamp
-                # and occupied/unoccupied text
-                self.frame = cv2.flip(_frame.array, 1)
+            # Capture frames from the camera.
+            for _frame in self.piCamera.capture_continuous(self.rawCapture, format='bgr', use_video_port=True):
+                # self.frame = cv2.flip(_frame.array, 1)
+                self.frame = _frame.array
                 self.screenheight, self.screenwidth = self.frame.shape[:2]
-                print "second screenheight, screenwidth:", self.screenheight, self.screenwidth
+                # TODO: Consider passing frame as local variable rather than
+                # global.
                 self.gameLoop()
         else:
             while self.looping:
                 self.gameLoop()
 
-    def initPyimgur(self):
-        """
-        Initialize variables and parameters for PyImgur.
-        """
-        self._url = 'https://api.projectoxford.ai/emotion/v1.0/recognize'
-        self._key = '1cc9418279ff4b2683b5050cfa6f3785'
-        self._maxNumRetries = 10
-        CLIENT_ID = "525d3ebc1147459"
-        CLIENT_SECRET = "75b8f9b449462150f374ae68f10154f2f392aa9b"
-        ALBUM_ID = "3mdlF"
-        self.im = pyimgur.Imgur(CLIENT_ID)
-
-        # TODO: Turn on album uploading.
-        # self.im = pyimgur.Imgur(CLIENT_ID, CLIENT_SECRET)
-        # self.im.change_authentication(
-        # refresh_token="814bed15fbea91dbc6131205f881fc45f8ee0715")
-        # self.im.refresh_access_token()
-        # user = im.get_user(spacemaker)
-        # self.album = self.im.get_album(ALBUM_ID)
-        self.result = []
-
     def gameLoop(self):
         """
         Start the game loop. Listen for escape key.
         """
+        # TODO: Check if following line is redundant.
         self.screenheight, self.screenwidth = self.frame.shape[:2]
         if self.level == 0:
             self.level0()
@@ -205,16 +199,17 @@ class PartyPi(object):
             self.level = 1
             self.click_point_x = None
 
-        # Draw faces
+        # Draw faces.
         faces = self.findFaces(self.frame)
         self.selectMode(faces)
 
-        # Display frame
+        # Display frame.
         self.addText(self.frame, "PartyPi v0.0.2", ((self.screenwidth / 5) * 4,
                                                     self.screenheight / 7), color=(68, 54, 66), size=0.5, thickness=0.5)
-        # Draw Christmas logo
+        # Draw Christmas logo.
         self.drawChristmasLogo(self.frame)
 
+        # Show image.
         cv2.imshow('PartyPi', self.frame)
 
         # if not self.calibrated and self.tickcount == 10:
@@ -298,7 +293,7 @@ class PartyPi(object):
         # Draw other text and flash on screen.
         if self.showBegin:
             cv2.putText(self.frame, "Begin!", (self.screenwidth / 3, self.screenheight / 2),
-                        self.font, 2.0, (255, 255, 255), 2)
+                        self.font, 2.8, (255, 255, 255), 2)
         elif self.flashon:
             cv2.rectangle(self.frame, (0, 0), (self.screenwidth,
                                                self.screenheight), (255, 255, 255), -1)
@@ -410,7 +405,7 @@ class PartyPi(object):
         self.currPosY = None
         self.click_point_x = None
         self.click_point_y = None
-        self.currEmotion = 'happiness'
+        self.currEmotion = self.emotions[1]
         self.result = []
         self.tickcount = 0
         self.static = False
@@ -460,9 +455,13 @@ class PartyPi(object):
             x0 = 2 * self.screenwidth / 3
         x1 = x0 + self.christmas.shape[1]
 
+        # Remove black background from png file.
         for c in range(0, 3):
-            frame[y0:y1, x0:x1, c] = self.christmas[:, :, c] * (self.christmas[:, :, 3] / 255.0) + frame[
-                y0:y1, x0:x1, c] * (1.0 - self.christmas[:, :, 3] / 255.0)
+            xmasSlice = self.christmas[:, :, c] * \
+                (self.christmas[:, :, 3] / 255.0)
+            backgroundSlice = frame[y0:y1, x0:x1, c] * \
+                (1.0 - self.christmas[:, :, 3] / 255.0)
+            frame[y0:y1, x0:x1, c] = xmasSlice + backgroundSlice
 
     def addText(self, frame, text, origin, size=1.0, color=(255, 255, 255), thickness=1):
         """
@@ -487,7 +486,7 @@ class PartyPi(object):
 
         faces = self.faceCascade.detectMultiScale(
             frame_gray,
-            scaleFactor=1.4,
+            scaleFactor=1.3,
             minNeighbors=5,
             minSize=(50, 50),
             #         flags=cv2.cv.CV_HAAR_SCALE_IMAGE
@@ -498,58 +497,33 @@ class PartyPi(object):
         """
         Take photo and prepare to write, then send to PyImgur.
         """
-        img_nr = self.get_last_image_nr()
-        self.imagepath = 'img/' + str(self.img_name) + \
-            str(img_nr) + str(self.img_end)
-        # bwphoto = cv2.cvtColor(self.photo, cv2.COLOR_BGR2GRAY)
-        # cv2.imwrite(self.imagepath, bwphoto)
-        cv2.imwrite(self.imagepath, self.photo)
-        img_nr += 1
-        self.upload_img()
+        imagePath = self.getImagePath()
 
-    def upload_img(self):
-        """
-        Send image to PyImgur.
-        """
-        print "Initate upload"
-
-        # try:
-        #     pass
-        # except Exception as e:
-        #     raise
-        # else:
-        #     pass
-        # finally:
-        #     pass
-        uploaded_image = self.im.upload_image(
-            self.imagepath, title="Uploaded with PyImgur")
-
-        # TODO: Turn on album uploading
-        # uploaded_image = self.im.upload_image(
-        #     self.imagepath, title="Uploaded with PyImgur", album=self.album)
-        print(uploaded_image.title)
-        print(uploaded_image.link)
-        print(uploaded_image.size)
-        print(uploaded_image.type)
-
-        print "Analyze image"
-        data = emotion_api(uploaded_image.link)
-        self.result = data
+        # If internet connection is poor, use black and white image.
+        if self.blackAndWhite:
+            bwphoto = cv2.cvtColor(self.photo, cv2.COLOR_BGR2GRAY)
+            cv2.imwrite(imagePpath, bwphoto)
+            self.results = self.uploader.upload_img(imagePath)
+        else:
+            cv2.imwrite(imagePath, self.photo)
+        self.results = self.uploader.upload_img(imagePath)
         self.display()
 
-    def get_last_image_nr(self):
-        self.img_name = 'img_'
-        img_nr = 0
-        self.img_end = ".png"
+    def getImagePath(self):
+        img_prefix = 'img_'
+        extension = '.png'
         nr = 0
         for file in os.listdir(os.getcwd() + '/img'):
-            if file.endswith(self.img_end):
-                file = file.replace(self.img_name, '')
-                file = file.replace(self.img_end, '')
-                print file
+            if file.endswith(extension):
+                file = file.replace(img_prefix, '')
+                file = file.replace(extension, '')
+                # print file
                 file_nr = int(file)
                 nr = max(nr, file_nr)
-        return nr + 1
+        img_nr = nr + 1
+        imagePath = 'img/' + str(img_prefix) + \
+            str(img_nr) + str(extension)
+        return imagePath
 
     def display(self):
         """
