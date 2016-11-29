@@ -9,3 +9,7 @@ Install opencv3 with python2 bindings
 Clone repository
 
 Run `python partypi.py`
+
+## TODO
+ - [ ] Fix alignment of analyzing text
+ - [ ] Redesign mode selection boxes
