@@ -22,8 +22,10 @@ class PartyPi(object):
         self.photo = cv2.imread('img_1.png')
         self.resolution = resolution
         self.screenwidth, self.screenheight = self.windowSize
-        self.colors = [(255, 255, 0), (238, 130, 238), (255, 0, 255),
-                       (0, 100, 0), (70, 130, 180), (25, 25, 112), (255, 20, 147), (244, 164, 96)]
+        self.colors = [(0, 100, 0), (4, 4, 230)]
+        self.analyzingLabels = ["Make Christmas Party Great Again", "Christms Elves are Analyzing...", "A Tribe of Unicorns is Working for You",
+                                "Take a Sip", "Turn around two times", "Saddling the unicorn", "Hey, Alan, we need your help", "Nothing to see here", "Uploading to Facebook..j/k", "Computing makes me thirsty"]
+        self.currentAnalLabel = 0
         # Setup for Raspberry Pi.
         if 'raspberrypi' in os.uname():
             print "PartyPi v0.0.2 for Raspberry Pi, Coxi Christmas Party Edition"
@@ -301,8 +303,9 @@ class PartyPi(object):
             cv2.rectangle(self.frame, (0, 0), (self.screenwidth,
                                                self.screenheight), (255, 255, 255), -1)
         if self.showAnalyzing:
-            self.addText(self.frame, "Analyzing...", (self.screenwidth / 5,
-                                                      self.screenheight / 4), size=2.2, color=(224, 23, 101))
+
+            self.addText(self.frame, self.analyzingLabels[self.currentAnalLabel % len(self.analyzingLabels)], (
+                self.screenwidth / 5, self.screenheight / 4), size=1.7, color=(224, 23, 101))
             self.drawChristmasLogo(self.frame)
         # Display image.
         self.addText(self.frame, "PartyPi v0.0.2", ((self.screenwidth / 5) * 4,
@@ -318,6 +321,7 @@ class PartyPi(object):
         Reset game with face detection.
         """
         self.tickcount += 1
+        self.currentAnalLabel += 1
         self.captureFrame()
 
         if self.raspberry:
@@ -623,9 +627,9 @@ class PartyPi(object):
                 print "Multiple winners!"
                 oneWinner = False
                 tiedWinners = []
-                for i in finalScores:
+                for ind, i in enumerate(finalScores):
                     if i == maxScore:
-                        tiedWinners.append(i)
+                        tiedWinners.append(ind)
 
             print "Scores:", finalScores, "Winner:", winner
 
