@@ -503,10 +503,10 @@ class PartyPi(object):
         if self.blackAndWhite:
             bwphoto = cv2.cvtColor(self.photo, cv2.COLOR_BGR2GRAY)
             cv2.imwrite(imagePpath, bwphoto)
-            self.results = self.uploader.upload_img(imagePath)
+            self.result = self.uploader.upload_img(imagePath)
         else:
             cv2.imwrite(imagePath, self.photo)
-        self.results = self.uploader.upload_img(imagePath)
+        self.result = self.uploader.upload_img(imagePath)
         self.display()
 
     def getImagePath(self):
