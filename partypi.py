@@ -110,6 +110,7 @@ class PartyPi(object):
         self.easySize = self.hardSize = self.easyIcon.shape[:2]
         self.playSize = self.playIcon.shape[:2]
         self.christmas = cv2.imread('christmas.png', -1)
+        self.hat = cv2.imread('hat.png', -1)
 
         print "Camera initialize"
         # if not self.raspberry:
@@ -208,7 +209,7 @@ class PartyPi(object):
                                                     self.screenheight / 7), color=(68, 54, 66), size=0.5, thickness=0.5)
         # Draw Christmas logo.
         self.drawChristmasLogo(self.frame)
-
+        self.drawHat(self.frame, faces)
         # Show image.
         cv2.imshow('PartyPi', self.frame)
 
@@ -462,6 +463,59 @@ class PartyPi(object):
             backgroundSlice = frame[y0:y1, x0:x1, c] * \
                 (1.0 - self.christmas[:, :, 3] / 255.0)
             frame[y0:y1, x0:x1, c] = xmasSlice + backgroundSlice
+
+    def drawHat(self, frame, faces):
+        hat = self.hat.copy()
+        hatHeight = hat.shape[0]
+        hatWidth = hat.shape[1]
+        hat = cv2.resize(hat, (hat.shape[1] * 2, hat.shape[0] * 2))
+        offsetY = 40
+        offsetX = 0
+        for (x, y, w, h) in faces:
+            hatx0 = hatx1 = haty0 = haty1 = 0
+            # Scale hat respective to face width.
+            if w > hatWidth:
+                hatScale = w / hatWidth
+                hat = cv2.resize(
+                    hat, (hatScale * hatWidth, hatScale * hatHeight))
+            # Adjust position of hat in frame with respect to face
+            y0 = y - offsetY
+
+            # Allow clipping.
+            if y0 < 0:
+                haty0 = abs(y0)
+                y0 = 0
+
+            y1 = y0 + hat.shape[0]
+
+            x0 = x - offsetX
+            if x0 < 0:
+                hatx0 = abs(x0)
+                x0 = 0
+
+            # Allow clipping.
+            x1 = x0 + hat.shape[1]
+
+            if x1 > self.screenwidth:
+                x1 = self.screenwidth
+                hatx1 = x1 - self.screenwidth
+
+            if y1 > self.screenheight:
+                y1 = self.screenheight
+                haty1 = y1 - self.screenheight
+
+            # Remove black background from png file.
+            for c in range(0, 3):
+                # hatSlice = hat[hatx0:hatx1, haty0:haty1, c] * \
+                #     (hat[hatx0:hatx1, haty0:haty1, 3] / 255.0)
+                # backgroundSlice = frame[y0:y1, x0:x1, c] * \
+                #     (1.0 - hat[:, :, 3] / 255.0)
+                # frame[y0:y1, x0:x1, c] = hatSlice + backgroundSlice
+                hatSlice = hat[:, :, c] * \
+                    (hat[:, :, 3] / 255.0)
+                backgroundSlice = frame[
+                    y0:y1, x0:x1, c] * (1.0 - hat[:, :, 3] / 255.0)
+                frame[y0:y1, x0:x1, c] = hatSlice + backgroundSlice
 
     def addText(self, frame, text, origin, size=1.0, color=(255, 255, 255), thickness=1):
         """
