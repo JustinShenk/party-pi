@@ -469,15 +469,21 @@ class PartyPi(object):
         hatHeight = hat.shape[0]
         hatWidth = hat.shape[1]
         hat = cv2.resize(hat, (hat.shape[1] * 2, hat.shape[0] * 2))
+        hatHeight = hat.shape[0]
+        hatWidth = hat.shape[1]
         offsetY = 40
         offsetX = 0
         for (x, y, w, h) in faces:
-            hatx0 = hatx1 = haty0 = haty1 = 0
+
+            hatx0 = haty0 = 0
+            hatx1 = hatWidth
+            haty1 = hatHeight
             # Scale hat respective to face width.
             if w > hatWidth:
-                hatScale = w / hatWidth
+                hatScale = float(w) / float(hatWidth)
                 hat = cv2.resize(
-                    hat, (hatScale * hatWidth, hatScale * hatHeight))
+                    hat, (int(hatScale * hatWidth), int(hatScale * hatHeight)))
+            offsetY = hat.shape[0]
             # Adjust position of hat in frame with respect to face
             y0 = y - offsetY
 
@@ -504,18 +510,22 @@ class PartyPi(object):
                 y1 = self.screenheight
                 haty1 = y1 - self.screenheight
 
-            # Remove black background from png file.
-            for c in range(0, 3):
-                # hatSlice = hat[hatx0:hatx1, haty0:haty1, c] * \
-                #     (hat[hatx0:hatx1, haty0:haty1, 3] / 255.0)
-                # backgroundSlice = frame[y0:y1, x0:x1, c] * \
-                #     (1.0 - hat[:, :, 3] / 255.0)
-                # frame[y0:y1, x0:x1, c] = hatSlice + backgroundSlice
-                hatSlice = hat[:, :, c] * \
-                    (hat[:, :, 3] / 255.0)
-                backgroundSlice = frame[
-                    y0:y1, x0:x1, c] * (1.0 - hat[:, :, 3] / 255.0)
-                frame[y0:y1, x0:x1, c] = hatSlice + backgroundSlice
+            if x0 < 0 or y0 < 0 or x1 > self.screenwidth or y1 > self.screenheight:
+                pass
+            else:
+                # Remove black background from png file.
+                for c in range(0, 3):
+                    # hatSlice = hat[hatx0:hatx1, haty0:haty1, c] * \
+                    #     (hat[haty0:haty1, hatx0:hatx1, 3] / 255.0)
+                    # backgroundSlice = frame[y0:y1, x0:x1, c] * \
+                    #     (1.0 - hat[:, :, 3] / 255.0)
+                    # print hatSlice.shape, backgroundSlice.shape, frame.shape, hat.shape, hatx0, hatx1, haty0, haty1
+                    # frame[y0:y1, x0:x1, c] = hatSlice + backgroundSlice
+                    hatSlice = hat[:, :, c] * \
+                        (hat[:, :, 3] / 255.0)
+                    backgroundSlice = frame[
+                        y0:y1, x0:x1, c] * (1.0 - hat[:, :, 3] / 255.0)
+                    frame[y0:y1, x0:x1, c] = hatSlice + backgroundSlice
 
     def addText(self, frame, text, origin, size=1.0, color=(255, 255, 255), thickness=1):
         """
