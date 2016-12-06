@@ -301,7 +301,7 @@ class PartyPi(object):
         if self.showAnalyzing:
 
             self.addText(self.frame, self.analyzingLabels[self.currentAnalLabel % len(self.analyzingLabels)], (
-                self.screenwidth / 5, self.screenheight / 4), size=1.7, color=(224, 23, 101))
+                self.screenwidth / 5, self.screenheight / 4 + 30), size=1.7, color=(224, 23, 101))
             self.drawChristmasLogo(self.frame)
         # Display image.
         self.addText(self.frame, "PartyPi v0.0.2", ((self.screenwidth / 5) * 4,
@@ -368,17 +368,21 @@ class PartyPi(object):
                 #     self.pretimer -= 1
                 self.reset()
 
-        # Show live image
+        # Show live image in corner.
         self.photo[self.screenheight - self.easySize[0]:self.screenheight, self.screenwidth - self.easySize[0]:self.screenwidth] = self.frame[
             self.screenheight - self.easySize[1]: self.screenheight, self.screenwidth - self.easySize[1]: self.screenwidth]
 
         self.overlay = self.photo.copy()
-        # Show 'Play Again'
+
+        # Show 'Play Again'.
         self.overlay[self.screenheight - self.playSize[1]: self.screenheight, self.screenwidth - self.playSize[1]: self.screenwidth] = self.playIcon[
             0: self.playSize[1], 0: self.playSize[0]]
 
+        # Blend photo with overlay.
         cv2.addWeighted(self.overlay, self.opacity, self.photo,
                         1 - self.opacity, 0, self.photo)
+
+        # Draw logo or title.
         self.addText(self.photo, "PartyPi v0.0.2", ((self.screenwidth / 5) * 4,
                                                     self.screenheight / 7), color=(68, 54, 66), size=0.5, thickness=0.5)
         self.drawChristmasLogo(self.photo)
@@ -399,7 +403,7 @@ class PartyPi(object):
 
     def reset(self):
         """
-        Reset to beginning.
+        Reset to beginning state.
         """
         self.level = 0
         self.currPosX = None
@@ -414,10 +418,9 @@ class PartyPi(object):
 
     def selectMode(self, faces):
 
-        # Draw a rectangle around the faces
+        # Draw a rectangle around the faces.
         for (x, y, w, h) in faces:
-            cv2.rectangle(self.frame, (x, y),
-                          (x + w, y + h), (0, 0, 255), 2)
+
             # Select easy mode with face
             if x + w < self.easySize[1] and y > self.screenheight - self.easySize[0]:
                 self.modeLoadCount += 1
@@ -426,7 +429,8 @@ class PartyPi(object):
                     self.modeLoadCount = 0
                     self.level = 1
                     self.tickcount = 0
-            # Select hard mode with face
+
+            # Select hard mode with face.
             elif x + w > (self.screenwidth - self.hardSize[1]) and y > (self.screenheight - self.hardSize[0]):
                 self.modeLoadCount += 1
                 if self.modeLoadCount is 20:
@@ -434,6 +438,7 @@ class PartyPi(object):
                     self.modeLoadCount = 0
                     self.level = 1
                     self.tickcount = 0
+
         # Draw easy mode selection box.
         if not self.raspberry:
             self.overlay[self.screenheight - self.easySize[0]:self.screenheight,
@@ -456,7 +461,7 @@ class PartyPi(object):
             x0 = 2 * self.screenwidth / 3
         x1 = x0 + self.christmas.shape[1]
 
-        # Remove black background from png file.
+        # Remove black background from png image.
         for c in range(0, 3):
             xmasSlice = self.christmas[:, :, c] * \
                 (self.christmas[:, :, 3] / 255.0)
@@ -471,20 +476,29 @@ class PartyPi(object):
         hat = cv2.resize(hat, (hat.shape[1] * 2, hat.shape[0] * 2))
         hatHeight = hat.shape[0]
         hatWidth = hat.shape[1]
-        offsetY = 40
+        hatAlignY = 40
+        hatAlignX = 0
         offsetX = 0
-        for (x, y, w, h) in faces:
 
+        # Extra offset for width and height scaling.
+        wOffset = 60
+        hOffset = 60
+
+        for (x, y, w, h) in faces:
             hatx0 = haty0 = 0
             hatx1 = hatWidth
             haty1 = hatHeight
+
             # Scale hat respective to face width.
             if w > hatWidth:
                 hatScale = float(w) / float(hatWidth)
                 hat = cv2.resize(
-                    hat, (int(hatScale * hatWidth), int(hatScale * hatHeight)))
-            offsetY = hat.shape[0]
-            # Adjust position of hat in frame with respect to face
+                    hat, (int(hatScale * hatWidth) + wOffset, int(hatScale * hatHeight) + hOffset))
+
+            # Align with top of head.
+            offsetY = hat.shape[0] - hatAlignY
+
+            # Adjust position of hat in frame with respect to face.
             y0 = y - offsetY
 
             # Allow clipping.
@@ -495,6 +509,7 @@ class PartyPi(object):
             y1 = y0 + hat.shape[0]
 
             x0 = x - offsetX
+
             if x0 < 0:
                 hatx0 = abs(x0)
                 x0 = 0
@@ -521,11 +536,12 @@ class PartyPi(object):
                     #     (1.0 - hat[:, :, 3] / 255.0)
                     # print hatSlice.shape, backgroundSlice.shape, frame.shape, hat.shape, hatx0, hatx1, haty0, haty1
                     # frame[y0:y1, x0:x1, c] = hatSlice + backgroundSlice
-                    hatSlice = hat[:, :, c] * \
-                        (hat[:, :, 3] / 255.0)
-                    backgroundSlice = frame[
-                        y0:y1, x0:x1, c] * (1.0 - hat[:, :, 3] / 255.0)
-                    frame[y0:y1, x0:x1, c] = hatSlice + backgroundSlice
+                    if hat[:, :, c].shape == frame[y0:y1, x0:x1, c].shape:
+                        hatSlice = hat[:, :, c] * \
+                            (hat[:, :, 3] / 255.0)
+                        backgroundSlice = frame[
+                            y0:y1, x0:x1, c] * (1.0 - hat[:, :, 3] / 255.0)
+                        frame[y0:y1, x0:x1, c] = hatSlice + backgroundSlice
 
     def addText(self, frame, text, origin, size=1.0, color=(255, 255, 255), thickness=1):
         """
@@ -598,7 +614,7 @@ class PartyPi(object):
         maxsecondemo = None
         firstEmotion = None
 
-        if self.result:  # if faces present
+        if self.result:  # If faces present.
 
             # Get lists of player points.
             firstEmoList = [
@@ -606,7 +622,7 @@ class PartyPi(object):
             secondEmoList = [(round(
                 x['scores'][self.secCurrEmotion] * 100)) for x in self.result]
 
-            # Compute the scores into `scoresList`
+            # Compute the scores into `scoresList`.
             scoresList = []
             if self.easyMode:  # Easy mode is points for first emotion.
                 scoresList = firstEmoList  # playerNumber, scores
@@ -617,16 +633,16 @@ class PartyPi(object):
                         (firstEmoList[i] + 1) * (secondEmoList[i] + 1))
             print "scoresList:", scoresList
 
-            # Draw the scores for the faces
+            # Draw the scores for the faces.
             for idx, currFace in enumerate(self.result):
                 faceRectangle = currFace['faceRectangle']
 
                 # Draw rectangles over all faces
                 cv2.rectangle(self.photo, (faceRectangle['left'], faceRectangle['top']),
                               (faceRectangle['left'] + faceRectangle['width'], faceRectangle['top'] +
-                               faceRectangle['height']), color=random.choice(self.colors), thickness=4)
+                               faceRectangle['height']), color=random.choice([1]), thickness=4)
 
-                # Get points for first emotion
+                # Get points for first emotion.
                 firstEmotion = firstEmoList[idx]
                 secEmotion = secondEmoList[idx]
 
@@ -660,7 +676,7 @@ class PartyPi(object):
             winner = finalScores.index(max(finalScores))
             maxScore = max(finalScores)
 
-            # Multiple winners - tie breaker
+            # Multiple winners - tie breaker.
             if finalScores.count(maxScore) > 1:
                 print "Multiple winners!"
                 oneWinner = False
@@ -686,15 +702,13 @@ class PartyPi(object):
                 if self.easyMode:
                     print "tiedWinners:", tiedWinners
                     for winner in tiedWinners:
-                        rectL = self.result[winner]['faceRectangle']['left']
-                        rectT = self.result[winner]['faceRectangle']['top']
-                        cv2.putText(self.photo, "Tied: ", (rectL, rectT - 40),
+                        rectL = firstRectLeft
+                        rectT = firstRectTop
+                        cv2.putText(self.photo, "Tied: ", (firstRectLeft, firstRectTop - 40),
                                     self.font, 0.8, (232, 167, 35), 2)
                 else:
                     for winner in tiedWinners:
-                        rectL = self.result[winner]['faceRectangle']['left']
-                        rectT = self.result[winner]['faceRectangle']['top']
-                        cv2.putText(self.photo, "Tied: ", (rectL, rectT - 70),
+                        cv2.putText(self.photo, "Tied: ", (firstRectLeft, firstRectTop - 70),
                                     self.font, 0.8, (232, 167, 35), 2)
 
         else:
