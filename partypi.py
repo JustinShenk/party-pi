@@ -290,20 +290,21 @@ class PartyPi(object):
                 self.screenheight * (7. / 8))), self.font, 1.0, (255, 255, 255), 2)
 
         # Draw other text and flash on screen.
+        textSize = 2.8 if self.raspberry else 3.6
         if self.showBegin:
             cv2.putText(self.frame, "Begin!", (self.screenwidth / 3, self.screenheight / 2),
-                        self.font, 2.8, (255, 255, 255), 2)
+                        self.font, textSize, (255, 255, 255), 2)
         elif self.flashon:
             cv2.rectangle(self.frame, (0, 0), (self.screenwidth,
                                                self.screenheight), (255, 255, 255), -1)
         if self.showAnalyzing:
             textSize = 0.7 if self.raspberry else 1.7
             self.addText(self.frame, self.analyzingLabels[self.currentAnalLabel % len(self.analyzingLabels)], (
-                self.screenwidth / 5, self.screenheight / 4 + 30), size=textSize, color=(224, 23, 101))
+                self.screenwidth / 5, self.screenheight / 4 + 30), textSize, color=(224, 23, 101))
             self.drawChristmasLogo(self.frame)
         # Display image.
-        self.addText(self.frame, "PartyPi v0.0.2", ((self.screenwidth / 5) * 4,
-                                                    self.screenheight / 7), color=(68, 54, 66), size=0.5, thickness=0.5)
+        self.addText(self.frame, "partypi.net", ((self.screenwidth / 5) * 4,
+                                                 self.screenheight / 7), color=(68, 54, 66), size=0.5, thickness=0.5)
         cv2.imshow('PartyPi', self.frame)
 
         if self.photoMode and self.startProcess:
@@ -381,8 +382,8 @@ class PartyPi(object):
                         1 - self.opacity, 0, self.photo)
 
         # Draw logo or title.
-        self.addText(self.photo, "PartyPi v0.0.2", ((self.screenwidth / 5) * 4,
-                                                    self.screenheight / 7), color=(68, 54, 66), size=0.5, thickness=0.5)
+        self.addText(self.photo, "partypi.net", ((self.screenwidth / 5) * 4,
+                                                 self.screenheight / 7), color=(68, 54, 66), size=0.5, thickness=0.5)
         self.drawChristmasLogo(self.photo)
         # self.drawHat(self.photo, faces)
         cv2.imshow('PartyPi', self.photo)
@@ -598,8 +599,8 @@ class PartyPi(object):
             cv2.imwrite(imagePpath, bwphoto)
             self.result = self.uploader.upload_img(imagePath)
         else:
-            self.addText(self.photo, "PartyPi v0.0.2", ((self.screenwidth / 5) * 4,
-                                                        self.screenheight / 7), color=(68, 54, 66), size=0.5, thickness=0.5)
+            self.addText(self.photo, "partypi.net", ((self.screenwidth / 5) * 4,
+                                                     self.screenheight / 7), color=(68, 54, 66), size=0.5, thickness=0.5)
             self.drawChristmasLogo(self.photo)
             self.drawHat(self.photo, faces)
             cv2.imwrite(imagePath, self.photo)
@@ -649,7 +650,7 @@ class PartyPi(object):
                     scoresList.append(
                         (firstEmoList[i] + 1) * (secondEmoList[i] + 1))
             print "scoresList:", scoresList
-
+            textSize = 0.5 if self.raspberry else 0.8
             # Draw the scores for the faces.
             for idx, currFace in enumerate(self.result):
                 faceRectangle = currFace['faceRectangle']
@@ -681,12 +682,12 @@ class PartyPi(object):
                 # Display points.
                 if self.easyMode:
                     cv2.putText(self.photo, textToWrite, (faceRectangle['left'], faceRectangle[
-                                'top'] - 10), self.font, 0.8, (232, 167, 35), 2)
+                                'top'] - 10), self.font, textSize, (232, 167, 35), 2)
                 else:
                     cv2.putText(self.photo, textToWrite, (faceRectangle['left'], faceRectangle[
-                                'top'] - 40), self.font, 0.8, (232, 167, 35), 2)
+                                'top'] - 40), self.font, textSize, (232, 167, 35), 2)
                     cv2.putText(self.photo, secondLine, (faceRectangle['left'], faceRectangle[
-                                'top'] - 10), self.font, 0.8, (232, 167, 35), 2)
+                                'top'] - 10), self.font, textSize, (232, 167, 35), 2)
 
             # Display 'Winner: ' above player with highest score.
             oneWinner = True
@@ -712,10 +713,10 @@ class PartyPi(object):
             if oneWinner:
                 if self.easyMode:
                     cv2.putText(self.photo, "Winner: ", (firstRectLeft, firstRectTop - 40),
-                                self.font, 0.8, (232, 167, 35), 2)
+                                self.font, textSize, (232, 167, 35), 2)
                 else:
                     cv2.putText(self.photo, "Winner: ", (firstRectLeft, firstRectTop - 70),
-                                self.font, 0.8, (232, 167, 35), 2)
+                                self.font, textSize, (232, 167, 35), 2)
             else:
                 if self.easyMode:
                     print "tiedWinners:", tiedWinners
@@ -723,11 +724,11 @@ class PartyPi(object):
                         rectL = firstRectLeft
                         rectT = firstRectTop
                         cv2.putText(self.photo, "Tied: ", (firstRectLeft, firstRectTop - 40),
-                                    self.font, 0.8, (232, 167, 35), 2)
+                                    self.font, textSize, (232, 167, 35), 2)
                 else:
                     for winner in tiedWinners:
                         cv2.putText(self.photo, "Tied: ", (firstRectLeft, firstRectTop - 70),
-                                    self.font, 0.8, (232, 167, 35), 2)
+                                    self.font, textSize, (232, 167, 35), 2)
 
         else:
             print "No results found."
@@ -736,12 +737,10 @@ class PartyPi(object):
         """
         Display prompt for emotion on screen.
         """
-        if self.easyMode:
-            cv2.putText(self.frame, "Show " + self.randomEmotion() + '_',
-                        (self.screenwidth / 5, 3 * (self.screenheight / 4)), self.font, 1.0, (255, 255, 255), 2)
-        else:
-            self.addText(self.frame, "Show " + self.randomEmotion() +
-                         '_', (10, 3 * self.screenheight / 4))
+        textSize = 1.0 if self.raspberry else 1.2
+        width = self.screenwidth / 5 if self.easyMode else 10
+        cv2.putText(self.frame, "Show " + self.randomEmotion() + '_',
+                    (width, 3 * (self.screenheight / 4)), self.font, textSize, (255, 255, 255), 2)
 
     def randomEmotion(self):
         """
@@ -749,10 +748,9 @@ class PartyPi(object):
         """
         if self.tickcount * self.redfactor > 30 or self.static:
             self.static = True
-            if self.easyMode:
-                return str(self.currEmotion)
-            else:
-                return self.currEmotion + '+' + self.secCurrEmotion
+            emotionString = str(
+                self.currEmotion) if self.easyMode else self.currEmotion + '+' + self.secCurrEmotion
+            return emotionString
         else:
             self.currEmotion = random.choice(self.emotions)
             randnum = (self.emotions.index(self.currEmotion) +
@@ -794,8 +792,8 @@ class PartyPi(object):
             self.addText(self.frame, "Press any key to quit_",
                          (self.screenwidth / 4, self.screenheight / 3))
             # self.presentation(self.frame)
-            self.addText(self.frame, "PartyPi v0.0.2", ((self.screenwidth / 5) * 4,
-                                                        self.screenheight / 7), color=(68, 54, 66), size=0.5, thickness=0.5)
+            self.addText(self.frame, "partypi.net", ((self.screenwidth / 5) * 4,
+                                                     self.screenheight / 7), color=(68, 54, 66), size=0.5, thickness=0.5)
         else:
             self.piCamera.close()
 
