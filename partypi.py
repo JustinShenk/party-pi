@@ -193,10 +193,7 @@ class PartyPi(object):
             cv2.rectangle(self.overlay, (self.screenwidth / 2, 0),
                           (self.screenwidth, self.screenheight), (211, 211, 211), -1)
         if self.click_point_x:
-            if self.click_point_x < self.screenwidth / 2:
-                self.easyMode = True  # Easy mode selected
-            else:
-                self.easyMode = False  # Hard mode selected
+            self.easyMode = True if self.click_point_x < self.screenwidth / 2 else False
             self.tickcount = 0
             self.level = 1
             self.click_point_x = None
@@ -300,9 +297,9 @@ class PartyPi(object):
             cv2.rectangle(self.frame, (0, 0), (self.screenwidth,
                                                self.screenheight), (255, 255, 255), -1)
         if self.showAnalyzing:
-
+            textSize = 0.7 if self.raspberry else 1.7
             self.addText(self.frame, self.analyzingLabels[self.currentAnalLabel % len(self.analyzingLabels)], (
-                self.screenwidth / 5, self.screenheight / 4 + 30), size=1.7, color=(224, 23, 101))
+                self.screenwidth / 5, self.screenheight / 4 + 30), size=textSize, color=(224, 23, 101))
             self.drawChristmasLogo(self.frame)
         # Display image.
         self.addText(self.frame, "PartyPi v0.0.2", ((self.screenwidth / 5) * 4,
@@ -483,14 +480,14 @@ class PartyPi(object):
         offsetX = 0
 
         # Extra offset for width and height scaling.
-        wOffset = 60
-        hOffset = 60
+        wOffset = 80
+        hOffset = 40
 
         # TODO: Find out why this doesn't work as expected.
         if self.raspberry:
             wOffset = 40
             hOffset = 30
-            hatAlignY = 200
+            hatAlignY = 60
 
         for (x, y, w, h) in faces:
             hatx0 = haty0 = 0
@@ -509,8 +506,9 @@ class PartyPi(object):
 
             # Adjust position of hat in frame with respect to face.
             # y: Face rectangle top-left corner.
+            # y0: Height of hat in frame.
             # hatAlignY: Number of pixels to move hat up.
-            y0 = y - hat.shape[0] - hatAlignY
+            y0 = y - hat.shape[0] + hatAlignY
 
             # Allow clipping.
             if y0 < 0:
