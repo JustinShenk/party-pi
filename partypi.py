@@ -71,6 +71,7 @@ class PartyPi(object):
         self.piCamera.resolution = self.resolution[0], self.resolution[1]
         self.screenwidth, self.screenheight = self.piCamera.resolution
         # self.piCamera.framerate = 10
+        self.piCamera.hflip = True
         self.piCamera.brightness = 55
         self.rawCapture = PiRGBArray(
             self.piCamera, size=(self.screenwidth, self.screenheight))
