@@ -495,7 +495,10 @@ class PartyPi(object):
                 hatScale = float(w) / float(hatWidth)
                 hat = cv2.resize(
                     hat, (int(hatScale * hatWidth) + wOffset, int(hatScale * hatHeight) + hOffset))
-
+            else:
+                hatScale = float(w) / float(hatWidth)
+                hat = cv2.resize(
+                    hat, (int(hatScale * hatWidth) + wOffset, int(hatScale * hatHeight) + hOffset))
             # Align with top of head.
             offsetY = hat.shape[0] - hatAlignY
 
@@ -646,9 +649,10 @@ class PartyPi(object):
                 faceRectangle = currFace['faceRectangle']
 
                 # Draw rectangles over all faces
-                cv2.rectangle(self.photo, (faceRectangle['left'], faceRectangle['top']),
-                              (faceRectangle['left'] + faceRectangle['width'], faceRectangle['top'] +
-                               faceRectangle['height']), color=random.choice([1]), thickness=4)
+                # cv2.rectangle(self.photo, (faceRectangle['left'], faceRectangle['top']),
+                #               (faceRectangle['left'] + faceRectangle['width'], faceRectangle['top'] +
+                # faceRectangle['height']),
+                # color=random.choice(self.colors[1]), thickness=4)
 
                 # Get points for first emotion.
                 firstEmotion = firstEmoList[idx]
