@@ -485,6 +485,11 @@ class PartyPi(object):
         wOffset = 60
         hOffset = 60
 
+        # TODO: Find out why this doesn't work as expected.
+        if self.raspberry:
+            wOffset = 0
+            hOffset = 0
+
         for (x, y, w, h) in faces:
             hatx0 = haty0 = 0
             hatx1 = hatWidth
