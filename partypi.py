@@ -490,7 +490,7 @@ class PartyPi(object):
         if self.raspberry:
             wOffset = 40
             hOffset = 30
-            hatAlignY = 80
+            hatAlignY = 200
 
         for (x, y, w, h) in faces:
             hatx0 = haty0 = 0
@@ -507,15 +507,10 @@ class PartyPi(object):
                 hat = cv2.resize(
                     hat, (int(hatScale * hatWidth) + wOffset, int(hatScale * hatHeight) + hOffset))
 
-            # Align with top of head.
-            # hat.shape[0]: Height of hat.
-            # hatAlignY: How much 'up' to adjust it.
-            offsetY = hat.shape[0] - hatAlignY
-
             # Adjust position of hat in frame with respect to face.
-            # y: face rectangle top-left corner.
-            # offsetY: number of pixels up to move hat up.
-            y0 = y - offsetY
+            # y: Face rectangle top-left corner.
+            # hatAlignY: Number of pixels to move hat up.
+            y0 = y - hat.shape[0] - hatAlignY
 
             # Allow clipping.
             if y0 < 0:
