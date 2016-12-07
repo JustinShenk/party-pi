@@ -138,6 +138,7 @@ class PartyPi(object):
             for _frame in self.piCamera.capture_continuous(self.rawCapture, format='bgr', use_video_port=True):
                 # self.frame = cv2.flip(_frame.array, 1)
                 self.frame = _frame.array
+                self.frame.flags.writeable = True
                 self.screenheight, self.screenwidth = self.frame.shape[:2]
                 # TODO: Consider passing frame as local variable rather than
                 # global.
