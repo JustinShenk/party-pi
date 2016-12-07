@@ -23,8 +23,8 @@ class PartyPi(object):
         self.resolution = resolution
         self.screenwidth, self.screenheight = self.windowSize
         self.colors = [(0, 100, 0), (4, 4, 230)]
-        self.analyzingLabels = ["Make Christmas Party Great Again", "Christms Elves are Analyzing...", "A Tribe of Unicorns is Working for You",
-                                "Take a Sip", "Turn around two times", "Saddling the unicorn", "Hey, Alan, we need your help", "Nothing to see here", "Uploading to Facebook..j/k", "Computing makes me thirsty"]
+        self.analyzingLabels = ["Make Christmas Party Great Again", "Christmas Elves are Analyzing...", "A Tribe of Unicorns is Working for You",
+                                "Take a Sip", "Turn around two times", "Saddling the unicorn", "Nothing to see here", "Uploading to Facebook..j/k", "Computing makes me thirsty"]
         self.currentAnalLabel = 0
         # Setup for Raspberry Pi.
         if 'raspberrypi' in os.uname():
@@ -72,7 +72,7 @@ class PartyPi(object):
         self.screenwidth, self.screenheight = self.piCamera.resolution
         # self.piCamera.framerate = 10
         self.piCamera.brightness = 55
-        self.camera.vflip = True
+        self.piCamera.vflip = True
         self.rawCapture = PiRGBArray(
             self.piCamera, size=(self.screenwidth, self.screenheight))
         self.frame = np.empty(
@@ -335,10 +335,10 @@ class PartyPi(object):
         # cv2.putText(self.photo, "[Click to play again]", (self.screenwidth / 2, int(
         # self.screenheight * (6. / 7))), self.font, 0.7, (62, 184, 144), 2)
 
-        if self.tickcount % 5 == 0:
-            faces = self.findFaces(self.frame)
-        else:
-            faces = []
+        # if self.tickcount % 5 == 0:
+        faces = self.findFaces(self.frame)
+        # else:
+        # faces = []
         if len(faces):
             rightFace = max([x for x, y, w, h in faces])
             bottomFace = max([y for x, y, w, h in faces])
@@ -386,6 +386,7 @@ class PartyPi(object):
         self.addText(self.photo, "PartyPi v0.0.2", ((self.screenwidth / 5) * 4,
                                                     self.screenheight / 7), color=(68, 54, 66), size=0.5, thickness=0.5)
         self.drawChristmasLogo(self.photo)
+        # self.drawHat(self.photo, faces)
         cv2.imshow('PartyPi', self.photo)
 
     def mouse(self, event, x, y, flags, param):
@@ -579,12 +580,19 @@ class PartyPi(object):
         """
         imagePath = self.getImagePath()
 
+        # Get faces for Christmas hat.
+        faces = self.findFaces(self.frame)
+
         # If internet connection is poor, use black and white image.
         if self.blackAndWhite:
             bwphoto = cv2.cvtColor(self.photo, cv2.COLOR_BGR2GRAY)
             cv2.imwrite(imagePpath, bwphoto)
             self.result = self.uploader.upload_img(imagePath)
         else:
+            self.addText(self.photo, "PartyPi v0.0.2", ((self.screenwidth / 5) * 4,
+                                                        self.screenheight / 7), color=(68, 54, 66), size=0.5, thickness=0.5)
+            self.drawChristmasLogo(self.photo)
+            self.drawHat(self.photo, faces)
             cv2.imwrite(imagePath, self.photo)
         self.result = self.uploader.upload_img(imagePath)
         self.display()
