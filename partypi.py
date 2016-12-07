@@ -487,7 +487,7 @@ class PartyPi(object):
         if self.raspberry:
             wOffset = 40
             hOffset = 30
-            hatAlignY = 60
+            hatAlignY = 20
 
         for (x, y, w, h) in faces:
             hatx0 = haty0 = 0
