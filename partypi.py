@@ -325,7 +325,7 @@ class PartyPi(object):
             self.drawChristmasLogo(self.frame)
         # Display image.
         self.addText(self.frame, brand, ((self.screenwidth / 5) * 4,
-                                         self.screenheight / 7), color=(255, 255, 255), size=0.5, thickness=0.5)
+                                         self.screenheight / 7), color=purple, size=0.5, thickness=0.5)
         cv2.imshow('PartyPi', self.frame)
 
         if self.photoMode and self.startProcess:
