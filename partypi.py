@@ -434,7 +434,7 @@ class PartyPi(object):
             self.click_point_right_x, self.click_point_right_y = x, y
             if self.level2:
                 self.reset()
-            self.easyMode = False
+                self.easyMode = False
                 self.level = 1
 
     def reset(self):
