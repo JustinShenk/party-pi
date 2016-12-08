@@ -7,7 +7,8 @@ import random
 import time
 import numpy as np
 
-brand = "Party Pi v0.0.2"
+brand = "partypi.net"
+purple = (68, 54, 66)
 
 
 class PartyPi(object):
@@ -27,7 +28,7 @@ class PartyPi(object):
         self.screenwidth, self.screenheight = self.windowSize
         self.colors = [(0, 100, 0), (4, 4, 230)]
         self.analyzingLabels = ["Make Christmas Party Great Again", "Christmas Elves are Analyzing...", "A Tribe of Unicorns is Working for You",
-                                "Take a Sip", "Turn around two times", "Saddling the unicorn", "Nothing to see here", "Uploading to Facebook..j/k", "Computing makes me thirsty"]
+                                "Take a Sip", "Turn around two times", "Saddling the unicorn", "Uploading to Facebook..j/k", "Computing makes me thirsty"]
         self.currentAnalLabel = 0
         # Setup for Raspberry Pi.
         if 'raspberrypi' in os.uname():
@@ -166,7 +167,10 @@ class PartyPi(object):
             self.level2()
 
         # Catch escape key 'q'.
-        keypress = cv2.waitKey(1) & 0xFF
+        if self.level == 2:
+            keypress = cv2.waitKey(500) & 0xFF
+        else:
+            keypress = cv2.waitKey(1) & 0xFF
 
         # Clear the stream in preparation for the next frame.
         if self.piCam == True:
@@ -190,7 +194,6 @@ class PartyPi(object):
         self.addText(self.frame, "Hard", (self.screenwidth / 2,
                                           (self.screenheight * 3) / 4), size=3)
 
-        print "currpos:", self.currPosX, self.currPosY
         # Listen for mode selection.
         if self.currPosX and self.currPosX < self.screenwidth / 2:
             cv2.rectangle(self.overlay, (0, 0), (self.screenwidth / 2,
@@ -221,11 +224,11 @@ class PartyPi(object):
         cv2.addWeighted(self.overlay, self.opacity, self.frame,
                         1 - self.opacity, 0, self.frame)
         # Display frame.
-        self.addText(self.frame, "PartyPi v0.0.2", ((self.screenwidth / 5) * 4,
-                                                    self.screenheight / 7), color=(68, 54, 66), size=0.5, thickness=0.5)
+        self.addText(self.frame, brand, ((self.screenwidth / 5) * 4,
+                                         self.screenheight / 7), color=(255, 255, 255), size=0.5, thickness=0.5)
         # Draw Christmas logo.
-        self.drawChristmasLogo(self.frame)
         self.drawHat(self.frame, faces)
+        self.drawChristmasLogo(self.frame)
         # Show image.
         cv2.imshow('PartyPi', self.frame)
 
@@ -322,7 +325,7 @@ class PartyPi(object):
             self.drawChristmasLogo(self.frame)
         # Display image.
         self.addText(self.frame, brand, ((self.screenwidth / 5) * 4,
-                                         self.screenheight / 7), color=(68, 54, 66), size=0.5, thickness=0.5)
+                                         self.screenheight / 7), color=(255, 255, 255), size=0.5, thickness=0.5)
         cv2.imshow('PartyPi', self.frame)
 
         if self.photoMode and self.startProcess:
@@ -331,11 +334,11 @@ class PartyPi(object):
 
     def level2(self):
         """
-        Reset game with face detection.
+        Show analyzing, then present photo, then reset game.
         """
         self.tickcount += 1
         self.currentAnalLabel += 1
-        self.captureFrame()
+        # self.captureFrame()
 
         if self.raspberry:
             self.tickcount += 1
@@ -347,12 +350,16 @@ class PartyPi(object):
         #     cv2.addWeighted(overlay, self.opacity, self.photo,
         #                     1 - self.opacity, 0, self.frame)
 
-        # Select mode with mouse button.
-        if self.click_point_y > self.screenheight - self.playSize[0] and self.click_point_x > self.screenwidth - self.playSize[1]:
+        # Reset with any mouse button.
+        if self.click_point_x or self.click_point_right_x:
             self.reset()
 
-        # cv2.putText(self.photo, "[Click to play again]", (self.screenwidth / 2, int(
-        # self.screenheight * (6. / 7))), self.font, 0.7, (62, 184, 144), 2)
+        # For positional selection.
+        # if self.click_point_y > self.screenheight - self.playSize[0] and self.click_point_x > self.screenwidth - self.playSize[1]:
+        #     self.reset()
+
+        cv2.putText(self.photo, "[Press any button]", (self.screenwidth / 2, int(
+            self.screenheight * (6. / 7))), self.font, 1.0, (62, 184, 144), 2)
 
         # if self.tickcount % 5 == 0:
         if self.faceSelect:
@@ -392,19 +399,19 @@ class PartyPi(object):
             self.photo[self.screenheight - self.easySize[0]:self.screenheight, self.screenwidth - self.easySize[0]:self.screenwidth] = self.frame[
                 self.screenheight - self.easySize[1]: self.screenheight, self.screenwidth - self.easySize[1]: self.screenwidth]
 
-        self.overlay = self.photo.copy()
+        # self.overlay = self.photo.copy()
 
-        # Show 'Play Again'.
-        self.overlay[self.screenheight - self.playSize[1]: self.screenheight, self.screenwidth - self.playSize[1]: self.screenwidth] = self.playIcon[
-            0: self.playSize[1], 0: self.playSize[0]]
+        # Show 'Play Again'. Disabled for party.
+        # self.overlay[self.screenheight - self.playSize[1]: self.screenheight, self.screenwidth - self.playSize[1]: self.screenwidth] = self.playIcon[
+        #     0: self.playSize[1], 0: self.playSize[0]]
 
         # Blend photo with overlay.
-        cv2.addWeighted(self.overlay, self.opacity, self.photo,
-                        1 - self.opacity, 0, self.photo)
+        # cv2.addWeighted(self.overlay, self.opacity, self.photo,
+        #                 1 - self.opacity, 0, self.photo)
 
         # Draw logo or title.
         self.addText(self.photo, brand, ((self.screenwidth / 5) * 4,
-                                         self.screenheight / 7), color=(68, 54, 66), size=0.5, thickness=0.5)
+                                         self.screenheight / 7), color=(255, 255, 255), size=0.5, thickness=0.5)
         self.drawChristmasLogo(self.photo)
         # self.drawHat(self.photo, faces)
         cv2.imshow('PartyPi', self.photo)
@@ -413,7 +420,6 @@ class PartyPi(object):
         """
         Listen for mouse.
         """
-        print "mouse:", event, x, y
         if event == cv2.EVENT_MOUSEMOVE:
             self.currPosX, self.currPosY = x, y
             # print "curposX,Y", x, y
@@ -439,7 +445,7 @@ class PartyPi(object):
         self.result = []
         self.tickcount = 0
         self.static = False
-        # self.playIcon = self.playIconOriginal
+        self.playIcon = self.playIconOriginal.copy()
 
     def selectMode(self, faces):
 
@@ -614,7 +620,7 @@ class PartyPi(object):
         imagePath = self.getImagePath()
 
         # Get faces for Christmas hat.
-        faces = self.findFaces(self.frame)
+        faces = self.findFaces(self.photo)
 
         # If internet connection is poor, use black and white image.
         if self.blackAndWhite:
@@ -623,7 +629,7 @@ class PartyPi(object):
             self.result = self.uploader.upload_img(imagePath)
         else:
             self.addText(self.photo, brand, ((self.screenwidth / 5) * 4,
-                                             self.screenheight / 7), color=(68, 54, 66), size=0.5, thickness=0.5)
+                                             self.screenheight / 7), color=(255, 255, 255), size=0.5, thickness=0.5)
             self.drawChristmasLogo(self.photo)
             self.drawHat(self.photo, faces)
             cv2.imwrite(imagePath, self.photo)
@@ -809,7 +815,7 @@ class PartyPi(object):
                          (self.screenwidth / 4, self.screenheight / 3))
             # self.presentation(self.frame)
             self.addText(self.frame, brand, ((self.screenwidth / 5) * 4,
-                                             self.screenheight / 7), color=(68, 54, 66), size=0.5, thickness=0.5)
+                                             self.screenheight / 7), color=(255, 255, 255), size=0.5, thickness=0.5)
         else:
             self.piCamera.close()
 
