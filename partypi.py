@@ -34,7 +34,6 @@ class PartyPi(object):
             self.initRaspberryPi()
         else:
             self.initWebcam()
-            cv2.setMouseCallback("PartyPi", self.mouse)
 
         # Reinitialize screenwidth and height in case changed by system.
         self.screenwidth, self.screenheight = self.frame.shape[:2]
@@ -131,6 +130,7 @@ class PartyPi(object):
         self.static = False
         self.photoMode = False
         cv2.namedWindow("PartyPi", cv2.WINDOW_NORMAL)
+        cv2.setMouseCallback("PartyPi", self.mouse)
         cv2.resizeWindow("PartyPi", self.windowSize[0], self.windowSize[1])
         # Returns - TypeError: Required argument 'prop_value' (pos 3) not found
         # cv2.setWindowProperty(
@@ -190,6 +190,7 @@ class PartyPi(object):
         self.addText(self.frame, "Hard", (self.screenwidth / 2,
                                           (self.screenheight * 3) / 4), size=3)
 
+        print "currpos:", self.currPosX, self.currPosY
         # Listen for mode selection.
         if self.currPosX and self.currPosX < self.screenwidth / 2:
             cv2.rectangle(self.overlay, (0, 0), (self.screenwidth / 2,
@@ -217,7 +218,8 @@ class PartyPi(object):
         faces = self.findFaces(self.frame)
         if self.faceSelect:
             self.selectMode(faces)
-
+        cv2.addWeighted(self.overlay, self.opacity, self.frame,
+                        1 - self.opacity, 0, self.frame)
         # Display frame.
         self.addText(self.frame, "PartyPi v0.0.2", ((self.screenwidth / 5) * 4,
                                                     self.screenheight / 7), color=(68, 54, 66), size=0.5, thickness=0.5)
@@ -411,7 +413,7 @@ class PartyPi(object):
         """
         Listen for mouse.
         """
-
+        print "mouse:", event, x, y
         if event == cv2.EVENT_MOUSEMOVE:
             self.currPosX, self.currPosY = x, y
             # print "curposX,Y", x, y
@@ -469,8 +471,6 @@ class PartyPi(object):
 
             self.overlay[self.screenheight - self.hardSize[0]:self.screenheight,
                          self.screenwidth - self.hardSize[1]:self.screenwidth] = self.hardIcon
-        cv2.addWeighted(self.overlay, self.opacity, self.frame,
-                        1 - self.opacity, 0, self.frame)
 
     def drawChristmasLogo(self, frame):
         if self.screenheight < 700:
