@@ -350,10 +350,6 @@ class PartyPi(object):
         #     cv2.addWeighted(overlay, self.opacity, self.photo,
         #                     1 - self.opacity, 0, self.frame)
 
-        # Reset with any mouse button.
-        if self.click_point_x or self.click_point_right_x:
-            self.reset()
-
         # For positional selection.
         # if self.click_point_y > self.screenheight - self.playSize[0] and self.click_point_x > self.screenwidth - self.playSize[1]:
         #     self.reset()
@@ -426,10 +422,14 @@ class PartyPi(object):
 
         elif event == cv2.EVENT_LBUTTONUP:
             self.click_point_x, self.click_point_y = x, y
+            if self.level2:
+                self.reset()
             # print "x,y", x, y
 
         elif event == cv2.EVENT_RBUTTONUP:
             self.click_point_right_x, self.click_point_right_y = x, y
+            if self.level2:
+                self.reset()
 
     def reset(self):
         """
