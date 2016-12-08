@@ -435,7 +435,7 @@ class PartyPi(object):
             if self.level2:
                 self.reset()
             self.easyMode = False
-                self.level == 1
+                self.level = 1
 
     def reset(self):
         """
