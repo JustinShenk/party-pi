@@ -92,6 +92,8 @@ class PartyPi(object):
         self.currPosY = None
         self.click_point_x = None
         self.click_point_y = None
+        self.click_point_right_x = None
+        self.click_point_right_y = None
         self.calibrated = False
         self.tickcount = 0
         self.modeLoadCount = 0
