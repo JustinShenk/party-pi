@@ -18,6 +18,7 @@ class PartyPi(object):
         self.blackAndWhite = blackAndWhite
         self.looping = True
         self.faceSelect = False
+        self.easyMode = None
         self.font = cv2.FONT_HERSHEY_SIMPLEX
         self.emotions = ['anger', 'contempt', 'disgust',
                          'fear', 'happiness', 'neutral', 'sadness', 'surprise']
@@ -106,9 +107,9 @@ class PartyPi(object):
         self.hardIcon = cv2.imread('hard.png')
         self.playIcon = cv2.imread('playagain.png')
         self.playIconOriginal = self.playIcon.copy()
-        self.playIcon1 = cv2.imread('playagain1.png')
-        self.playIcon2 = cv2.imread('playagain2.png')
-        self.playIcon3 = cv2.imread('playagain3.png')
+        # self.playIcon1 = cv2.imread('playagain1.png')
+        # self.playIcon2 = cv2.imread('playagain2.png')
+        # self.playIcon3 = cv2.imread('playagain3.png')
         self.easySize = self.hardSize = self.easyIcon.shape[:2]
         self.playSize = self.playIcon.shape[:2]
         self.christmas = cv2.imread('christmas.png', -1)
@@ -195,14 +196,25 @@ class PartyPi(object):
             cv2.rectangle(self.overlay, (self.screenwidth / 2, 0),
                           (self.screenwidth, self.screenheight), (211, 211, 211), -1)
         if self.click_point_x:
-            self.easyMode = True if self.click_point_x < self.screenwidth / 2 else False
+            # self.easyMode = True if self.click_point_x < self.screenwidth / 2
+            # else False # For positional selection.
+            self.easyMode = True
             self.tickcount = 0
             self.level = 1
             self.click_point_x = None
+            self.click_point_right_x = None
+
+        if self.click_point_right_x:
+            self.easyMode = False
+            self.tickcount = 0
+            self.level = 1
+            self.click_point_x = None
+            self.click_point_right_x = None
 
         # Draw faces.
         faces = self.findFaces(self.frame)
-        self.selectMode(faces)
+        if self.faceSelect:
+            self.selectMode(faces)
 
         # Display frame.
         self.addText(self.frame, "PartyPi v0.0.2", ((self.screenwidth / 5) * 4,
@@ -330,6 +342,8 @@ class PartyPi(object):
         #                   (self.screenwidth, self.screenheight), (224, 23, 101), -1)
         #     cv2.addWeighted(overlay, self.opacity, self.photo,
         #                     1 - self.opacity, 0, self.frame)
+
+        # Select mode with mouse button.
         if self.click_point_y > self.screenheight - self.playSize[0] and self.click_point_x > self.screenwidth - self.playSize[1]:
             self.reset()
 
@@ -337,39 +351,39 @@ class PartyPi(object):
         # self.screenheight * (6. / 7))), self.font, 0.7, (62, 184, 144), 2)
 
         # if self.tickcount % 5 == 0:
-        faces = self.findFaces(self.frame)
-        # else:
-        # faces = []
-        if len(faces):
-            rightFace = max([x for x, y, w, h in faces])
-            bottomFace = max([y for x, y, w, h in faces])
-            if rightFace > self.screenwidth - self.playSize[1] * 1.2:
-                self.playIcon = self.playIcon1.copy()
-                if bottomFace > self.screenheight / 2:
-                    self.playIcon = self.playIcon2.copy()
+        if self.faceSelect:
+            faces = self.findFaces(self.frame)
+            # else:
+            # faces = []
+            if len(faces):
+                rightFace = max([x for x, y, w, h in faces])
+                bottomFace = max([y for x, y, w, h in faces])
+                if rightFace > self.screenwidth - self.playSize[1] * 1.2:
+                    self.playIcon = self.playIcon1.copy()
+                    if bottomFace > self.screenheight / 2:
+                        self.playIcon = self.playIcon2.copy()
+                else:
+                    self.playIcon = self.playIconOriginal.copy()
             else:
                 self.playIcon = self.playIconOriginal.copy()
-        else:
-            self.playIcon = self.playIconOriginal.copy()
 
-        # Draw a rectangle around the faces.
-        for (x, y, w, h) in faces:
-            cv2.rectangle(self.frame, (x, y),
-                          (x + w, y + h), (0, 255, 0), 2)
-            if x > (self.screenwidth - self.playSize[1]) and y > (self.screenheight - self.playSize[0]):
-                # self.playIcon = self.playIcon3.copy()
-                # Timer function useful when checking for faces in every frame
-                # if self.raspberry:
-                #     self.pretimer = 10
-                # else:
-                #     self.pretimer = 100
-                # if not self.pretimer:
-                #     self.reset()
-                # else:
-                #     self.pretimer -= 1
-                self.reset()
+            # Draw a rectangle around the faces.
+            for (x, y, w, h) in faces:
+                cv2.rectangle(self.frame, (x, y),
+                              (x + w, y + h), (0, 255, 0), 2)
+                if x > (self.screenwidth - self.playSize[1]) and y > (self.screenheight - self.playSize[0]):
+                    # self.playIcon = self.playIcon3.copy()
+                    # Timer function useful when checking for faces in every frame
+                    # if self.raspberry:
+                    #     self.pretimer = 10
+                    # else:
+                    #     self.pretimer = 100
+                    # if not self.pretimer:
+                    #     self.reset()
+                    # else:
+                    #     self.pretimer -= 1
+                    self.reset()
 
-        if self.faceSelect:
             # Show live image in corner.
             self.photo[self.screenheight - self.easySize[0]:self.screenheight, self.screenwidth - self.easySize[0]:self.screenwidth] = self.frame[
                 self.screenheight - self.easySize[1]: self.screenheight, self.screenwidth - self.easySize[1]: self.screenwidth]
@@ -416,11 +430,12 @@ class PartyPi(object):
         self.currPosY = None
         self.click_point_x = None
         self.click_point_y = None
+        self.click_point_right_x = None
         self.currEmotion = self.emotions[1]
         self.result = []
         self.tickcount = 0
         self.static = False
-        self.playIcon = self.playIconOriginal
+        # self.playIcon = self.playIconOriginal
 
     def selectMode(self, faces):
 
