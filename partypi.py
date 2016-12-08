@@ -422,14 +422,20 @@ class PartyPi(object):
 
         elif event == cv2.EVENT_LBUTTONUP:
             self.click_point_x, self.click_point_y = x, y
-            if self.level2:
+            if self.level == 0:
+                self.easyMode = True
+                self.level == 1
+            if self.level == 2:
                 self.reset()
+
             # print "x,y", x, y
 
         elif event == cv2.EVENT_RBUTTONUP:
             self.click_point_right_x, self.click_point_right_y = x, y
             if self.level2:
                 self.reset()
+            self.easyMode = False
+                self.level == 1
 
     def reset(self):
         """
