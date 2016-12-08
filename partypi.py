@@ -7,6 +7,8 @@ import random
 import time
 import numpy as np
 
+brand = "Party Pi v0.0.2"
+
 
 class PartyPi(object):
 
@@ -15,7 +17,7 @@ class PartyPi(object):
         self.windowSize = windowSize
         self.blackAndWhite = blackAndWhite
         self.looping = True
-
+        self.faceSelect = False
         self.font = cv2.FONT_HERSHEY_SIMPLEX
         self.emotions = ['anger', 'contempt', 'disgust',
                          'fear', 'happiness', 'neutral', 'sadness', 'surprise']
@@ -303,8 +305,8 @@ class PartyPi(object):
                 self.screenwidth / 5, self.screenheight / 4 + 30), textSize, color=(224, 23, 101))
             self.drawChristmasLogo(self.frame)
         # Display image.
-        self.addText(self.frame, "partypi.net", ((self.screenwidth / 5) * 4,
-                                                 self.screenheight / 7), color=(68, 54, 66), size=0.5, thickness=0.5)
+        self.addText(self.frame, brand, ((self.screenwidth / 5) * 4,
+                                         self.screenheight / 7), color=(68, 54, 66), size=0.5, thickness=0.5)
         cv2.imshow('PartyPi', self.frame)
 
         if self.photoMode and self.startProcess:
@@ -367,9 +369,10 @@ class PartyPi(object):
                 #     self.pretimer -= 1
                 self.reset()
 
-        # Show live image in corner.
-        self.photo[self.screenheight - self.easySize[0]:self.screenheight, self.screenwidth - self.easySize[0]:self.screenwidth] = self.frame[
-            self.screenheight - self.easySize[1]: self.screenheight, self.screenwidth - self.easySize[1]: self.screenwidth]
+        if self.faceSelect:
+            # Show live image in corner.
+            self.photo[self.screenheight - self.easySize[0]:self.screenheight, self.screenwidth - self.easySize[0]:self.screenwidth] = self.frame[
+                self.screenheight - self.easySize[1]: self.screenheight, self.screenwidth - self.easySize[1]: self.screenwidth]
 
         self.overlay = self.photo.copy()
 
@@ -382,8 +385,8 @@ class PartyPi(object):
                         1 - self.opacity, 0, self.photo)
 
         # Draw logo or title.
-        self.addText(self.photo, "partypi.net", ((self.screenwidth / 5) * 4,
-                                                 self.screenheight / 7), color=(68, 54, 66), size=0.5, thickness=0.5)
+        self.addText(self.photo, brand, ((self.screenwidth / 5) * 4,
+                                         self.screenheight / 7), color=(68, 54, 66), size=0.5, thickness=0.5)
         self.drawChristmasLogo(self.photo)
         # self.drawHat(self.photo, faces)
         cv2.imshow('PartyPi', self.photo)
@@ -400,6 +403,9 @@ class PartyPi(object):
         elif event == cv2.EVENT_LBUTTONUP:
             self.click_point_x, self.click_point_y = x, y
             # print "x,y", x, y
+
+        elif event == cv2.EVENT_RBUTTONUP:
+            self.click_point_right_x, self.click_point_right_y = x, y
 
     def reset(self):
         """
@@ -478,8 +484,8 @@ class PartyPi(object):
         hatWidth = hat.shape[1]
         hatAlignY = 40  # Number of pixels down to move hat.
         hatAlignX = 0
-        xOffset = 0  # Number of pixels left to move hat.
-
+        xOffset = 20  # Number of pixels left to move hat.
+        yOffset = 30
         # Extra offset for width and height scaling.
         wOffset = 80
         hOffset = 40
@@ -509,7 +515,7 @@ class PartyPi(object):
             # Adjust position of hat in frame with respect to face.
             # y: Face rectangle top-left corner.
             # y0: Height of hat in frame.
-            # hatAlignY: Number of pixels to move hat up.
+            # yOffset: Number of pixels to move hat up.
             y0 = y - hat.shape[0] + yOffset
 
             # Allow clipping.
@@ -599,8 +605,8 @@ class PartyPi(object):
             cv2.imwrite(imagePpath, bwphoto)
             self.result = self.uploader.upload_img(imagePath)
         else:
-            self.addText(self.photo, "partypi.net", ((self.screenwidth / 5) * 4,
-                                                     self.screenheight / 7), color=(68, 54, 66), size=0.5, thickness=0.5)
+            self.addText(self.photo, brand, ((self.screenwidth / 5) * 4,
+                                             self.screenheight / 7), color=(68, 54, 66), size=0.5, thickness=0.5)
             self.drawChristmasLogo(self.photo)
             self.drawHat(self.photo, faces)
             cv2.imwrite(imagePath, self.photo)
@@ -680,12 +686,11 @@ class PartyPi(object):
                         secEmotion, self.secCurrEmotion)
 
                 # Display points.
-                if self.easyMode:
-                    cv2.putText(self.photo, textToWrite, (faceRectangle['left'], faceRectangle[
-                                'top'] - 10), self.font, textSize, (232, 167, 35), 2)
-                else:
-                    cv2.putText(self.photo, textToWrite, (faceRectangle['left'], faceRectangle[
-                                'top'] - 40), self.font, textSize, (232, 167, 35), 2)
+                scoreHeightOffset = 10 if self.easyMode else 40
+                cv2.putText(self.photo, textToWrite, (faceRectangle['left'], faceRectangle[
+                    'top'] - scoreHeightOffset), self.font, textSize, (232, 167, 35), 2)
+
+                if not self.easyMode:
                     cv2.putText(self.photo, secondLine, (faceRectangle['left'], faceRectangle[
                                 'top'] - 10), self.font, textSize, (232, 167, 35), 2)
 
@@ -709,26 +714,20 @@ class PartyPi(object):
             # Identify winner's face.
             firstRectLeft = self.result[winner]['faceRectangle']['left']
             firstRectTop = self.result[winner]['faceRectangle']['top']
-
             if oneWinner:
-                if self.easyMode:
-                    cv2.putText(self.photo, "Winner: ", (firstRectLeft, firstRectTop - 40),
-                                self.font, textSize, (232, 167, 35), 2)
-                else:
-                    cv2.putText(self.photo, "Winner: ", (firstRectLeft, firstRectTop - 70),
-                                self.font, textSize, (232, 167, 35), 2)
+                tiedTextHeightOffset = 40 if self.easyMode else 70
+                cv2.putText(self.photo, "Winner: ", (firstRectLeft, firstRectTop - tiedTextHeightOffset),
+                            self.font, textSize, (232, 167, 35), 2)
             else:
-                if self.easyMode:
-                    print "tiedWinners:", tiedWinners
-                    for winner in tiedWinners:
-                        rectL = firstRectLeft
-                        rectT = firstRectTop
-                        cv2.putText(self.photo, "Tied: ", (firstRectLeft, firstRectTop - 40),
-                                    self.font, textSize, (232, 167, 35), 2)
-                else:
-                    for winner in tiedWinners:
-                        cv2.putText(self.photo, "Tied: ", (firstRectLeft, firstRectTop - 70),
-                                    self.font, textSize, (232, 167, 35), 2)
+                tiedTextHeightOffset = 40 if self.easyMode else 70
+                print "tiedWinners:", tiedWinners
+                for winner in tiedWinners:
+                    # FIXME: show both
+                    firstRectLeft = self.result[
+                        winner]['faceRectangle']['left']
+                    firstRectTop = self.result[winner]['faceRectangle']['top']
+                    cv2.putText(self.photo, "Tied: ", (firstRectLeft, firstRectTop - tiedTextHeightOffset),
+                                self.font, textSize, (232, 167, 35), 2)
 
         else:
             print "No results found."
@@ -792,8 +791,8 @@ class PartyPi(object):
             self.addText(self.frame, "Press any key to quit_",
                          (self.screenwidth / 4, self.screenheight / 3))
             # self.presentation(self.frame)
-            self.addText(self.frame, "partypi.net", ((self.screenwidth / 5) * 4,
-                                                     self.screenheight / 7), color=(68, 54, 66), size=0.5, thickness=0.5)
+            self.addText(self.frame, brand, ((self.screenwidth / 5) * 4,
+                                             self.screenheight / 7), color=(68, 54, 66), size=0.5, thickness=0.5)
         else:
             self.piCamera.close()
 
