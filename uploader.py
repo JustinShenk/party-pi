@@ -15,7 +15,8 @@ class Uploader(object):
         """
         # self.album = "iX0uj" # Testing.
         # self.album = "zzf6O"
-        self.album = "6U86u"
+        # self.album = "6U86u"
+        self.album = "JugqY"
         _url = 'https://api.projectoxford.ai/emotion/v1.0/recognize'
         _key = '1cc9418279ff4b2683b5050cfa6f3785'
         _maxNumRetries = 10
