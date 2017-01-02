@@ -13,7 +13,8 @@ class Uploader(object):
         """
         Initialize variables and parameters for PyImgur.
         """
-        self.album = "iX0uj"  # Testing.
+        # self.album = "iX0uj"  # Testing.
+        self.album = "3mdlF"
         # self.album = "zzf6O"
         # self.album = "6U86u"
         # self.album = "JugqY"
@@ -28,15 +29,20 @@ class Uploader(object):
         self.im = pyimgur.Imgur(CLIENT_ID, CLIENT_SECRET)
         self.im.change_authentication(
             refresh_token="814bed15fbea91dbc6131205f881fc45f8ee0715")
-        self.im.refresh_access_token()
-        # user = self.im.get_user('spacemaker')
-        # album = im.get_album(ALBUM_ID)
+        try:
+            self.im.refresh_access_token()
+        except:
+            print("Can't connect to internet")
+        else:
+            pass
+            # user = self.im.get_user('spacemaker')
+            # album = im.get_album(ALBUM_ID)
 
     def upload_img(self, imagepath):
         """
         Send image to PyImgur.
         """
-        print "Initate upload"
+        print("Initate upload")
 
         uploaded_image = self.im.upload_image(
             imagepath, title="Uploaded with PyImgur", album=self.album)
@@ -44,11 +50,11 @@ class Uploader(object):
         # TODO: Turn on album uploading
         # uploaded_image = self.im.upload_image(
         #     self.imagepath, title="Uploaded with PyImgur", album=self.album)
-        print(uploaded_image.title)
-        print(uploaded_image.link)
-        print(uploaded_image.size)
-        print(uploaded_image.type)
+        print((uploaded_image.title))
+        print((uploaded_image.link))
+        print((uploaded_image.size))
+        print((uploaded_image.type))
 
-        print "Analyze image"
+        print("Analyze image")
         data = emotion_api(uploaded_image.link)
         return data

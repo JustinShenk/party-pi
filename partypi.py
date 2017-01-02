@@ -6,6 +6,7 @@ from uploader import Uploader
 import random
 import time
 import numpy as np
+import json
 
 brand = "partypi.net"
 purple = (68, 54, 66)
@@ -14,23 +15,14 @@ purple = (68, 54, 66)
 class PartyPi(object):
 
     def __init__(self, piCam=False, resolution=(1280 / 2, 1024 / 2), windowSize=(1200, 1024), blackAndWhite=False):
-        self.piCam = piCam
+        self.piCam = piCam  # Using raspberry pi camera module or not.
         self.windowSize = windowSize
         self.blackAndWhite = blackAndWhite
-        self.looping = True
-        self.faceSelect = False
-        self.easyMode = None
-        self.font = cv2.FONT_HERSHEY_SIMPLEX
-        self.emotions = ['anger', 'contempt', 'disgust',
-                         'fear', 'happiness', 'neutral', 'sadness', 'surprise']
         # self.emotions2 = ['psycho','John Cena','ecstasy','Duckface']
         self.photo = cv2.imread('img_1.png')
         self.resolution = resolution
         self.screenwidth, self.screenheight = self.windowSize
-        self.colors = [(0, 100, 0), (4, 4, 230)]
-        self.analyzingLabels = ["Make Christmas Party Great Again", "Christmas Elves are Analyzing...", "A Tribe of Unicorns is Working for You",
-                                "Take a Sip", "Turn around two times", "Saddling the unicorn", "Uploading to Facebook..j/k", "Computing makes me thirsty"]
-        self.currentAnalLabel = 0
+
         # Setup for Raspberry Pi.
         if 'raspberrypi' in os.uname():
             self.initRaspberryPi()
@@ -39,7 +31,7 @@ class PartyPi(object):
 
         # Reinitialize screenwidth and height in case changed by system.
         self.screenwidth, self.screenheight = self.frame.shape[:2]
-        print "first screenheight:", self.screenheight, self.screenwidth, self.frame.shape
+        print("first screenheight:", self.screenheight, self.screenwidth, self.frame.shape)
 
         # Finish setup.
         self.setupGame()
@@ -52,7 +44,7 @@ class PartyPi(object):
         _, self.frame = self.cam.read()
 
     def initRaspberryPi(self):
-        print "PartyPi v0.0.2 for Raspberry Pi, Coxi Christmas Party Edition"
+        print("PartyPi v0.0.2 for Raspberry Pi, Coxi Christmas Party Edition")
         self.raspberry = True
 
         # Set up picamera module.
@@ -70,23 +62,36 @@ class PartyPi(object):
         """
         from picamera import PiCamera
         from picamera.array import PiRGBArray
-        self.piCamera = PiCamera()
+        piCamera = PiCamera()
         # self.piCamera.resolution = (640, 480)
-        self.piCamera.resolution = self.resolution[0], self.resolution[1]
-        self.screenwidth, self.screenheight = self.piCamera.resolution
+        piCamera.resolution = self.resolution[0], self.resolution[1]
+        self.screenwidth, self.screenheight = piCamera.resolution
         # self.piCamera.framerate = 10
-        self.piCamera.hflip = True
-        self.piCamera.brightness = 55
+        piCamera.hflip = True
+        piCamera.brightness = 55
         self.rawCapture = PiRGBArray(
-            self.piCamera, size=(self.screenwidth, self.screenheight))
+            piCamera, size=(self.screenwidth, self.screenheight))
         self.frame = np.empty(
             (self.screenheight, self.screenwidth, 3), dtype=np.uint8)
+        self.piCamera = piCamera
         time.sleep(1)
 
     def setupGame(self):
         """
         Initialize variables, set up icons and face cascade.
         """
+        self.font = cv2.FONT_HERSHEY_SIMPLEX
+        self.colors = [(0, 100, 0), (4, 4, 230)]
+        self.currentAnalLabel = 0
+
+        with open('emotions.json', 'r') as f:
+            d = f.read()
+            data = json.loads(d)
+            self.emotions = data['emotions']
+            self.analyzingLabels = data['analyzingLabels']
+        self.looping = True
+        self.faceSelect = False
+        self.easyMode = None
         self.currEmotion = self.emotions[0]
         self.countx = None
         self.currPosX = None
@@ -98,7 +103,7 @@ class PartyPi(object):
         self.calibrated = False
         self.tickcount = 0
         self.modeLoadCount = 0
-        self.level = 0
+        self.curr_level = 0
         self.result = []
         self.uploader = Uploader()
         cascPath = "face.xml"
@@ -118,7 +123,7 @@ class PartyPi(object):
         self.christmas = cv2.imread('christmas.png', -1)
         self.hat = cv2.imread('hat.png', -1)
 
-        print "Camera initialize"
+        print("Camera initialize")
         # if not self.raspberry:
         #     print "MAC or PC initialize"
         #     self.cam.set(3, self.screenwidth)
@@ -160,15 +165,15 @@ class PartyPi(object):
         """
         # TODO: Check if following line is redundant.
         self.screenheight, self.screenwidth = self.frame.shape[:2]
-        if self.level == 0:
+        if self.curr_level == 0:
             self.level0()
-        elif self.level == 1:
+        elif self.curr_level == 1:
             self.level1()
-        elif self.level == 2:
+        elif self.curr_level == 2:
             self.level2()
 
         # Catch escape key 'q'.
-        if self.level == 2:
+        if self.curr_level == 2:
             keypress = cv2.waitKey(500) & 0xFF
         else:
             keypress = cv2.waitKey(1) & 0xFF
@@ -183,7 +188,7 @@ class PartyPi(object):
         """
         Select a mode: Easy or Hard.
         """
-        self.tickcount += 1
+        self.tickcount + 1
 
         if self.raspberry:
             self.tickcount += 1
@@ -200,21 +205,21 @@ class PartyPi(object):
             cv2.rectangle(self.overlay, (0, 0), (self.screenwidth / 2,
                                                  self.screenheight), (211, 211, 211), -1)
         else:
-            cv2.rectangle(self.overlay, (self.screenwidth / 2, 0),
+            cv2.rectangle(self.overlay, (int(self.screenwidth / 2), 0),
                           (self.screenwidth, self.screenheight), (211, 211, 211), -1)
-        if self.click_point_x:
+        if self.click_point_x:  # If user clicks left mouse button.
             # self.easyMode = True if self.click_point_x < self.screenwidth / 2
             # else False # For positional selection.
             self.easyMode = True
             self.tickcount = 0
-            self.level = 1
+            self.curr_level = 1
             self.click_point_x = None
             self.click_point_right_x = None
 
         if self.click_point_right_x:
             self.easyMode = False
             self.tickcount = 0
-            self.level = 1
+            self.curr_level = 1
             self.click_point_x = None
             self.click_point_right_x = None
 
@@ -298,7 +303,7 @@ class PartyPi(object):
             self.startProcess = False
             self.flashon = False
             self.showAnalyzing = False
-            self.level = 2
+            self.curr_level = 2
             self.click_point_y = None
 
         # Draw the count "3..".
@@ -330,7 +335,7 @@ class PartyPi(object):
         cv2.imshow('PartyPi', self.frame)
 
         if self.photoMode and self.startProcess:
-            print "take photo"
+            print("take photo")
             self.takePhoto()
 
     def level2(self):
@@ -423,10 +428,10 @@ class PartyPi(object):
 
         elif event == cv2.EVENT_LBUTTONUP:
             self.click_point_x, self.click_point_y = x, y
-            if self.level == 0:
+            if self.curr_level == 0:
                 self.easyMode = True
-                self.level = 1
-            if self.level == 2:
+                self.curr_level = 1
+            if self.curr_level == 2:
                 self.reset()
 
             # print "x,y", x, y
@@ -436,13 +441,13 @@ class PartyPi(object):
             if self.level2:
                 self.reset()
                 self.easyMode = False
-                self.level = 1
+                self.curr_level = 1
 
     def reset(self):
         """
         Reset to beginning state.
         """
-        self.level = 0
+        self.curr_level = 0
         self.currPosX = None
         self.currPosY = None
         self.click_point_x = None
@@ -465,7 +470,7 @@ class PartyPi(object):
                 if self.modeLoadCount is 20:
                     self.easyMode = True
                     self.modeLoadCount = 0
-                    self.level = 1
+                    self.curr_level = 1
                     self.tickcount = 0
 
             # Select hard mode with face.
@@ -474,7 +479,7 @@ class PartyPi(object):
                 if self.modeLoadCount is 20:
                     self.easyMode = False
                     self.modeLoadCount = 0
-                    self.level = 1
+                    self.curr_level = 1
                     self.tickcount = 0
 
         # Draw easy mode selection box.
@@ -594,6 +599,7 @@ class PartyPi(object):
         """
         Put text on current frame.
         """
+        origin =  int(origin[0]),int(origin[1])
         cv2.putText(frame, text, origin,
                     self.font, size, color, 2)
 
@@ -685,7 +691,7 @@ class PartyPi(object):
                 for i in range(len(firstEmoList)):
                     scoresList.append(
                         (firstEmoList[i] + 1) * (secondEmoList[i] + 1))
-            print "scoresList:", scoresList
+            print("scoresList:", scoresList)
             textSize = 0.5 if self.raspberry else 0.8
             # Draw the scores for the faces.
             for idx, currFace in enumerate(self.result):
@@ -732,14 +738,14 @@ class PartyPi(object):
 
             # Multiple winners - tie breaker.
             if finalScores.count(maxScore) > 1:
-                print "Multiple winners!"
+                print("Multiple winners!")
                 oneWinner = False
                 tiedWinners = []
                 for ind, i in enumerate(finalScores):
                     if i == maxScore:
                         tiedWinners.append(ind)
 
-            print "Scores:", finalScores, "Winner:", winner
+            print("Scores:", finalScores, "Winner:", winner)
 
             # Identify winner's face.
             firstRectLeft = self.result[winner]['faceRectangle']['left']
@@ -750,7 +756,7 @@ class PartyPi(object):
                             self.font, textSize, (232, 167, 35), 2)
             else:
                 tiedTextHeightOffset = 40 if self.easyMode else 70
-                print "tiedWinners:", tiedWinners
+                print("tiedWinners:", tiedWinners)
                 for winner in tiedWinners:
                     # FIXME: show both
                     firstRectLeft = self.result[
@@ -760,7 +766,7 @@ class PartyPi(object):
                                 self.font, textSize, (232, 167, 35), 2)
 
         else:
-            print "No results found."
+            print("No results found.")
 
     def promptEmotion(self):
         """
@@ -783,7 +789,7 @@ class PartyPi(object):
         else:
             self.currEmotion = random.choice(self.emotions)
             randnum = (self.emotions.index(self.currEmotion) +
-                       random.choice(range(1, 7))) % 8
+                       random.choice(list(range(1, 7)))) % 8
             self.secCurrEmotion = self.emotions[randnum]
             if self.easyMode:
                 return self.currEmotion
@@ -797,19 +803,19 @@ class PartyPi(object):
         if keypress != 255:
             print(keypress)
             if keypress == ord('q'):  # 'q' pressed to quit
-                print "Escape key entered"
+                print("Escape key entered")
                 self.looping = False
                 self.endGame()
-            elif self.level == 0:
+            elif self.curr_level == 0:
                 if keypress == 81 or keypress == 2:  # left
                     self.easyMode = True
                     self.tickcount = 0
-                    self.level = 1
+                    self.curr_level = 1
                 elif keypress == 83 or keypress == 3:  # right
                     self.easyMode = False
                     self.tickcount = 0
-                    self.level = 1
-            elif self.level == 2:
+                    self.curr_level = 1
+            elif self.curr_level == 2:
                 self.reset()
 
     def endGame(self):
@@ -837,23 +843,39 @@ def main():
     Load application.
     """
     # sys.argv[1] = Using piCamera module
-    if len(sys.argv) == 2:
-        if 'picam' or '-p' in sys.argv[1]:
-            application = PartyPi(True)
-        else:
-            print "Load default settings"
-            application = PartyPi()
-    elif len(sys.argv) == 3:
-        if 'x' in sys.argv[2]:
-            res = sys.argv[2]
-            w = res.split('x')[0]
-            h = res.split('x')[1]
-            application = PartyPi(True, (w, h))
-        else:
-            print "Load default settings"
-            application = PartyPi(True)
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-r',"--resolution", metavar='resolution',
+                        nargs='+', type=int)
+    parser.add_argument('-p',"--picam", type=bool,default=False)
+    args = parser.parse_args()
+    resolution = args.resolution
+    print(resolution)
+    if resolution and len(resolution):
+        w = resolution[0]
+        h = resolution[1]
+        resolution = (w, h)
     else:
-        application = PartyPi()
+        resolution = (1280 / 2, 1024 / 2)
+    application = PartyPi(piCam=args.picam, resolution=resolution)
+    print("arguments", args.picam, resolution)
+    # if len(sys.argv) == 2:
+    #     if 'picam' or '-p' in sys.argv[1]:
+    #         application = PartyPi(True)
+    #     else:
+    #         print "Load default settings"
+    #         application = PartyPi()
+    # elif len(sys.argv) == 3:
+    #     if 'x' in sys.argv[2]:
+    #         res = sys.argv[2]
+    #         w = res.split('x')[0]
+    #         h = res.split('x')[1]
+    #         application = PartyPi(True, (w, h))
+    #     else:
+    #         print "Load default settings"
+    #         application = PartyPi(True)
+    # else:
+    #     application = PartyPi()
 
 
 if __name__ == '__main__':
