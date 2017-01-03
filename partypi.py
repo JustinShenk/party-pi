@@ -39,7 +39,7 @@ class PartyPi(object):
 
         # Reinitialize screenwidth and height in case changed by system.
         self.screenwidth, self.screenheight = self.frame.shape[:2]
-        print "first screenheight:", self.screenheight, self.screenwidth, self.frame.shape
+        print("first screenheight:", self.screenheight, self.screenwidth, self.frame.shape)
 
         # Finish setup.
         self.setupGame()
@@ -52,7 +52,7 @@ class PartyPi(object):
         _, self.frame = self.cam.read()
 
     def initRaspberryPi(self):
-        print "PartyPi v0.0.2 for Raspberry Pi, Coxi Christmas Party Edition"
+        print("PartyPi v0.0.2 for Raspberry Pi, Coxi Christmas Party Edition")
         self.raspberry = True
 
         # Set up picamera module.
@@ -118,7 +118,7 @@ class PartyPi(object):
         self.christmas = cv2.imread('christmas.png', -1)
         self.hat = cv2.imread('hat.png', -1)
 
-        print "Camera initialize"
+        print("Camera initialize")
         # if not self.raspberry:
         #     print "MAC or PC initialize"
         #     self.cam.set(3, self.screenwidth)
@@ -190,17 +190,17 @@ class PartyPi(object):
         self.captureFrame()
 
         # Draw "Easy" and "Hard".
-        self.addText(self.frame, "Easy", (self.screenwidth / 8,
-                                          (self.screenheight * 3) / 4), size=3)
-        self.addText(self.frame, "Hard", (self.screenwidth / 2,
-                                          (self.screenheight * 3) / 4), size=3)
+        self.addText(self.frame, "Easy", (self.screenwidth // 8,
+                                          (self.screenheight * 3) // 4), size=3)
+        self.addText(self.frame, "Hard", (self.screenwidth // 2,
+                                          (self.screenheight * 3) // 4), size=3)
 
         # Listen for mode selection.
         if self.currPosX and self.currPosX < self.screenwidth / 2:
-            cv2.rectangle(self.overlay, (0, 0), (self.screenwidth / 2,
-                                                 self.screenheight), (211, 211, 211), -1)
+            cv2.rectangle(self.overlay, (0, 0), (self.screenwidth // 2,
+                                                 int(self.screenheight)), (211, 211, 211), -1)
         else:
-            cv2.rectangle(self.overlay, (self.screenwidth / 2, 0),
+            cv2.rectangle(self.overlay, (self.screenwidth // 2, 0),
                           (self.screenwidth, self.screenheight), (211, 211, 211), -1)
         if self.click_point_x:
             # self.easyMode = True if self.click_point_x < self.screenwidth / 2
@@ -225,8 +225,8 @@ class PartyPi(object):
         cv2.addWeighted(self.overlay, self.opacity, self.frame,
                         1 - self.opacity, 0, self.frame)
         # Display frame.
-        self.addText(self.frame, brand, ((self.screenwidth / 5) * 4,
-                                         self.screenheight / 7), color=(255, 255, 255), size=0.5, thickness=0.5)
+        self.addText(self.frame, brand, ((self.screenwidth // 5) * 4,
+                                         self.screenheight // 7), color=(255, 255, 255), size=0.5, thickness=0.5)
         # Draw Christmas logo.
         self.drawHat(self.frame, faces)
         self.drawChristmasLogo(self.frame)
@@ -314,7 +314,7 @@ class PartyPi(object):
         # Draw other text and flash on screen.
         textSize = 2.8 if self.raspberry else 3.6
         if self.showBegin:
-            cv2.putText(self.frame, "Begin!", (self.screenwidth / 3, self.screenheight / 2),
+            cv2.putText(self.frame, "Begin!", (self.screenwidth // 3, self.screenheight // 2),
                         self.font, textSize, (255, 255, 255), 2)
         elif self.flashon:
             cv2.rectangle(self.frame, (0, 0), (self.screenwidth,
@@ -322,15 +322,15 @@ class PartyPi(object):
         if self.showAnalyzing:
             textSize = 0.7 if self.raspberry else 1.7
             self.addText(self.frame, self.analyzingLabels[self.currentAnalLabel % len(self.analyzingLabels)], (
-                self.screenwidth / 5, self.screenheight / 4 + 30), textSize, color=(224, 23, 101))
+                self.screenwidth // 5, self.screenheight // 4 + 30), textSize, color=(224, 23, 101))
             self.drawChristmasLogo(self.frame)
         # Display image.
-        self.addText(self.frame, brand, ((self.screenwidth / 5) * 4,
-                                         self.screenheight / 7), color=purple, size=0.5, thickness=0.5)
+        self.addText(self.frame, brand, ((self.screenwidth // 5) * 4,
+                                         self.screenheight // 7), color=purple, size=0.5, thickness=0.5)
         cv2.imshow('PartyPi', self.frame)
 
         if self.photoMode and self.startProcess:
-            print "take photo"
+            print("take photo")
             self.takePhoto()
 
     def level2(self):
@@ -355,7 +355,7 @@ class PartyPi(object):
         # if self.click_point_y > self.screenheight - self.playSize[0] and self.click_point_x > self.screenwidth - self.playSize[1]:
         #     self.reset()
 
-        cv2.putText(self.photo, "[Press any button]", (self.screenwidth / 2, int(
+        cv2.putText(self.photo, "[Press any button]", (self.screenwidth // 2, int(
             self.screenheight * (6. / 7))), self.font, 1.0, (62, 184, 144), 2)
 
         # if self.tickcount % 5 == 0:
@@ -407,8 +407,8 @@ class PartyPi(object):
         #                 1 - self.opacity, 0, self.photo)
 
         # Draw logo or title.
-        self.addText(self.photo, brand, ((self.screenwidth / 5) * 4,
-                                         self.screenheight / 7), color=(255, 255, 255), size=0.5, thickness=0.5)
+        self.addText(self.photo, brand, ((self.screenwidth // 5) * 4,
+                                         self.screenheight // 7), color=(255, 255, 255), size=0.5, thickness=0.5)
         self.drawChristmasLogo(self.photo)
         # self.drawHat(self.photo, faces)
         cv2.imshow('PartyPi', self.photo)
@@ -489,12 +489,12 @@ class PartyPi(object):
         if self.screenheight < 700:
             y0 = 0
         else:
-            y0 = (self.screenheight / 7) + 0
+            y0 = (self.screenheight // 7) + 0
         y1 = y0 + self.christmas.shape[0]
         if self.screenwidth < 700:
             x0 = 0
         else:
-            x0 = 2 * self.screenwidth / 3
+            x0 = 2 * self.screenwidth // 3
         x1 = x0 + self.christmas.shape[1]
 
         # Remove black background from png image.
@@ -534,11 +534,11 @@ class PartyPi(object):
 
             # Scale hat respective to face width.
             if w > hatWidth:
-                hatScale = float(w) / float(hatWidth)
+                hatScale = float(w) // float(hatWidth)
                 hat = cv2.resize(
                     hat, (int(hatScale * hatWidth) + wOffset, int(hatScale * hatHeight) + hOffset))
             else:
-                hatScale = float(w) / float(hatWidth)
+                hatScale = float(w) // float(hatWidth)
                 hat = cv2.resize(
                     hat, (int(hatScale * hatWidth) + wOffset, int(hatScale * hatHeight) + hOffset))
 
@@ -594,6 +594,8 @@ class PartyPi(object):
         """
         Put text on current frame.
         """
+        originx,originy = origin
+        origin = (int(originx),int(originy))
         cv2.putText(frame, text, origin,
                     self.font, size, color, 2)
 
@@ -635,8 +637,8 @@ class PartyPi(object):
             cv2.imwrite(imagePpath, bwphoto)
             self.result = self.uploader.upload_img(imagePath)
         else:
-            self.addText(self.photo, brand, ((self.screenwidth / 5) * 4,
-                                             self.screenheight / 7), color=(255, 255, 255), size=0.5, thickness=0.5)
+            self.addText(self.photo, brand, (int((self.screenwidth / 5) * 4),
+                                             int(self.screenheight / 7)), color=(255, 255, 255), size=0.5, thickness=0.5)
             self.drawChristmasLogo(self.photo)
             self.drawHat(self.photo, faces)
             cv2.imwrite(imagePath, self.photo)
@@ -685,7 +687,7 @@ class PartyPi(object):
                 for i in range(len(firstEmoList)):
                     scoresList.append(
                         (firstEmoList[i] + 1) * (secondEmoList[i] + 1))
-            print "scoresList:", scoresList
+            print("scoresList:", scoresList)
             textSize = 0.5 if self.raspberry else 0.8
             # Draw the scores for the faces.
             for idx, currFace in enumerate(self.result):
@@ -732,14 +734,14 @@ class PartyPi(object):
 
             # Multiple winners - tie breaker.
             if finalScores.count(maxScore) > 1:
-                print "Multiple winners!"
+                print("Multiple winners!")
                 oneWinner = False
                 tiedWinners = []
                 for ind, i in enumerate(finalScores):
                     if i == maxScore:
                         tiedWinners.append(ind)
 
-            print "Scores:", finalScores, "Winner:", winner
+            print("Scores:", finalScores, "Winner:", winner)
 
             # Identify winner's face.
             firstRectLeft = self.result[winner]['faceRectangle']['left']
@@ -750,7 +752,7 @@ class PartyPi(object):
                             self.font, textSize, (232, 167, 35), 2)
             else:
                 tiedTextHeightOffset = 40 if self.easyMode else 70
-                print "tiedWinners:", tiedWinners
+                print("tiedWinners:", tiedWinners)
                 for winner in tiedWinners:
                     # FIXME: show both
                     firstRectLeft = self.result[
@@ -760,16 +762,16 @@ class PartyPi(object):
                                 self.font, textSize, (232, 167, 35), 2)
 
         else:
-            print "No results found."
+            print("No results found.")
 
     def promptEmotion(self):
         """
         Display prompt for emotion on screen.
         """
         textSize = 1.0 if self.raspberry else 1.2
-        width = self.screenwidth / 5 if self.easyMode else 10
+        width = self.screenwidth // 5 if self.easyMode else 10
         cv2.putText(self.frame, "Show " + self.randomEmotion() + '_',
-                    (width, 3 * (self.screenheight / 4)), self.font, textSize, (255, 255, 255), 2)
+                    (width, 3 * (self.screenheight // 4)), self.font, textSize, (255, 255, 255), 2)
 
     def randomEmotion(self):
         """
@@ -783,7 +785,7 @@ class PartyPi(object):
         else:
             self.currEmotion = random.choice(self.emotions)
             randnum = (self.emotions.index(self.currEmotion) +
-                       random.choice(range(1, 7))) % 8
+                       random.choice(list(range(1, 7)))) % 8
             self.secCurrEmotion = self.emotions[randnum]
             if self.easyMode:
                 return self.currEmotion
@@ -797,7 +799,7 @@ class PartyPi(object):
         if keypress != 255:
             print(keypress)
             if keypress == ord('q'):  # 'q' pressed to quit
-                print "Escape key entered"
+                print("Escape key entered")
                 self.looping = False
                 self.endGame()
             elif self.level == 0:
@@ -819,10 +821,10 @@ class PartyPi(object):
         if not self.piCam:
             self.cam.release()
             self.addText(self.frame, "Press any key to quit_",
-                         (self.screenwidth / 4, self.screenheight / 3))
+                         (self.screenwidth // 4, self.screenheight // 3))
             # self.presentation(self.frame)
-            self.addText(self.frame, brand, ((self.screenwidth / 5) * 4,
-                                             self.screenheight / 7), color=(255, 255, 255), size=0.5, thickness=0.5)
+            self.addText(self.frame, brand, ((self.screenwidth // 5) * 4,
+                                             self.screenheight // 7), color=(255, 255, 255), size=0.5, thickness=0.5)
         else:
             self.piCamera.close()
 
@@ -841,7 +843,7 @@ def main():
         if 'picam' or '-p' in sys.argv[1]:
             application = PartyPi(True)
         else:
-            print "Load default settings"
+            print("Load default settings")
             application = PartyPi()
     elif len(sys.argv) == 3:
         if 'x' in sys.argv[2]:
@@ -850,7 +852,7 @@ def main():
             h = res.split('x')[1]
             application = PartyPi(True, (w, h))
         else:
-            print "Load default settings"
+            print("Load default settings")
             application = PartyPi(True)
     else:
         application = PartyPi()
