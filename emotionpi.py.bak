@@ -26,7 +26,7 @@ def emotion_api(url_path):
         conn.request("POST", "/emotion/v1.0/recognize?%s" %
                      params, body, headers)
         response = conn.getresponse()
-        data = response.read()
+        data = response.readall().decode('utf-8')
         print(data)
         conn.close()
         json_data = json.loads(data)

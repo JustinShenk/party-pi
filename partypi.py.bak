@@ -6,7 +6,6 @@ from uploader import Uploader
 import random
 import time
 import numpy as np
-import json
 
 brand = "partypi.net"
 purple = (68, 54, 66)
@@ -15,14 +14,23 @@ purple = (68, 54, 66)
 class PartyPi(object):
 
     def __init__(self, piCam=False, resolution=(1280 / 2, 1024 / 2), windowSize=(1200, 1024), blackAndWhite=False):
-        self.piCam = piCam  # Using raspberry pi camera module or not.
+        self.piCam = piCam
         self.windowSize = windowSize
         self.blackAndWhite = blackAndWhite
+        self.looping = True
+        self.faceSelect = False
+        self.easyMode = None
+        self.font = cv2.FONT_HERSHEY_SIMPLEX
+        self.emotions = ['anger', 'contempt', 'disgust',
+                         'fear', 'happiness', 'neutral', 'sadness', 'surprise']
         # self.emotions2 = ['psycho','John Cena','ecstasy','Duckface']
         self.photo = cv2.imread('img_1.png')
         self.resolution = resolution
         self.screenwidth, self.screenheight = self.windowSize
-
+        self.colors = [(0, 100, 0), (4, 4, 230)]
+        self.analyzingLabels = ["Make Christmas Party Great Again", "Christmas Elves are Analyzing...", "A Tribe of Unicorns is Working for You",
+                                "Take a Sip", "Turn around two times", "Saddling the unicorn", "Uploading to Facebook..j/k", "Computing makes me thirsty"]
+        self.currentAnalLabel = 0
         # Setup for Raspberry Pi.
         if 'raspberrypi' in os.uname():
             self.initRaspberryPi()
@@ -62,36 +70,23 @@ class PartyPi(object):
         """
         from picamera import PiCamera
         from picamera.array import PiRGBArray
-        piCamera = PiCamera()
+        self.piCamera = PiCamera()
         # self.piCamera.resolution = (640, 480)
-        piCamera.resolution = self.resolution[0], self.resolution[1]
-        self.screenwidth, self.screenheight = piCamera.resolution
+        self.piCamera.resolution = self.resolution[0], self.resolution[1]
+        self.screenwidth, self.screenheight = self.piCamera.resolution
         # self.piCamera.framerate = 10
-        piCamera.hflip = True
-        piCamera.brightness = 55
+        self.piCamera.hflip = True
+        self.piCamera.brightness = 55
         self.rawCapture = PiRGBArray(
-            piCamera, size=(self.screenwidth, self.screenheight))
+            self.piCamera, size=(self.screenwidth, self.screenheight))
         self.frame = np.empty(
             (self.screenheight, self.screenwidth, 3), dtype=np.uint8)
-        self.piCamera = piCamera
         time.sleep(1)
 
     def setupGame(self):
         """
         Initialize variables, set up icons and face cascade.
         """
-        self.font = cv2.FONT_HERSHEY_SIMPLEX
-        self.colors = [(0, 100, 0), (4, 4, 230)]
-        self.currentAnalLabel = 0
-
-        with open('emotions.json', 'r') as f:
-            d = f.read()
-            data = json.loads(d)
-            self.emotions = data['emotions']
-            self.analyzingLabels = data['analyzingLabels']
-        self.looping = True
-        self.faceSelect = False
-        self.easyMode = None
         self.currEmotion = self.emotions[0]
         self.countx = None
         self.currPosX = None
@@ -103,7 +98,7 @@ class PartyPi(object):
         self.calibrated = False
         self.tickcount = 0
         self.modeLoadCount = 0
-        self.curr_level = 0
+        self.level = 0
         self.result = []
         self.uploader = Uploader()
         cascPath = "face.xml"
@@ -165,15 +160,15 @@ class PartyPi(object):
         """
         # TODO: Check if following line is redundant.
         self.screenheight, self.screenwidth = self.frame.shape[:2]
-        if self.curr_level == 0:
+        if self.level == 0:
             self.level0()
-        elif self.curr_level == 1:
+        elif self.level == 1:
             self.level1()
-        elif self.curr_level == 2:
+        elif self.level == 2:
             self.level2()
 
         # Catch escape key 'q'.
-        if self.curr_level == 2:
+        if self.level == 2:
             keypress = cv2.waitKey(500) & 0xFF
         else:
             keypress = cv2.waitKey(1) & 0xFF
@@ -188,7 +183,7 @@ class PartyPi(object):
         """
         Select a mode: Easy or Hard.
         """
-        self.tickcount + 1
+        self.tickcount += 1
 
         if self.raspberry:
             self.tickcount += 1
@@ -207,19 +202,19 @@ class PartyPi(object):
         else:
             cv2.rectangle(self.overlay, (self.screenwidth / 2, 0),
                           (self.screenwidth, self.screenheight), (211, 211, 211), -1)
-        if self.click_point_x:  # If user clicks left mouse button.
+        if self.click_point_x:
             # self.easyMode = True if self.click_point_x < self.screenwidth / 2
             # else False # For positional selection.
             self.easyMode = True
             self.tickcount = 0
-            self.curr_level = 1
+            self.level = 1
             self.click_point_x = None
             self.click_point_right_x = None
 
         if self.click_point_right_x:
             self.easyMode = False
             self.tickcount = 0
-            self.curr_level = 1
+            self.level = 1
             self.click_point_x = None
             self.click_point_right_x = None
 
@@ -303,7 +298,7 @@ class PartyPi(object):
             self.startProcess = False
             self.flashon = False
             self.showAnalyzing = False
-            self.curr_level = 2
+            self.level = 2
             self.click_point_y = None
 
         # Draw the count "3..".
@@ -428,10 +423,10 @@ class PartyPi(object):
 
         elif event == cv2.EVENT_LBUTTONUP:
             self.click_point_x, self.click_point_y = x, y
-            if self.curr_level == 0:
+            if self.level == 0:
                 self.easyMode = True
-                self.curr_level = 1
-            if self.curr_level == 2:
+                self.level = 1
+            if self.level == 2:
                 self.reset()
 
             # print "x,y", x, y
@@ -441,13 +436,13 @@ class PartyPi(object):
             if self.level2:
                 self.reset()
                 self.easyMode = False
-                self.curr_level = 1
+                self.level = 1
 
     def reset(self):
         """
         Reset to beginning state.
         """
-        self.curr_level = 0
+        self.level = 0
         self.currPosX = None
         self.currPosY = None
         self.click_point_x = None
@@ -470,7 +465,7 @@ class PartyPi(object):
                 if self.modeLoadCount is 20:
                     self.easyMode = True
                     self.modeLoadCount = 0
-                    self.curr_level = 1
+                    self.level = 1
                     self.tickcount = 0
 
             # Select hard mode with face.
@@ -479,7 +474,7 @@ class PartyPi(object):
                 if self.modeLoadCount is 20:
                     self.easyMode = False
                     self.modeLoadCount = 0
-                    self.curr_level = 1
+                    self.level = 1
                     self.tickcount = 0
 
         # Draw easy mode selection box.
@@ -805,16 +800,16 @@ class PartyPi(object):
                 print "Escape key entered"
                 self.looping = False
                 self.endGame()
-            elif self.curr_level == 0:
+            elif self.level == 0:
                 if keypress == 81 or keypress == 2:  # left
                     self.easyMode = True
                     self.tickcount = 0
-                    self.curr_level = 1
+                    self.level = 1
                 elif keypress == 83 or keypress == 3:  # right
                     self.easyMode = False
                     self.tickcount = 0
-                    self.curr_level = 1
-            elif self.curr_level == 2:
+                    self.level = 1
+            elif self.level == 2:
                 self.reset()
 
     def endGame(self):
@@ -842,39 +837,23 @@ def main():
     Load application.
     """
     # sys.argv[1] = Using piCamera module
-    import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--resolution', metavar='resolution',
-                        nargs='+', type=int)
-    parser.add_argument('--picam', default=False)
-    args = parser.parse_args()
-    resolution = args.resolution
-    print args.resolution
-    if len(resolution):
-        w = resolution[0]
-        h = resolution[1]
-        resolution = (w, h)
+    if len(sys.argv) == 2:
+        if 'picam' or '-p' in sys.argv[1]:
+            application = PartyPi(True)
+        else:
+            print "Load default settings"
+            application = PartyPi()
+    elif len(sys.argv) == 3:
+        if 'x' in sys.argv[2]:
+            res = sys.argv[2]
+            w = res.split('x')[0]
+            h = res.split('x')[1]
+            application = PartyPi(True, (w, h))
+        else:
+            print "Load default settings"
+            application = PartyPi(True)
     else:
-        resolution = (1280 / 2, 1024 / 2)
-    application = PartyPi(picam=args.picam, resolution=resolution)
-    print "arguments", args.picam, resolution
-    # if len(sys.argv) == 2:
-    #     if 'picam' or '-p' in sys.argv[1]:
-    #         application = PartyPi(True)
-    #     else:
-    #         print "Load default settings"
-    #         application = PartyPi()
-    # elif len(sys.argv) == 3:
-    #     if 'x' in sys.argv[2]:
-    #         res = sys.argv[2]
-    #         w = res.split('x')[0]
-    #         h = res.split('x')[1]
-    #         application = PartyPi(True, (w, h))
-    #     else:
-    #         print "Load default settings"
-    #         application = PartyPi(True)
-    # else:
-    #     application = PartyPi()
+        application = PartyPi()
 
 
 if __name__ == '__main__':
