@@ -10,6 +10,7 @@ import numpy as np
 brand = "partypi.net"
 purple = (68, 54, 66)
 
+analyzingBox = (self.screenwidth // 5, self.screenheight // 3 if self.raspberry else self.screenheight // 4 +30)
 
 class PartyPi(object):
 
@@ -320,9 +321,8 @@ class PartyPi(object):
             cv2.rectangle(self.frame, (0, 0), (self.screenwidth,
                                                self.screenheight), (255, 255, 255), -1)
         if self.showAnalyzing:
-            textSize = 0.7 if self.raspberry else 1.7
-            self.addText(self.frame, self.analyzingLabels[self.currentAnalLabel % len(self.analyzingLabels)], (
-                self.screenwidth // 5, self.screenheight // 4 + 30), textSize, color=(224, 23, 101))
+            textSize = 0.7 if self.raspberry else 1.7            
+            self.addText(self.frame, self.analyzingLabels[self.currentAnalLabel % len(self.analyzingLabels)], analyzingBox, textSize, color=(224, 23, 101))
             self.drawChristmasLogo(self.frame)
         # Display image.
         self.addText(self.frame, brand, ((self.screenwidth // 5) * 4,
