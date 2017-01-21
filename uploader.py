@@ -1,8 +1,7 @@
-#!/ usr/bin/python
-########### Python 2.7 #############
+#!/ usr/bin/env python
 import pyimgur
 from emotionpi import emotion_api
-
+from secret import *
 
 class Uploader(object):
 
@@ -18,16 +17,14 @@ class Uploader(object):
         # self.album = "6U86u"
         # self.album = "JugqY"
         _url = 'https://api.projectoxford.ai/emotion/v1.0/recognize'
-        _key = '1cc9418279ff4b2683b5050cfa6f3785'
+        _key = get_key()
         _maxNumRetries = 10
-        CLIENT_ID = "525d3ebc1147459"
-        CLIENT_SECRET = "75b8f9b449462150f374ae68f10154f2f392aa9b"
-        # ACCESS_TOKEN = "f6d9b3f3121cc259570acb4e4e1626cc53816d5b"
-        # ACCOUNT_ID = "36381482"
+        CLIENT_ID = get_client_id()
+        CLIENT_SECRET = get_client_secret()
 
         self.im = pyimgur.Imgur(CLIENT_ID, CLIENT_SECRET)
         self.im.change_authentication(
-            refresh_token="814bed15fbea91dbc6131205f881fc45f8ee0715")
+            refresh_token=get_refresh_token())
         self.im.refresh_access_token()
         # user = self.im.get_user('spacemaker')
         # album = im.get_album(ALBUM_ID)

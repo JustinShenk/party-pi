@@ -7,3 +7,4 @@ lkface*
 *.bak
 .env
 pyqt5
+secret.py
