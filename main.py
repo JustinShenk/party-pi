@@ -19,7 +19,7 @@ UPLOADING_CAPTION = ["Make Christmas Party Great Again", "Christmas Elves are An
 REDUCTION_FACTOR = 1.  # Reduction factor for timing.
 FONT = cv2.FONT_HERSHEY_SIMPLEX
 OPACITY = 0.4
-HAT_PATH = 'hat.png'
+HAT_PATH = 'images/hat.png'
 
 if cv2.__version__.startswith('3'):
     CASCADE_PATH = "/usr/local/opt/opencv3/share/OpenCV/haarcascades/haarcascade_frontalface_default.xml"
@@ -172,16 +172,16 @@ class PartyPi(object):
         self.pretimer = None
 
         # TODO: Consider placing icons in a dictionary.
-        self.easyIcon = cv2.imread('easy.png')
-        self.hardIcon = cv2.imread('hard.png')
-        self.playIcon = cv2.imread('playagain.png')
+        self.easyIcon = cv2.imread('images/easy.png')
+        self.hardIcon = cv2.imread('images/hard.png')
+        self.playIcon = cv2.imread('images/playagain.png')
         self.playIconOriginal = self.playIcon.copy()
         # self.playIcon1 = cv2.imread('playagain1.png')
         # self.playIcon2 = cv2.imread('playagain2.png')
         # self.playIcon3 = cv2.imread('playagain3.png')
         self.easySize = self.hardSize = self.easyIcon.shape[:2]
         self.playSize = self.playIcon.shape[:2]
-        self.christmas = cv2.imread('christmas.png', cv2.IMREAD_UNCHANGED)
+        self.christmas = cv2.imread('images/christmas.png', cv2.IMREAD_UNCHANGED)
         self.hat = cv2.imread(HAT_PATH, cv2.IMREAD_UNCHANGED)
         if self.hat is None:
             raise ValueError('No hat image found at `{}`'.format(HAT_PATH))
