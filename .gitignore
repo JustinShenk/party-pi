@@ -1,4 +1,5 @@
 /extras
+config.json
 img/
 lkface*
 *.pyc
