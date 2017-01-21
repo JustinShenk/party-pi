@@ -4,3 +4,6 @@ lkface*
 *.pyc
 /partypi
 *.swp
+*.bak
+.env
+pyqt5
