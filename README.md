@@ -58,4 +58,4 @@ Select Easy or Hard Mode (left or right arrow keys)
 
 ## Author
 
-[Justin Shenk](https://github.com/justinshenk/)
+[Justin Shenk](https://github.com/JustinShenk/)
