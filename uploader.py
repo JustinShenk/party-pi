@@ -1,4 +1,4 @@
-#!/ usr/bin/env python
+#!/usr/bin/env python
 import pyimgur
 import json
 from emotion_API import Emotion_API
@@ -56,12 +56,12 @@ class Uploader(object):
         _url = 'https://api.projectoxford.ai/emotion/v1.0/recognize'
         _key = get_key()
         _maxNumRetries = 10
-        CLIENT_ID = get_client_id()
-        CLIENT_SECRET = get_client_secret()
+        CLIENT_ID = self.config.CLIENT_ID
+        CLIENT_SECRET = self.config.CLIENT_SECRET
 
         self.im = pyimgur.Imgur(CLIENT_ID, CLIENT_SECRET)
         self.im.change_authentication(
-            refresh_token=get_refresh_token())
+            refresh_token=self.config.refresh_token)
         self.im.refresh_access_token()
         # user = self.im.get_user('spacemaker')
         # album = im.get_album(ALBUM_ID)
