@@ -29,7 +29,7 @@ Install OpenCV3 with python3 bindings
 ## Get authorization keys
 
 [Microsoft/Oxford Emotion API](https://dev.projectoxford.ai/docs/services/5639d931ca73072154c1ce89)
-- Place your subscription key in auth.json: "Ocp-Apim-Subscription-Key: {subscription key}"
+- Place your subscription key in config.json: "Ocp-Apim-Subscription-Key: {subscription key}"
 
 [Imgur API](https://api.imgur.com/endpoints)
 
@@ -38,7 +38,7 @@ Install OpenCV3 with python3 bindings
 Clone repository - `git clone https://github.com/JustinShenk/party-pi.git`
 `cd party-pi`
 
-Change auth.json.example to auth.json and add your Emotion_API and Imgur keys.
+Change auth.json.example to config.json and add your Emotion_API and Imgur keys.
 
 `python main.py`
 
