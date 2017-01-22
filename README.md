@@ -5,7 +5,7 @@ Emotion detection game for parties.
 Interactive game that prompts players to show an emotion (eg, "Show surprise"), and displays the winner. 
 
 ## Demo
-![happiness](party-pi/demo.png)
+![happiness](demo.png)
 
 ## Install
 Install OpenCV3 with python3 bindings
