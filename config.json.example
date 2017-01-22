@@ -1,0 +1,9 @@
+{
+	"key": "YOUR_KEY",
+	"CLIENT_ID": "YOUR_CLIENT_ID",
+	"CLIENT_SECRET": "YOUR_CLIENT_SECRET",
+	"refresh_token": "YOUR_REFRESH_TOKEN",
+	"album": "IMGUR ALBUM ID",
+	"user": "IMGUR USER",
+	"emotion_API": "YOUR MICROSOFT EMOTION API"
+}
