@@ -30,11 +30,6 @@ class Uploader(object):
         """
         Initialize variables and parameters for PyImgur.
         """
-
-        # self.album = "iX0uj" # Testing.
-        # self.album = "zzf6O"
-        # self.album = "6U86u"
-        self.album = "JugqY"
         _url = 'https://api.projectoxford.ai/emotion/v1.0/recognize'
         _maxNumRetries = 10
         CLIENT_ID = self.config.CLIENT_ID
