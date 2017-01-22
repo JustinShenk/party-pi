@@ -52,10 +52,6 @@ Select Easy or Hard Mode (left or right arrow keys)
  - [ ] Redesign mode selection boxes
  - [ ] Add PyQT
 
-## License
-
-Mit
-
 ## Website
 
 [partypi.net](https://partypi.net)
