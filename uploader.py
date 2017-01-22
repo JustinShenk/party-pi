@@ -54,7 +54,7 @@ class Uploader(object):
         # self.album = "6U86u"
         # self.album = "JugqY"
         _url = 'https://api.projectoxford.ai/emotion/v1.0/recognize'
-        _key = get_key()
+        _key = self.config.key
         _maxNumRetries = 10
         CLIENT_ID = self.config.CLIENT_ID
         CLIENT_SECRET = self.config.CLIENT_SECRET
