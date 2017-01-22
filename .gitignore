@@ -1,6 +1,11 @@
 /extras
+config.json
 img/
 lkface*
 *.pyc
 /partypi
 *.swp
+*.bak
+.env
+pyqt5
+secret.py
