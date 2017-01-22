@@ -1,6 +1,5 @@
 #!/usr/lib/env python
 
-import sys
 import os
 import cv2
 import random
@@ -837,7 +836,6 @@ def main():
     """ Run application.
 
     """
-    # sys.argv[1] = Using piCamera module
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("-r", "--resolution")

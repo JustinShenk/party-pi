@@ -16,7 +16,7 @@ Install OpenCV3 with python3 bindings
 `brew install opencv3 --with-python3 --with-contrib`
 
 #### Anaconda
-conda install -c menpo opencv3=3.1.0
+`conda install -c menpo opencv3=3.1.0`
 
 ### Ubuntu
 
