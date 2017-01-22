@@ -41,6 +41,8 @@ Clone repository
 
 `cd party-pi`
 
+`pip install -r requirements.txt`
+
 Change auth.json.example to config.json and add your Emotion_API and Imgur keys.
 
 `python main.py`
