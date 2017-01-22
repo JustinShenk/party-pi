@@ -2,7 +2,7 @@
 Emotion detection game for parties using computer vision.
 
 ## Description
-Interactive game that prompts players to show an emotion (eg, "Show surprise"), and displays the winner. 
+Interactive game that prompts players to show an emotion (eg, "Show surprise"), and displays the winner. Can be used on raspberry pi with piCamera module.
 
 ## Demo
 ![happiness](demo.png)
@@ -44,6 +44,8 @@ Clone repository
 Change auth.json.example to config.json and add your Emotion_API and Imgur keys.
 
 `python main.py`
+
+Additional arguments: `--picam` for piCamera module and `--resolution` to specify resolution.
 
 Select Easy or Hard Mode (left or right arrow keys)
 
