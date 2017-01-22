@@ -35,7 +35,9 @@ Install OpenCV3 with python3 bindings
 
 ## Getting Started
 
-Clone repository - `git clone https://github.com/JustinShenk/party-pi.git`
+Clone repository
+
+`git clone https://github.com/JustinShenk/party-pi.git`
 `cd party-pi`
 
 Change auth.json.example to config.json and add your Emotion_API and Imgur keys.
