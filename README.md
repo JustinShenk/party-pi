@@ -1,5 +1,5 @@
 # Party Pi
-Emotion detection game for parties.
+Emotion detection game for parties using computer vision.
 
 ## Description
 Interactive game that prompts players to show an emotion (eg, "Show surprise"), and displays the winner. 

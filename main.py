@@ -409,25 +409,12 @@ class PartyPi(object):
         if self.raspberry:
             self.tickcount += 1
 
-        # overlay = self.photo.copy()
-        # if self.currPosY >= self.screenheight * (4. / 5) and self.currPosY < self.screenheight:
-        #     cv2.rectangle(overlay, (0, int(self.screenheight * (3. / 4))),
-        #                   (self.screenwidth, self.screenheight), (224, 23, 101), -1)
-        #     cv2.addWeighted(overlay, OPACITY, self.photo,
-        #                     1 - OPACITY, 0, self.frame)
-
-        # For positional selection.
-        # if self.click_point_y > self.screenheight - self.playSize[0] and self.click_point_x > self.screenwidth - self.playSize[1]:
-        #     self.reset()
-
         cv2.putText(self.photo, "[Press any button]", (self.screenwidth // 2, int(
             self.screenheight * (6. / 7))), FONT, 1.0, (62, 184, 144), 2)
 
         # if self.tickcount % 5 == 0:
         if self.faceSelect:
             faces = find_faces(self.frame)
-            # else:
-            # faces = []
             if len(faces):
                 rightFace = max([x for x, y, w, h in faces])
                 bottomFace = max([y for x, y, w, h in faces])
@@ -445,24 +432,14 @@ class PartyPi(object):
                 cv2.rectangle(self.frame, (x, y),
                               (x + w, y + h), (0, 255, 0), 2)
                 if x > (self.screenwidth - self.playSize[1]) and y > (self.screenheight - self.playSize[0]):
-                    # self.playIcon = self.playIcon3.copy()
-                    # Timer function useful when checking for faces in every frame
-                    # if self.raspberry:
-                    #     self.pretimer = 10
-                    # else:
-                    #     self.pretimer = 100
-                    # if not self.pretimer:
-                    #     self.reset()
-                    # else:
-                    #     self.pretimer -= 1
                     self.reset()
 
             # Show live image in corner.
             self.photo[self.screenheight - self.easySize[0]:self.screenheight, self.screenwidth - self.easySize[0]:self.screenwidth] = self.frame[
                 self.screenheight - self.easySize[1]: self.screenheight, self.screenwidth - self.easySize[1]: self.screenwidth]
 
+        # Face-based replay and mode selection (disabled).
         # self.overlay = self.photo.copy()
-
         # Show 'Play Again'. Disabled for party.
         # self.overlay[self.screenheight - self.playSize[1]: self.screenheight, self.screenwidth - self.playSize[1]: self.screenwidth] = self.playIcon[
         #     0: self.playSize[1], 0: self.playSize[0]]
@@ -493,8 +470,6 @@ class PartyPi(object):
                 self.level = 1
             if self.level == 2:
                 self.reset()
-
-            # print "x,y", x, y
 
         elif event == cv2.EVENT_RBUTTONUP:
             self.click_point_right_x, self.click_point_right_y = x, y
@@ -690,12 +665,6 @@ class PartyPi(object):
             # Draw the scores for the faces.
             for idx, currFace in enumerate(self.result):
                 faceRectangle = currFace['faceRectangle']
-
-                # Draw rectangles over all faces
-                # cv2.rectangle(self.photo, (faceRectangle['left'], faceRectangle['top']),
-                #               (faceRectangle['left'] + faceRectangle['width'], faceRectangle['top'] +
-                # faceRectangle['height']),
-                # color=random.choice(COLORS[1]), thickness=4)
 
                 # Get points for first emotion.
                 firstEmotion = firstEmoList[idx]
