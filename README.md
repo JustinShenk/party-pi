@@ -54,7 +54,7 @@ Select Easy or Hard Mode (left or right arrow keys)
 ## TODO
  - [ ] Fix alignment of analyzing text
  - [ ] Redesign mode selection boxes
- - [ ] Add PyQT
+ - [ ] Add PyQT for font and sizing support
 
 ## Author
 

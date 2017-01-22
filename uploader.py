@@ -43,28 +43,6 @@ class Uploader(object):
 
         # TODO: Complete Imgur user settings.
         # user = self.config.user
-        self.initPyimgur()
-
-    def initPyimgur(self):
-        """
-        Initialize variables and parameters for PyImgur.
-        """
-        self.album = "iX0uj"  # Testing.
-        # self.album = "zzf6O"
-        # self.album = "6U86u"
-        # self.album = "JugqY"
-        _url = 'https://api.projectoxford.ai/emotion/v1.0/recognize'
-        _key = self.config.key
-        _maxNumRetries = 10
-        CLIENT_ID = self.config.CLIENT_ID
-        CLIENT_SECRET = self.config.CLIENT_SECRET
-
-        self.im = pyimgur.Imgur(CLIENT_ID, CLIENT_SECRET)
-        self.im.change_authentication(
-            refresh_token=self.config.refresh_token)
-        self.im.refresh_access_token()
-        # user = self.im.get_user('spacemaker')
-        # album = im.get_album(ALBUM_ID)
 
     def upload_img(self, imagepath):
         """
@@ -85,6 +63,5 @@ class Uploader(object):
 
         # Send emotion data to API and return to game.
         data = self.emotion_API.get_emotions(uploaded_image.link)
-        data = emotion_api(uploaded_image.link)
 
         return data

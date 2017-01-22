@@ -438,6 +438,7 @@ class PartyPi(object):
             self.photo[self.screenheight - self.easySize[0]:self.screenheight, self.screenwidth - self.easySize[0]:self.screenwidth] = self.frame[
                 self.screenheight - self.easySize[1]: self.screenheight, self.screenwidth - self.easySize[1]: self.screenwidth]
 
+        # TODO: Move to separate function.
         # Face-based replay and mode selection (disabled).
         # self.overlay = self.photo.copy()
         # Show 'Play Again'. Disabled for party.
@@ -631,7 +632,7 @@ class PartyPi(object):
             self.draw_christmas_logo(self.photo)
             self.draw_hat(self.photo, faces)
             cv2.imwrite(imagePath, self.photo)
-        self.result = self.uploader.upload_img(imagePath)
+            self.result = self.uploader.upload_img(imagePath)
         self.display()
 
     def display(self):
