@@ -54,10 +54,6 @@ Select Easy or Hard Mode (left or right arrow keys)
  - [ ] Redesign mode selection boxes
  - [ ] Add PyQT
 
-## Website
-
-[partypi.net](https://partypi.net)
-
 ## Author
 
 [Justin Shenk](https://github.com/justinshenk/)
