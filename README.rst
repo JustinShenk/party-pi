@@ -21,12 +21,12 @@ Mac
 
 Brew
 
-.. code-block python
+.. code-block:: python
     brew install opencv3 --with-python3 --with-contrib
 
 Anaconda
 
-.. code-block python
+.. code-block:: python
     conda install -c menpo opencv3=3.1.0
 
 Ubuntu
