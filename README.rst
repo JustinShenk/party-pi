@@ -49,7 +49,7 @@ Change ``config.json.example`` to ``config.json`` and add your Emotion_API and I
 
 Additional (optional)  arguments: ``--picam`` for piCamera module and ``--resolution`` to specify resolution.
 
-Select Easy or Hard Mode (left or right arrow keys)
+Select Easy or Hard Mode (left or right arrow keys).
 
 TODO
 ====
