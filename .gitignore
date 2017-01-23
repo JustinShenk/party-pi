@@ -1,4 +1,5 @@
 /extras
+*.egg-info
 config.json
 img/
 lkface*
