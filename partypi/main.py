@@ -10,17 +10,22 @@ import json
 from uploader import Uploader
 
 BRAND = "partypi.net"
+VERSION = "0.1.0"
 PURPLE = (68, 54, 66)
-COLORS = [(0, 100, 0), (4, 4, 230)]
-EMOTIONS = ['anger', 'contempt', 'disgust',
-            'fear', 'happiness', 'neutral', 'sadness', 'surprise']
-UPLOADING_CAPTION = ["Make Christmas Party Great Again", "Christmas Elves are Analyzing...", "A Tribe of Unicorns is Working for You",
-                     "Take a Sip", "Turn around two times", "Saddling the unicorn", "Uploading to Facebook..j/k", "Computing makes me thirsty"]
+
+# Load string constants from json file.
+with open('emotions.json', 'r') as f:
+    d = f.read()
+    data = json.loads(d)
+    EMOTIONS = data['emotions']
+    WAIT_CAPTIONS = data['wait_captions']
+
 REDUCTION_FACTOR = 1.  # Reduction factor for timing.
 FONT = cv2.FONT_HERSHEY_SIMPLEX
 OPACITY = 0.4
 HAT_PATH = 'images/hat.png'
 
+# Set Haar cascade path.
 if cv2.__version__.startswith('3'):
     CASCADE_PATH = "/usr/local/opt/opencv3/share/OpenCV/haarcascades/haarcascade_frontalface_default.xml"
 else:  # Assume OpenCV version is 2.
@@ -84,7 +89,7 @@ class PartyPi(object):
         self.easyMode = None
 
         # TODO: Integrate into `EMOTIONS`.
-        EMOTIONS2 = ['psycho', 'John Cena', 'ecstasy', 'duckface']
+        # EMOTIONS2 = ['psycho', 'John Cena', 'ecstasy', 'duckface']
         self.photo = cv2.imread('img_1.png')  # To prepare window transition.
         self.screenwidth, self.screenheight = self.windowSize
 
@@ -117,15 +122,11 @@ class PartyPi(object):
         self.cam.set(4, self.screenheight)
         _, self.frame = self.cam.read()
 
-    def initRaspberryPi(self):
-        print("PartyPi v0.0.2 for Raspberry Pi, Coxi Christmas Party Edition")
-        self.raspberry = True
-
     def initialize_raspberry(self, resolution):
         """ Set up piCamera module or webcam.
 
         """
-        print("PartyPi v0.0.2 for Raspberry Pi, Coxi Christmas Party Edition")
+        print("PartyPi v0.1.0 for Raspberry Pi, Coxi Christmas Party Edition")
         self.raspberry = True
         self.resolution = resolution
         # Set up picamera module.
@@ -160,28 +161,21 @@ class PartyPi(object):
     def setup_game(self):
         """ Initialize variables, set up icons and face cascade.
 
-        """
-        self.font = cv2.FONT_HERSHEY_SIMPLEX
-        self.colors = [(0, 100, 0), (4, 4, 230)]
-        self.currentAnalLabel = 0
-
-        with open('emotions.json', 'r') as f:
-            d = f.read()
-            data = json.loads(d)
-            self.emotions = data['emotions']
-            self.analyzingLabels = data['analyzingLabels']
+        """        
         self.looping = True
         self.faceSelect = False
         self.easyMode = None
-        self.currEmotion = self.emotions[0]
         self.currentEmotion = EMOTIONS[0]
         self.countx = None
+
+        # Initialize mouse click positions.
         self.currPosX = None
         self.currPosY = None
         self.click_point_x = None
         self.click_point_y = None
         self.click_point_right_x = None
         self.click_point_right_y = None
+
         self.calibrated = False
         self.looping = True
         self.currentCaptionIndex = 0
@@ -190,9 +184,8 @@ class PartyPi(object):
         self.curr_level = 0
         self.result = []
         self.uploader = Uploader()
-        self.pretimer = None
 
-        # TODO: Consider placing icons in a dictionary.
+        # TODO: Place icons in a dictionary or object.
         self.easyIcon = cv2.imread('images/easy.png')
         self.hardIcon = cv2.imread('images/hard.png')
         self.playIcon = cv2.imread('images/playagain.png')
@@ -409,8 +402,8 @@ class PartyPi(object):
                                                self.screenheight), (255, 255, 255), -1)
         if self.showAnalyzing:
             textSize = 0.7 if self.raspberry else 1.7
-            add_text(self.frame, UPLOADING_CAPTION[self.currentCaptionIndex % len(
-                UPLOADING_CAPTION)], self.uploading_caption_location, textSize, color=(224, 23, 101))
+            add_text(self.frame, WAIT_CAPTIONS[self.currentCaptionIndex % len(
+                WAIT_CAPTIONS)], self.uploading_caption_location, textSize, color=(224, 23, 101))
             self.draw_christmas_logo(self.frame)
         # Display image.
         add_text(self.frame, BRAND, ((self.screenwidth // 5) * 4,
@@ -830,6 +823,7 @@ def main():
     """ Run application.
     """
     app = PartyPi()
+
 
 if __name__ == '__main__':
     main()

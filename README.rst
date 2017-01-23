@@ -55,6 +55,7 @@ Select Easy or Hard Mode (left or right arrow keys)
  - [ ] Fix alignment of analyzing text
  - [ ] Redesign mode selection boxes
  - [ ] Add PyQT for font and sizing support
+ - [ ] Add Python 2 compatibility
 
 ## Author
 

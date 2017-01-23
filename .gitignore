@@ -1,4 +1,6 @@
 /extras
+/build
+/dist
 *.egg-info
 config.json
 img/
