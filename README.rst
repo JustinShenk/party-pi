@@ -32,21 +32,21 @@ Anaconda
 Ubuntu
 ------
 
-Installing_ OpenCV3 on Ubuntu
+`Installing`_ OpenCV3 on Ubuntu
 
 .. _Installing: http://www.pyimagesearch.com/2015/07/20/install-opencv-3-0-and-python-3-4-on-ubuntu/
 
 Windows
 -------
 
-Installing_ OpenCV3 on Windows
+`Installing`_ OpenCV3 on Windows
 
 .. _Installing: https://www.solarianprogrammer.com/2016/09/17/install-opencv-3-with-python-3-on-windows/
 
 Get Authorization Keys
 ======================
 
-Microsoft/Oxford Emotion API Reference_
+Microsoft/Oxford Emotion API `Reference`_
 
 .. _Reference: https://dev.projectoxford.ai/docs/services/5639d931ca73072154c1ce89
 
