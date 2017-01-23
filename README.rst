@@ -16,44 +16,14 @@ Install
 =======
 Install OpenCV3 with python3 bindings
 
-Mac
----
-
-Brew
-
-.. code-block:: python
-    brew install opencv3 --with-python3 --with-contrib
-
-Anaconda
-
-.. code-block:: python
-    conda install -c menpo opencv3=3.1.0
-
-Ubuntu
-------
-
-`Installing`_ OpenCV3 on Ubuntu
-
-.. _Installing: http://www.pyimagesearch.com/2015/07/20/install-opencv-3-0-and-python-3-4-on-ubuntu/
-
-Windows
--------
-
-`Installing`_ OpenCV3 on Windows
-
-.. _Installing: https://www.solarianprogrammer.com/2016/09/17/install-opencv-3-with-python-3-on-windows/
-
 Get Authorization Keys
 ======================
 
-Microsoft/Oxford Emotion API `Reference`_
-
-.. _Reference: https://dev.projectoxford.ai/docs/services/5639d931ca73072154c1ce89
+Microsoft/Oxford Emotion API `Reference <https://dev.projectoxford.ai/docs/services/5639d931ca73072154c1ce89>`_
 
 - Place your subscription key in config.json: "Ocp-Apim-Subscription-Key: {subscription key}"
 
-Imgur API Reference_
-.. _Reference: https://api.imgur.com/endpoints
+Imgur API `Reference <https://api.imgur.com/endpoints>`_
 
 Getting Started
 ===============
@@ -90,5 +60,6 @@ Author
 ======
 
 `Justin Shenk`_ (`@JustinShenk`_) created Party Pi.
+
 .. _Justin Shenk: https://linkedin.com/in/JustinShenk/
 .. _@JustinShenk: https://github.com/JustinShenk/
