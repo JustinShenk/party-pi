@@ -41,13 +41,13 @@ Install dependencies:
 
     pip install -r requirements.txt
 
-Change config.json.example to config.json and add your Emotion_API and Imgur keys. Then start the game:
+Change ``config.json.example`` to ``config.json`` and add your Emotion_API and Imgur keys. Then start the game:
 
 .. code-block:: python
 
     python main.py
 
-Additional (optional)  arguments: `--picam` for piCamera module and `--resolution` to specify resolution.
+Additional (optional)  arguments: ``--picam`` for piCamera module and ``--resolution`` to specify resolution.
 
 Select Easy or Hard Mode (left or right arrow keys)
 
