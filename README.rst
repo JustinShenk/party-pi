@@ -53,11 +53,11 @@ Select Easy or Hard Mode (left or right arrow keys).
 
 TODO
 ====
- - [ ] Fix alignment of analyzing text
- - [ ] Redesign mode selection boxes
- - [ ] Add PyQT for font and sizing support
- - [ ] Add Python 2 compatibility
- - [ ] Add camera detection feature to recognize if raspberry pi
+ - Fix alignment of analyzing text
+ - Redesign mode selection boxes
+ - Add PyQT for font and sizing support
+ - Add Python 2 compatibility
+ - Add camera detection feature to recognize if raspberry pi
 
 Author
 ======
