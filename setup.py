@@ -4,7 +4,7 @@ import re
 import sys
 
 
-VERSION = '0.1.0' # x.y.z[-dev#]
+VERSION = '0.1.1' # x.y.z[-dev#]
 REPOSITORY = 'https://github.com/JustinShenk/party-pi'
 PACKAGES = find_packages(where='partypi')
 README = ''
