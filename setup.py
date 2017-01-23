@@ -1,4 +1,4 @@
-from distutils.core import setup
+from setuptools import setup, find_packages
 
 import re
 import sys
@@ -6,9 +6,9 @@ import sys
 
 VERSION = '0.1.0' # x.y.z[-dev#]
 REPOSITORY = 'https://github.com/JustinShenk/party-pi'
-
+PACKAGES = find_packages(where='partypi')
 README = ''
-with open('README.md', 'r') as f:
+with open('README.rst', 'r') as f:
     README = f.read()
 README = re.sub(r' _(.+): ([^(http)].+)', r' _\1: {}/blob/master/\2'.format(REPOSITORY), README)
 
@@ -19,9 +19,10 @@ setup(
   long_description = README,
   author = 'Justin Shenk',
   author_email = 'shenk.justin@gmail.com',
+
   url = REPOSITORY,
   download_url = '{}/tarball/{}'.format(REPOSITORY, VERSION),
-  packages = ['partypi'],
+  packages = PACKAGES,
   classifiers = [
       'Development Status :: 3 - Alpha',
       'Intended Audience :: Education',

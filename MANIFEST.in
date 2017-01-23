@@ -1,0 +1,3 @@
+include config.json.example README.rst setup.cfg
+recursive-include cvloop *.py
+recursive-include images *.png
