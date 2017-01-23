@@ -58,7 +58,7 @@ class Uploader(object):
         #     self.imagepath, title="Uploaded with PyImgur", album=self.album)
         print((uploaded_image.title))
         print((uploaded_image.link))
-        print((uploaded_im  age.size))
+        print((uploaded_image.size))
         print((uploaded_image.type))
 
         # Send emotion data to API and return to game.

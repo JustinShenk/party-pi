@@ -76,15 +76,6 @@ def get_image_path():
 
 class PartyPi(object):
 
-<<<<<<< HEAD:partypi.py
-    def __init__(self, piCam=False, resolution=(1280 / 2, 1024 / 2), windowSize=(1200, 1024), blackAndWhite=False):
-        self.piCam = piCam  # Using raspberry pi camera module or not.
-        self.windowSize = windowSize
-        self.blackAndWhite = blackAndWhite
-        # self.emotions2 = ['psycho','John Cena','ecstasy','Duckface']
-        self.photo = cv2.imread('img_1.png')
-        self.resolution = resolution
-=======
     def __init__(self, piCam=False, windowSize=(1200, 1024), resolution=(1280 // 2, 1024 // 2), gray=False):
         self.piCam = piCam
         self.windowSize = windowSize
@@ -95,7 +86,6 @@ class PartyPi(object):
         # TODO: Integrate into `EMOTIONS`.
         EMOTIONS2 = ['psycho', 'John Cena', 'ecstasy', 'duckface']
         self.photo = cv2.imread('img_1.png')  # To prepare window transition.
->>>>>>> master:main.py
         self.screenwidth, self.screenheight = self.windowSize
 
         # Setup for Raspberry Pi.
@@ -106,12 +96,10 @@ class PartyPi(object):
 
         # Reinitialize screenwidth and height in case changed by system.
         self.screenwidth, self.screenheight = self.frame.shape[:2]
-<<<<<<< HEAD:partypi.py
-        print("first screenheight:", self.screenheight, self.screenwidth, self.frame.shape)
-=======
+        print("first screenheight:", self.screenheight,
+              self.screenwidth, self.frame.shape)
         print("Window size:", self.frame.shape)
         self.uploading_caption_location = self.screenwidth // 5, self.screenheight // 3 if self.raspberry else self.screenheight // 4 + 30
->>>>>>> master:main.py
 
         # Complete setup.
         self.setup_game()
@@ -122,20 +110,19 @@ class PartyPi(object):
         self.raspberry = False
         self.cam = cv2.VideoCapture(0)
         _, self.frame = self.cam.read()
-        self.screenheight, self.screenwidth = self.frame.shape[:2] # Update class variables.
+        # Update class variables.
+        self.screenheight, self.screenwidth = self.frame.shape[:2]
         print(self.frame.shape)
         self.cam.set(3, self.screenwidth)
         self.cam.set(4, self.screenheight)
         _, self.frame = self.cam.read()
 
-<<<<<<< HEAD:partypi.py
     def initRaspberryPi(self):
         print("PartyPi v0.0.2 for Raspberry Pi, Coxi Christmas Party Edition")
         self.raspberry = True
-=======
+
     def initialize_raspberry(self, resolution):
         """ Set up piCamera module or webcam.
->>>>>>> master:main.py
 
         """
         print("PartyPi v0.0.2 for Raspberry Pi, Coxi Christmas Party Edition")
@@ -174,7 +161,6 @@ class PartyPi(object):
         """ Initialize variables, set up icons and face cascade.
 
         """
-<<<<<<< HEAD:partypi.py
         self.font = cv2.FONT_HERSHEY_SIMPLEX
         self.colors = [(0, 100, 0), (4, 4, 230)]
         self.currentAnalLabel = 0
@@ -188,9 +174,7 @@ class PartyPi(object):
         self.faceSelect = False
         self.easyMode = None
         self.currEmotion = self.emotions[0]
-=======
         self.currentEmotion = EMOTIONS[0]
->>>>>>> master:main.py
         self.countx = None
         self.currPosX = None
         self.currPosY = None
@@ -218,16 +202,13 @@ class PartyPi(object):
         # self.playIcon3 = cv2.imread('playagain3.png')
         self.easySize = self.hardSize = self.easyIcon.shape[:2]
         self.playSize = self.playIcon.shape[:2]
-        self.christmas = cv2.imread('images/christmas.png', cv2.IMREAD_UNCHANGED)
+        self.christmas = cv2.imread(
+            'images/christmas.png', cv2.IMREAD_UNCHANGED)
         self.hat = cv2.imread(HAT_PATH, cv2.IMREAD_UNCHANGED)
         if self.hat is None:
             raise ValueError('No hat image found at `{}`'.format(HAT_PATH))
 
-<<<<<<< HEAD:partypi.py
-        print("Camera initialize")
-=======
         print("Camera initialized")
->>>>>>> master:main.py
         # if not self.raspberry:
         #     print "MAC or PC initialize"
         #     self.cam.set(3, self.screenwidth)
@@ -307,11 +288,7 @@ class PartyPi(object):
             cv2.rectangle(self.overlay, (0, 0), (self.screenwidth // 2,
                                                  int(self.screenheight)), (211, 211, 211), -1)
         else:
-<<<<<<< HEAD:partypi.py
-            cv2.rectangle(self.overlay, (int(self.screenwidth / 2), 0),
-=======
             cv2.rectangle(self.overlay, (self.screenwidth // 2, 0),
->>>>>>> master:main.py
                           (self.screenwidth, self.screenheight), (211, 211, 211), -1)
         if self.click_point_x:  # If user clicks left mouse button.
             # self.easyMode = True if self.click_point_x < self.screenwidth / 2
@@ -442,11 +419,7 @@ class PartyPi(object):
 
         if self.photoMode and self.startProcess:
             print("take photo")
-<<<<<<< HEAD:partypi.py
-            self.takePhoto()
-=======
             self.take_photo()
->>>>>>> master:main.py
 
     def level2(self):
         """ Show analyzing, then present photo, then reset game.
@@ -654,42 +627,7 @@ class PartyPi(object):
     def capture_frame(self):
         """ Capture frame-by-frame.
 
-<<<<<<< HEAD:partypi.py
-            if y1 > self.screenheight:
-                y1 = self.screenheight
-                haty1 = y1 - self.screenheight
 
-            if x0 < 0 or y0 < 0 or x1 > self.screenwidth or y1 > self.screenheight:
-                pass
-            else:
-                # Remove black background from png file.
-                for c in range(0, 3):
-                    # hatSlice = hat[hatx0:hatx1, haty0:haty1, c] * \
-                    #     (hat[haty0:haty1, hatx0:hatx1, 3] / 255.0)
-                    # backgroundSlice = frame[y0:y1, x0:x1, c] * \
-                    #     (1.0 - hat[:, :, 3] / 255.0)
-                    # print hatSlice.shape, backgroundSlice.shape, frame.shape, hat.shape, hatx0, hatx1, haty0, haty1
-                    # frame[y0:y1, x0:x1, c] = hatSlice + backgroundSlice
-                    if hat[:, :, c].shape == frame[y0:y1, x0:x1, c].shape:
-                        hatSlice = hat[:, :, c] * \
-                            (hat[:, :, 3] / 255.0)
-                        backgroundSlice = frame[
-                            y0:y1, x0:x1, c] * (1.0 - hat[:, :, 3] / 255.0)
-                        frame[y0:y1, x0:x1, c] = hatSlice + backgroundSlice
-
-    def addText(self, frame, text, origin, size=1.0, color=(255, 255, 255), thickness=1):
-        """
-        Put text on current frame.
-        """
-        origin =  int(origin[0]),int(origin[1])
-        cv2.putText(frame, text, origin,
-                    self.font, size, color, 2)
-
-    def captureFrame(self):
-        """
-        Capture frame-by-frame.
-=======
->>>>>>> master:main.py
         """
 
         if not self.piCam:
@@ -817,12 +755,9 @@ class PartyPi(object):
 
         else:
             print("No results found.")
-<<<<<<< HEAD:partypi.py
-=======
 
     def prompt_emotion(self):
         """ Display prompt for emotion on screen.
->>>>>>> master:main.py
 
         """
         textSize = 1.0 if self.raspberry else 1.2
@@ -840,17 +775,10 @@ class PartyPi(object):
                 self.currentEmotion) if self.easyMode else self.currentEmotion + '+' + self.seccurrentEmotion
             return emotionString
         else:
-<<<<<<< HEAD:partypi.py
-            self.currEmotion = random.choice(self.emotions)
-            randnum = (self.emotions.index(self.currEmotion) +
-                       random.choice(list(range(1, 7)))) % 8
-            self.secCurrEmotion = self.emotions[randnum]
-=======
             self.currentEmotion = random.choice(EMOTIONS)
             randnum = (EMOTIONS.index(self.currentEmotion) +
                        random.choice(list(range(1, 7)))) % 8
             self.seccurrentEmotion = EMOTIONS[randnum]
->>>>>>> master:main.py
             if self.easyMode:
                 return self.currentEmotion
             else:
@@ -865,13 +793,8 @@ class PartyPi(object):
             if keypress == ord('q'):  # 'q' pressed to quit
                 print("Escape key entered")
                 self.looping = False
-<<<<<<< HEAD:partypi.py
-                self.endGame()
-            elif self.curr_level == 0:
-=======
                 self.end_game()
-            elif self.level == 0:
->>>>>>> master:main.py
+            elif self.curr_level == 0:
                 if keypress == 81 or keypress == 2:  # left
                     self.easyMode = True
                     self.tickcount = 0
@@ -905,56 +828,8 @@ class PartyPi(object):
 
 def main():
     """ Run application.
-
     """
-<<<<<<< HEAD:partypi.py
-    Load application.
-    """
-    # sys.argv[1] = Using piCamera module
-    import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-r',"--resolution", metavar='resolution',
-                        nargs='+', type=int)
-    parser.add_argument('-p',"--picam", type=bool,default=False)
-    args = parser.parse_args()
-    resolution = args.resolution
-    print(resolution)
-    if resolution and len(resolution):
-        w = resolution[0]
-        h = resolution[1]
-        resolution = (w, h)
-    else:
-        resolution = (1280 / 2, 1024 / 2)
-    application = PartyPi(piCam=args.picam, resolution=resolution)
-    print("arguments", args.picam, resolution)
-    # if len(sys.argv) == 2:
-    #     if 'picam' or '-p' in sys.argv[1]:
-    #         application = PartyPi(True)
-    #     else:
-    #         print "Load default settings"
-    #         application = PartyPi()
-    # elif len(sys.argv) == 3:
-    #     if 'x' in sys.argv[2]:
-    #         res = sys.argv[2]
-    #         w = res.split('x')[0]
-    #         h = res.split('x')[1]
-    #         application = PartyPi(True, (w, h))
-    #     else:
-    #         print "Load default settings"
-    #         application = PartyPi(True)
-    # else:
-    #     application = PartyPi()
-=======
-    import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-r", "--resolution")
-    parser.add_argument("-p", "--picam", action="store_true", default=False)
-    parser.add_argument("-g", "--gray", action="store_true", default=False)
-    args = parser.parse_args()
-    application = PartyPi(resolution=args.resolution,
-                          piCam=args.picam, gray=args.gray)
->>>>>>> master:main.py
-
+    app = PartyPi()
 
 if __name__ == '__main__':
     main()
