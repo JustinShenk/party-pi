@@ -1,0 +1,3 @@
+include partypi/config.json.example README.rst setup.cfg
+recursive-include partypi *.py
+recursive-include partypi/images *.png
