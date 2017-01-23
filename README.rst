@@ -28,24 +28,26 @@ Imgur API `Reference <https://api.imgur.com/endpoints>`_
 Getting Started
 ===============
 
-Clone repository
+Clone repository:
 
 .. code-block:: python
 
     git clone https://github.com/JustinShenk/party-pi.git
     cd party-pi
 
-Install dependencies
+Install dependencies:
 
 .. code-block:: python
+
     pip install -r requirements.txt
 
-Change config.json.example to config.json and add your Emotion_API and Imgur keys.
+Change config.json.example to config.json and add your Emotion_API and Imgur keys. Then start the game:
 
 .. code-block:: python
+
     python main.py
 
-Additional arguments: `--picam` for piCamera module and `--resolution` to specify resolution.
+Additional (optional)  arguments: `--picam` for piCamera module and `--resolution` to specify resolution.
 
 Select Easy or Hard Mode (left or right arrow keys)
 
@@ -55,6 +57,7 @@ TODO
  - [ ] Redesign mode selection boxes
  - [ ] Add PyQT for font and sizing support
  - [ ] Add Python 2 compatibility
+ - [ ] Add camera detection feature to recognize if raspberry pi
 
 Author
 ======
