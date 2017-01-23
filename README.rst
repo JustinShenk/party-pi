@@ -1,64 +1,92 @@
-# Party Pi
+Party Pi
+========
+
 Emotion detection game for parties using computer vision.
 
-## Description
+Description
+-----------
 Interactive game that prompts players to show an emotion (eg, "Show surprise"), and displays the winner. Can be used on raspberry pi with piCamera module.
 
-## Demo
-![happiness](demo.png)
-
-## Install
+Demo
+----
+.. image:: demo.png
+   
+Install
+-------
 Install OpenCV3 with python3 bindings
 
-### Mac
+Mac
+~~~
 
-#### Brew
-`brew install opencv3 --with-python3 --with-contrib`
+*Brew*
 
-#### Anaconda
-`conda install -c menpo opencv3=3.1.0`
+.. code-block python
+    brew install opencv3 --with-python3 --with-contrib
 
-### Ubuntu
+*Anaconda*
 
-[Installing OpenCV3 on Ubuntu](http://www.pyimagesearch.com/2015/07/20/install-opencv-3-0-and-python-3-4-on-ubuntu/)
+.. code-block python
+    conda install -c menpo opencv3=3.1.0
 
-### Windows
+Ubuntu
+~~~~~~
 
-[Installing OpenCV3 on Windows](https://www.solarianprogrammer.com/2016/09/17/install-opencv-3-with-python-3-on-windows/)
+Installing_ OpenCV3 on Ubuntu
 
-## Get authorization keys
+.. _Installing: http://www.pyimagesearch.com/2015/07/20/install-opencv-3-0-and-python-3-4-on-ubuntu/
 
-[Microsoft/Oxford Emotion API](https://dev.projectoxford.ai/docs/services/5639d931ca73072154c1ce89)
+Windows
+~~~~~~~
+
+Installing_ OpenCV3 on Windows
+
+.. _Installing: https://www.solarianprogrammer.com/2016/09/17/install-opencv-3-with-python-3-on-windows/
+
+Get authorization keys
+----------------------
+
+Microsoft/Oxford Emotion API Reference_
+
+.. _Reference: https://dev.projectoxford.ai/docs/services/5639d931ca73072154c1ce89
+
 - Place your subscription key in config.json: "Ocp-Apim-Subscription-Key: {subscription key}"
 
-[Imgur API](https://api.imgur.com/endpoints)
+Imgur API Reference_
+.. _Reference: https://api.imgur.com/endpoints
 
-## Getting Started
+Getting Started
+---------------
 
 Clone repository
 
-`git clone https://github.com/JustinShenk/party-pi.git`
+.. code-block:: python
 
-`cd party-pi`
+    git clone https://github.com/JustinShenk/party-pi.git
+    cd party-pi
 
 Install dependencies
 
-`pip install -r requirements.txt`
+.. code-block:: python
+    pip install -r requirements.txt
 
 Change config.json.example to config.json and add your Emotion_API and Imgur keys.
 
-`python main.py`
+.. code-block:: python
+    python main.py
 
 Additional arguments: `--picam` for piCamera module and `--resolution` to specify resolution.
 
 Select Easy or Hard Mode (left or right arrow keys)
 
-## TODO
+TODO
+----
  - [ ] Fix alignment of analyzing text
  - [ ] Redesign mode selection boxes
  - [ ] Add PyQT for font and sizing support
  - [ ] Add Python 2 compatibility
 
-## Author
+Author
+------
 
-[Justin Shenk](https://github.com/JustinShenk/)
+`Justin Shenk`
+__ https://github.com/JustinShenk/
