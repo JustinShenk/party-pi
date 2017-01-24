@@ -4,9 +4,11 @@ import re
 import sys
 
 
-VERSION = '0.1.1' # x.y.z[-dev#]
+VERSION = '0.1.2' # x.y.z[-dev#]
 REPOSITORY = 'https://github.com/JustinShenk/party-pi'
+
 PACKAGES = find_packages(where='partypi')
+
 README = ''
 with open('README.rst', 'r') as f:
     README = f.read()

@@ -10,7 +10,8 @@ Interactive game that prompts players to show an emotion (eg, "Show surprise"), 
 
 Demo
 ====
-.. image:: partypi/demo.png
+
+`Screenshot <https://www.partypi.net/img/demo.png>`_
    
 Install
 =======
@@ -19,11 +20,11 @@ Install OpenCV3 with python3 bindings
 Get Authorization Keys
 ======================
 
-Microsoft/Oxford Emotion API `Reference <https://dev.projectoxford.ai/docs/services/5639d931ca73072154c1ce89>`_
+`Microsoft/Oxford Emotion API Reference <https://dev.projectoxford.ai/docs/services/5639d931ca73072154c1ce89>`_
 
 - Place your subscription key in config.json: "Ocp-Apim-Subscription-Key: {subscription key}"
 
-Imgur API `Reference <https://api.imgur.com/endpoints>`_
+`Imgur API Reference <https://api.imgur.com/endpoints>`_
 
 Getting Started
 ===============
@@ -53,11 +54,11 @@ Select Easy or Hard Mode (left or right arrow keys).
 
 TODO
 ====
- - Fix alignment of analyzing text
- - Redesign mode selection boxes
- - Add PyQT for font and sizing support
- - Add Python 2 compatibility
- - Add camera detection feature to recognize if raspberry pi
+- Fix alignment of analyzing text
+- Redesign mode selection boxes
+- Add PyQT for font and sizing support
+- Add Python 2 compatibility
+- Add camera detection feature to recognize if raspberry pi
 
 Author
 ======
@@ -66,3 +67,8 @@ Author
 
 .. _Justin Shenk: https://linkedin.com/in/JustinShenk/
 .. _@JustinShenk: https://github.com/JustinShenk/
+
+License
+=======
+
+`MIT <https://github.com/JustinShenk/party-pi/blob/master/LICENSE>`_

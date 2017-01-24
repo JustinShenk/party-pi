@@ -1,4 +1,5 @@
 /extras
+update.py
 /build
 /dist
 *.egg-info
