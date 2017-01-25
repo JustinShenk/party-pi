@@ -7,7 +7,6 @@ config.json
 img/
 lkface*
 *.pyc
-/partypi
 *.swp
 *.bak
 .env
