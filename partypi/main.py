@@ -10,7 +10,7 @@ import json
 from uploader import Uploader
 
 BRAND = "partypi.net"
-VERSION = "0.1.2"
+VERSION = "0.1.3"
 PURPLE = (68, 54, 66)
 
 # Load string constants from json file.
@@ -26,10 +26,13 @@ OPACITY = 0.4
 HAT_PATH = 'images/hat.png'
 
 # Set Haar cascade path.
-if cv2.__version__.startswith('3'):
-    CASCADE_PATH = "/usr/local/opt/opencv3/share/OpenCV/haarcascades/haarcascade_frontalface_default.xml"
-else:  # Assume OpenCV version is 2.
-    CASCADE_PATH = "/usr/local/opt/opencv/share/OpenCV/haarcascades/haarcascade_frontalface_default.xml"
+CASCADE_PATH = '/usr/local/opt/opencv/share/OpenCV/haarcascades/haarcascade_frontalface_default.xml'
+if not os.path.exists(CASCADE_PATH):
+    # Try alternative file path
+    CASCADE_PATH = '/usr/local/opt/opencv3/share/OpenCV/haarcascades/haarcascade_frontalface_default.xml'
+    if not os.path.exists(CASCADE_PATH):
+        raise NameError('File not found:', CASCADE_PATH)
+
 FACE_CASCADE = cv2.CascadeClassifier(CASCADE_PATH)
 
 
@@ -161,7 +164,7 @@ class PartyPi(object):
     def setup_game(self):
         """ Initialize variables, set up icons and face cascade.
 
-        """        
+        """
         self.looping = True
         self.faceSelect = False
         self.easyMode = None
@@ -405,6 +408,8 @@ class PartyPi(object):
             add_text(self.frame, WAIT_CAPTIONS[self.currentCaptionIndex % len(
                 WAIT_CAPTIONS)], self.uploading_caption_location, textSize, color=(224, 23, 101))
             self.draw_christmas_logo(self.frame)
+            add_text(self.frame, 'Please wait', (self.uploading_caption_location[
+                     0], self.uploading_caption_location[1] + 80), textSize * 0.7, color=(244, 23, 101))
         # Display image.
         add_text(self.frame, BRAND, ((self.screenwidth // 5) * 4,
                                      self.screenheight // 7), color=PURPLE, size=0.5, thickness=0.5)
@@ -641,7 +646,8 @@ class PartyPi(object):
         # If internet connection is poor, use black and white image.
         if self.gray:
             bwphoto = cv2.cvtColor(self.photo, cv2.COLOR_BGR2GRAY)
-            cv2.imwrite(imagepath, bwphoto)
+            cv2.imwrite(imagePath, bwphoto)
+            # FIXME: Move to separate function
             self.result = self.uploader.upload_img(imagePath)
         else:
             add_text(self.photo, BRAND, (int((self.screenwidth / 5) * 4),
@@ -649,6 +655,7 @@ class PartyPi(object):
             self.draw_christmas_logo(self.photo)
             self.draw_hat(self.photo, faces)
             cv2.imwrite(imagePath, self.photo)
+            # FIXME: Move to separate function
             self.result = self.uploader.upload_img(imagePath)
         self.display()
 
