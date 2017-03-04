@@ -27,4 +27,4 @@ if OPENCV_FOUND:
 
 
 if OPENCV_FOUND and OPENCV_VERSION_COMPATIBLE:
-    from .partypi import *
+    from .main import *

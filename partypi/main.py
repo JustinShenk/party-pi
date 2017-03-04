@@ -10,7 +10,7 @@ import json
 from uploader import Uploader
 
 BRAND = "partypi.net"
-VERSION = "0.1.3"
+VERSION = "0.1.4"
 PURPLE = (68, 54, 66)
 
 # Load string constants from json file.
