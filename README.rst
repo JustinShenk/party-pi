@@ -1,9 +1,7 @@
 Party Pi
 ########
 
-.. image:: https://img.shields.io/badge/license-MIT-blue.svg
-
-.. image:: https://badge.fury.io/py/partypi.svg
+.. image:: https://img.shields.io/badge/license-MIT-blue.svg  .. image:: https://badge.fury.io/py/partypi.svg
     :target: https://badge.fury.io/py/partypi
     :alt: PyPi Badge
     
