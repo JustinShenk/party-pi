@@ -1,7 +1,7 @@
 Party Pi
-########
+========
 
-|license| |PyPi|
+|license| |nbsp| |PyPi|
     
 Emotion detection game for parties using computer vision.
 
@@ -74,7 +74,10 @@ License
 =======
 
 `MIT <https://github.com/JustinShenk/party-pi/blob/master/LICENSE>`_
+
 .. |license| image:: https://img.shields.io/badge/license-MIT-blue.svg  
 .. |PyPi| image:: https://badge.fury.io/py/partypi.svg
     :target: https://badge.fury.io/py/partypi
     :alt: PyPi Badge
+.. |nbsp| unicode:: 0xA0 
+   :trim:
