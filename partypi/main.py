@@ -26,10 +26,10 @@ OPACITY = 0.4
 HAT_PATH = 'images/hat.png'
 
 # Set Haar cascade path.
-CASCADE_PATH = '/usr/local/opt/opencv/share/OpenCV/haarcascades/haarcascade_frontalface_default.xml'
+CASCADE_PATH = '/usr/local/opt/opencv3/share/OpenCV/haarcascades/haarcascade_frontalface_default.xml'
 if not os.path.exists(CASCADE_PATH):
     # Try alternative file path
-    CASCADE_PATH = '/usr/local/opt/opencv3/share/OpenCV/haarcascades/haarcascade_frontalface_default.xml'
+    CASCADE_PATH = 'face.xml'
     if not os.path.exists(CASCADE_PATH):
         raise NameError('File not found:', CASCADE_PATH)
 
