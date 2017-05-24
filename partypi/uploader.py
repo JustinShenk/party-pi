@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import pyimgur
 import json
 import time
 import requests
@@ -37,6 +36,7 @@ class Uploader(object):
         """
         Initialize variables and parameters for PyImgur.
         """
+        import pyimgur
         CLIENT_ID = self.config.CLIENT_ID
         CLIENT_SECRET = self.config.CLIENT_SECRET
         self.album = self.config.album

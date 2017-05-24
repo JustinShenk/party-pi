@@ -26,7 +26,6 @@ Get Authorization Keys
 
 - Place your subscription key in config.json: "Ocp-Apim-Subscription-Key: {subscription key}"
 
-`Imgur API Reference <https://api.imgur.com/endpoints>`_
 
 Getting Started
 ===============
