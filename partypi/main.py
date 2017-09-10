@@ -1,4 +1,4 @@
-#!/usr/lib/env python
+#!/usr/bin/env python
 
 import os
 import cv2
@@ -23,7 +23,8 @@ with open('emotions.json', 'r') as f:
 REDUCTION_FACTOR = 1.  # Reduction factor for timing.
 FONT = cv2.FONT_HERSHEY_SIMPLEX
 OPACITY = 0.4
-HAT_PATH = 'images/hat.png'
+# HAT_PATH = 'images/hat.png'
+HAT_PATH = 'images/prop.png'
 
 # Set Haar cascade path.
 CASCADE_PATH = '/usr/local/opt/opencv3/share/OpenCV/haarcascades/haarcascade_frontalface_default.xml'
