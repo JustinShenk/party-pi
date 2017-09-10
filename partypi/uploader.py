@@ -60,8 +60,14 @@ class Uploader(object):
     def upload_img(self, imagepath, pyimgur=False):
         """
         Send local image directly or send image to PyImgur for hosting.
+
+        Args:
+
+        Returns:
+            data
+            callback:    None or Error
         """
-        print("Initate upload")
+        print("Initiate upload")
 
         if pyimgur:
             uploaded_image = self.im.upload_image(
@@ -76,8 +82,8 @@ class Uploader(object):
             print((uploaded_image.type))
 
             # Send emotion data to API and return to game.
-            data = self.emotion_API.get_emotions(uploaded_image.link)
+            data, callback = self.emotion_API.get_emotions(uploaded_image.link)
         else:
-            data = self.emotion_API.get_emotions(imagepath, local=True)
-
-        return data
+            data, callback = self.emotion_API.get_emotions(
+                imagepath, local=True)
+        return data, callback
