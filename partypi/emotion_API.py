@@ -3,6 +3,7 @@ import os
 import http.client
 import json
 import requests
+from requests import ConnectionError
 import time
 
 from urllib.parse import urlencode
@@ -51,12 +52,13 @@ class Emotion_API(object):
                 data = f.read()
             json = None
             params = None
-
-            result = self.processRequest(json, data, headers, params)
+            callback = None
+            result, callback = self.processRequest(json, data, headers, params)
             print(headers)
-            if result is not None:
+
+            if result is not None:  # For debugging only
                 print("Emotions found:", result)
-            return result
+            return result, callback
 
         else:
             # Send link of pyimgur image to Microsoft Oxford API
@@ -75,7 +77,7 @@ class Emotion_API(object):
                 conn.close()
                 json_data = json.loads(data)
 
-                return json_data
+                return json_data, callback
 
             except Exception as e:
                 print(("[Errno {}] ".format(e)))
@@ -93,12 +95,19 @@ class Emotion_API(object):
 
         retries = None
         result = None
+        callback = None
 
         while True:
 
-            response = requests.request(
-                'post', _url, json=json, data=data, headers=headers, params=params)
-            print(response)
+            try:
+                response = requests.request(
+                    'post', _url, json=json, data=data, headers=headers, params=params)
+                print(response)
+            except ConnectionError:
+                print("Cannot connect - check internet connection")
+                callback = 'ConnectionError'
+                continue
+
             if response.status_code == 429:
 
                 print("Message: %s" % (response.json()['error']['message']))
@@ -123,10 +132,9 @@ class Emotion_API(object):
             else:
                 print("Error code: %d" % (response.status_code))
                 print("Message: %s" % (response.json()['error']['message']))
-
             break
 
-        return result
+        return result, callback
 
 
 def main():
