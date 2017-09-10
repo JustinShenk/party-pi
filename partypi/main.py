@@ -167,6 +167,7 @@ class PartyPi(object):
 
         """
         self.looping = True
+        self.status = []
         self.faceSelect = False
         self.easyMode = None
         self.currentEmotion = EMOTIONS[0]
@@ -199,9 +200,13 @@ class PartyPi(object):
         # self.playIcon3 = cv2.imread('playagain3.png')
         self.easySize = self.hardSize = self.easyIcon.shape[:2]
         self.playSize = self.playIcon.shape[:2]
+        self.webBanner = cv2.imread(
+            'images/partypi_banner.png', cv2.IMREAD_UNCHANGED)
         self.christmas = cv2.imread(
             'images/christmas.png', cv2.IMREAD_UNCHANGED)
         self.hat = cv2.imread(HAT_PATH, cv2.IMREAD_UNCHANGED)
+        self.crown = cv2.imread('images/crown.png', cv2.IMREAD_UNCHANGED)
+
         if self.hat is None:
             raise ValueError('No hat image found at `{}`'.format(HAT_PATH))
 
@@ -275,6 +280,7 @@ class PartyPi(object):
         self.capture_frame()
 
         # Draw "Easy" and "Hard".
+        self.frame = self.overlayUI(self.frame)
         add_text(self.frame, "Easy", (self.screenwidth // 8,
                                       (self.screenheight * 3) // 4), size=3)
         add_text(self.frame, "Hard", (self.screenwidth // 2,
@@ -305,16 +311,11 @@ class PartyPi(object):
 
         # Draw faces.
         faces = find_faces(self.frame)
-        if self.faceSelect:
-            self.select_mode(faces)
         cv2.addWeighted(self.overlay, OPACITY, self.frame,
                         1 - OPACITY, 0, self.frame)
-        # Display frame.
-        add_text(self.frame, BRAND, ((self.screenwidth // 5) * 4,
-                                     self.screenheight // 7), color=(255, 255, 255), size=0.5, thickness=0.5)
         # Draw Christmas logo.
         self.draw_hat(self.frame, faces)
-        self.draw_christmas_logo(self.frame)
+        # self.draw_christmas_logo(self.frame) # Only for christmas
         # Show image.
         cv2.imshow('PartyPi', self.frame)
 
@@ -408,12 +409,15 @@ class PartyPi(object):
             textSize = 0.7 if self.raspberry else 1.7
             add_text(self.frame, WAIT_CAPTIONS[self.currentCaptionIndex % len(
                 WAIT_CAPTIONS)], self.uploading_caption_location, textSize, color=(224, 23, 101))
-            self.draw_christmas_logo(self.frame)
-            add_text(self.frame, 'Please wait', (self.uploading_caption_location[
-                     0], self.uploading_caption_location[1] + 80), textSize * 0.7, color=(244, 23, 101))
+            # self.draw_christmas_logo(self.frame) # Only for christmas
+            if 'Error' in self.status:
+                add_text(self.frame, 'Please check your internet connection', (self.uploading_caption_location[
+                    0], self.uploading_caption_location[1] + 80), textSize * 0.7, color=(244, 23, 101))
+            else:
+                add_text(self.frame, 'Please wait', (self.uploading_caption_location[
+                    0], self.uploading_caption_location[1] + 80), textSize * 0.7, color=(244, 23, 101))
         # Display image.
-        add_text(self.frame, BRAND, ((self.screenwidth // 5) * 4,
-                                     self.screenheight // 7), color=PURPLE, size=0.5, thickness=0.5)
+        self.frame = self.overlayUI(self.frame)
         cv2.imshow('PartyPi', self.frame)
 
         if self.photoMode and self.startProcess:
@@ -435,31 +439,6 @@ class PartyPi(object):
             self.screenheight * (6. / 7))), FONT, 1.0, (62, 184, 144), 2)
 
         # if self.tickcount % 5 == 0:
-        if self.faceSelect:
-            faces = find_faces(self.frame)
-            if len(faces):
-                rightFace = max([x for x, y, w, h in faces])
-                bottomFace = max([y for x, y, w, h in faces])
-                if rightFace > self.screenwidth - self.playSize[1] * 1.2:
-                    self.playIcon = self.playIcon1.copy()
-                    if bottomFace > self.screenheight / 2:
-                        self.playIcon = self.playIcon2.copy()
-                else:
-                    self.playIcon = self.playIconOriginal.copy()
-            else:
-                self.playIcon = self.playIconOriginal.copy()
-
-            # Draw a rectangle around the faces.
-            for (x, y, w, h) in faces:
-                cv2.rectangle(self.frame, (x, y),
-                              (x + w, y + h), (0, 255, 0), 2)
-                if x > (self.screenwidth - self.playSize[1]) and y > (self.screenheight - self.playSize[0]):
-                    self.reset()
-
-            # Show live image in corner.
-            self.photo[self.screenheight - self.easySize[0]:self.screenheight, self.screenwidth - self.easySize[0]:self.screenwidth] = self.frame[
-                self.screenheight - self.easySize[1]: self.screenheight, self.screenwidth - self.easySize[1]: self.screenwidth]
-
         # TODO: Move to separate function.
         # Face-based replay and mode selection (disabled).
         # self.overlay = self.photo.copy()
@@ -472,11 +451,45 @@ class PartyPi(object):
         #                 1 - OPACITY, 0, self.photo)
 
         # Draw logo or title.
-        add_text(self.photo, BRAND, ((self.screenwidth // 5) * 4,
-                                     self.screenheight // 7), color=(255, 255, 255), size=0.5, thickness=0.5)
-        self.draw_christmas_logo(self.photo)
-        # self.draw_hat(self.photo, faces)
+        self.photo = self.overlayUI(self.photo)
+        # self.draw_christmas_logo(self.photo) # Only for Christmas
+        # self.draw_hat(self.photo, self.faces, crowns=self.crownOverFaces)
         cv2.imshow('PartyPi', self.photo)
+
+    def overlayUI(self, frame):
+
+        # add_text(self.frame, BRAND, ((self.screenwidth // 5) * 4,
+                                    #  self.screenheight // 7), color=PURPLE, size=0.5, thickness=0.5)
+        h, w, = self.webBanner.shape[:2]
+        y, x, = frame.shape[:2]
+        frame_loc = (y - h, y, x - w, x)
+        banner_loc = (0, h, 0, w)
+        subImage = self._remove_background(
+            frame, self.webBanner, frame_loc, banner_loc)
+        frame[y - h:y, x - w: x] = subImage
+
+        return frame
+
+    def _remove_background(self, frame, image, frame_loc, img_loc):
+        """Remove black background from `image` and place on `frame`.
+
+        Args:
+
+        Returns:
+
+        """
+        y0, y1, x0, x1 = frame_loc
+        img_y0, img_y1, img_x0, img_x1 = img_loc
+
+        # Iterate over all channels
+        for c in range(0, 3):
+            img_slice = image[img_y0:img_y1, img_x0:img_x1, c] * \
+                (image[img_y0:img_y1, img_x0:img_x1, 3] / 255.0)
+            bg_slice = frame[y0:y1, x0:x1, c] * \
+                (1.0 - image[img_y0:img_y1, img_x0:img_x1, 3]
+                    / 255.0)
+            frame[y0:y1, x0:x1, c] = img_slice + bg_slice
+        return frame[y0:y1, x0:x1]
 
     def mouse(self, event, x, y, flags, param):
         """ Listen for mouse.
@@ -573,18 +586,24 @@ class PartyPi(object):
                 (1.0 - self.christmas[:, :, 3] / 255.0)
             frame[y0:y1, x0:x1, c] = xmasSlice + backgroundSlice
 
-    def draw_hat(self, frame, faces):
+    def draw_hat(self, frame, faces, crowns=None):
         """ Draws hats above detected faces.
 
         """
-        frame_height = frame.shape[0]
-        frame_width = frame.shape[1]
+        frame_height, frame_width = frame.shape[:2]
 
         w_offset = 1.3
         x_offset = -20
         y_offset = 80
+        # Adjust offset for propeller hat
+        if 'prop' in HAT_PATH:
+            y_offset = 30
 
-        for x, y, w, h in faces:
+        for ind, (x, y, w, h) in enumerate(faces):
+            # if crowns is not None and ind in crowns:
+            #     hat = self.crown.copy()
+            # else:
+            #     hat = self.hat.copy()
             hat = self.hat.copy()
 
             # Scale hat to fit face.
@@ -614,14 +633,8 @@ class PartyPi(object):
                 hat_right = hat_width - (x1 - frame_width)
                 x1 = frame_width
 
-            # Remove background from hat image.
-            for c in range(0, 3):
-                hat_slice = hat[hat_top:hat_bottom, hat_left:hat_right, c] * \
-                    (hat[hat_top:hat_bottom, hat_left:hat_right, 3] / 255.0)
-                bg_slice = frame[y0:y1, x0:x1, c] * \
-                    (1.0 - hat[hat_top:hat_bottom, hat_left:hat_right, 3]
-                        / 255.0)
-                frame[y0:y1, x0:x1, c] = hat_slice + bg_slice
+            frame[y0:y1, x0:x1] = self._remove_background(frame, hat, frame_loc=(
+                y0, y1, x0, x1), img_loc=(hat_top, hat_bottom, hat_left, hat_right))
 
     def capture_frame(self):
         """ Capture frame-by-frame.
@@ -643,32 +656,31 @@ class PartyPi(object):
 
         # Get faces for Christmas hat.
         faces = find_faces(self.photo)
-
+        self.faces = faces
         # If internet connection is poor, use black and white image.
         if self.gray:
             bwphoto = cv2.cvtColor(self.photo, cv2.COLOR_BGR2GRAY)
             cv2.imwrite(imagePath, bwphoto)
             # FIXME: Move to separate function
-            self.result = self.uploader.upload_img(imagePath)
+            self.result, callback = self.uploader.upload_img(imagePath)
         else:
-            add_text(self.photo, BRAND, (int((self.screenwidth / 5) * 4),
-                                         int(self.screenheight / 7)), color=(255, 255, 255), size=0.5, thickness=0.5)
-            self.draw_christmas_logo(self.photo)
+            self.photo = self.overlayUI(self.photo)
+            # self.draw_christmas_logo(self.photo) # Only for christmas
             self.draw_hat(self.photo, faces)
             cv2.imwrite(imagePath, self.photo)
             # FIXME: Move to separate function
-            self.result = self.uploader.upload_img(imagePath)
-        self.display()
+            self.result, callback = self.uploader.upload_img(imagePath)
+        try:
+            if callback is not None:
+                # Assume Connection Error for now
+                self.status.append('ConnectionError')
+        except:
+            pass
 
-    def display(self):
-        """ Display results of game on screen, with winner and scores for emotions.
-
-        """
         scores = []
         maxfirstemo = None
         maxsecondemo = None
         firstEmotion = None
-
         if self.result:  # If faces present.
 
             # Get lists of player points.
@@ -739,10 +751,12 @@ class PartyPi(object):
             # Identify winner's face.
             firstRectLeft = self.result[winner]['faceRectangle']['left']
             firstRectTop = self.result[winner]['faceRectangle']['top']
+            self.crownOverFaces = []
             if oneWinner:
                 tiedTextHeightOffset = 40 if self.easyMode else 70
                 cv2.putText(self.photo, "Winner: ", (firstRectLeft, firstRectTop - tiedTextHeightOffset),
                             FONT, textSize, (232, 167, 35), 2)
+                self.crownOverFaces = [winner]
             else:
                 tiedTextHeightOffset = 40 if self.easyMode else 70
                 print("tiedWinners:", tiedWinners)
@@ -753,6 +767,107 @@ class PartyPi(object):
                     firstRectTop = self.result[winner]['faceRectangle']['top']
                     cv2.putText(self.photo, "Tied: ", (firstRectLeft, firstRectTop - tiedTextHeightOffset),
                                 FONT, textSize, (232, 167, 35), 2)
+                self.crownOverFaces = tiedWinners
+
+        else:
+            print("No results found.")
+        # self.display()
+
+    def display(self):
+        """ Display results of game on screen, with winner and scores for emotions.
+
+        """
+        scores = []
+        maxfirstemo = None
+        maxsecondemo = None
+        firstEmotion = None
+        if self.result:  # If faces present.
+
+            # Get lists of player points.
+            firstEmoList = [
+                (round(x['scores'][self.currentEmotion] * 100)) for x in self.result]
+            secondEmoList = [(round(
+                x['scores'][self.seccurrentEmotion] * 100)) for x in self.result]
+
+            # Compute the scores into `scoresList`.
+            scoresList = []
+            if self.easyMode:  # Easy mode is points for first emotion.
+                scoresList = firstEmoList  # playerNumber, scores
+            # Hard mode scores are product of points of both emotions.
+            else:
+                for i in range(len(firstEmoList)):
+                    scoresList.append(
+                        (firstEmoList[i] + 1) * (secondEmoList[i] + 1))
+            print("scoresList:", scoresList)
+            textSize = 0.5 if self.raspberry else 0.8
+            # Draw the scores for the faces.
+            for idx, currFace in enumerate(self.result):
+                faceRectangle = currFace['faceRectangle']
+
+                # Get points for first emotion.
+                firstEmotion = firstEmoList[idx]
+                secEmotion = secondEmoList[idx]
+
+                # Format points.
+                if firstEmotion == 1:
+                    textToWrite = "%i point: %s" % (
+                        firstEmotion, self.currentEmotion)
+                else:
+                    textToWrite = "%i points: %s" % (
+                        firstEmotion, self.currentEmotion)
+                if secEmotion == 1:
+                    secondLine = "%i point: %s" % (
+                        secEmotion, self.seccurrentEmotion)
+                else:
+                    secondLine = "%i points: %s" % (
+                        secEmotion, self.seccurrentEmotion)
+
+                # Display points.
+                scoreHeightOffset = 10 if self.easyMode else 40
+                cv2.putText(self.photo, textToWrite, (faceRectangle['left'], faceRectangle[
+                    'top'] - scoreHeightOffset), FONT, textSize, (232, 167, 35), 2)
+
+                if not self.easyMode:
+                    cv2.putText(self.photo, secondLine, (faceRectangle['left'], faceRectangle[
+                                'top'] - 10), FONT, textSize, (232, 167, 35), 2)
+
+            # Display 'Winner: ' above player with highest score.
+            oneWinner = True
+            finalScores = scoresList
+            winner = finalScores.index(max(finalScores))
+            maxScore = max(finalScores)
+
+            # Multiple winners - tie breaker.
+            if finalScores.count(maxScore) > 1:
+                print("Multiple winners!")
+                oneWinner = False
+                tiedWinners = []
+                for ind, i in enumerate(finalScores):
+                    if i == maxScore:
+                        tiedWinners.append(ind)
+
+            print("Scores:", finalScores, "Winner:", winner)
+
+            # Identify winner's face.
+            firstRectLeft = self.result[winner]['faceRectangle']['left']
+            firstRectTop = self.result[winner]['faceRectangle']['top']
+            self.crownOverFaces = []
+            if oneWinner:
+                tiedTextHeightOffset = 40 if self.easyMode else 70
+                cv2.putText(self.photo, "Winner: ", (firstRectLeft, firstRectTop - tiedTextHeightOffset),
+                            FONT, textSize, (232, 167, 35), 2)
+                self.crownOverFaces = [winner]
+            else:
+                tiedTextHeightOffset = 40 if self.easyMode else 70
+                print("tiedWinners:", tiedWinners)
+                for winner in tiedWinners:
+                    # FIXME: show both
+                    firstRectLeft = self.result[
+                        winner]['faceRectangle']['left']
+                    firstRectTop = self.result[winner]['faceRectangle']['top']
+                    cv2.putText(self.photo, "Tied: ", (firstRectLeft, firstRectTop - tiedTextHeightOffset),
+                                FONT, textSize, (232, 167, 35), 2)
+                self.crownOverFaces = tiedWinners
 
         else:
             print("No results found.")
@@ -816,8 +931,7 @@ class PartyPi(object):
             add_text(self.frame, "Press any key to quit_",
                      (self.screenwidth // 4, self.screenheight // 3))
             # self.presentation(self.frame)
-            add_text(self.frame, BRAND, ((self.screenwidth // 5) * 4,
-                                         self.screenheight // 7), color=(255, 255, 255), size=0.5, thickness=0.5)
+            self.frame = self.overlayUI(self.frame)
         else:
             self.piCamera.close()
 
