@@ -14,6 +14,7 @@ Demo
 ====
 
 `Screenshot <https://www.partypi.net/img/demo.png>`_
+
 `Pics from a demo at the Institute of Cognitive Science Christmas Party <https://coxi.partypi.net>`_
 
 Install
