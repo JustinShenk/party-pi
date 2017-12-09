@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 import json
 import time
-import requests
+# import requests
+import six
 
 from emotion_API import Emotion_API
 
@@ -50,7 +51,8 @@ class Uploader(object):
                     refresh_token=self.config.refresh_token)
                 self.im.refresh_access_token()
                 ok = True
-            except requests.exceptions.HTTPError:
+            # except http.client.exceptions.HTTPError:
+            except:
                 print("Imgur is temporarily over capacity. Please try again later.")
                 time.sleep(4)
 

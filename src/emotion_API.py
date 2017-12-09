@@ -2,8 +2,8 @@
 import os
 import http.client
 import json
-import requests
-from requests import ConnectionError
+# import requests
+# from requests import ConnectionError
 import time
 
 from urllib.parse import urlencode
@@ -19,12 +19,15 @@ def get_conf():
     class ConfObj:
         pass
 
-    conf_dict = json.load(open('config.json'))
-    conf_obj = ConfObj()
-    for key, value in conf_dict.items():
-        setattr(conf_obj, key, value)
+    try:
+        conf_dict = json.load(open('config.json'))
+        conf_obj = ConfObj()
+        for key, value in conf_dict.items():
+            setattr(conf_obj, key, value)
 
-    return conf_obj
+        return conf_obj
+    except:
+        return None
 
 
 class Emotion_API(object):
@@ -100,9 +103,10 @@ class Emotion_API(object):
         while True:
 
             try:
-                response = requests.request(
-                    'post', _url, json=json, data=data, headers=headers, params=params)
-                print(response)
+                # response = requests.request(
+                #     'post', _url, json=json, data=data, headers=headers, params=params)
+                # print(response)
+                pass
             except ConnectionError:
                 print("Cannot connect - check internet connection")
                 callback = 'ConnectionError'
