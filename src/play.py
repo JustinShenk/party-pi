@@ -1,15 +1,15 @@
 #! /usr/bin/env python
-from statistics import mode
-
-import os
 import cv2
+import json
+import numpy as np
+import os
 import random
 import time
-import numpy as np
-import json
+import traceback
 
 from keras.models import load_model
-
+from statistics import mode
+from uploader import Uploader
 from utils.inference import detect_faces
 from utils.inference import draw_text
 from utils.inference import draw_bounding_box
@@ -18,7 +18,6 @@ from utils.inference import load_detection_model
 from utils.inference import get_class_to_arg
 from utils.inference import get_labels
 from utils.preprocessor import preprocess_input
-from uploader import Uploader
 
 np.set_printoptions(formatter={'float': '{: 0.3f}'.format})
 
@@ -98,7 +97,6 @@ class PartyPi(object):
 
         # TODO: Integrate into `EMOTIONS`.
         # EMOTIONS2 = ['psycho', 'John Cena', 'ecstasy', 'duckface']
-        self.photo = cv2.imread('img_1.png')  # To prepare window transition.
         self.screenwidth, self.screenheight = self.windowSize
 
         # Setup for Raspberry Pi.
@@ -176,7 +174,7 @@ class PartyPi(object):
         self.faceSelect = False
         self.easy_mode = None
         self.current_emotion = EMOTIONS[0]
-        self.countx = None
+        self.countdown = 3
 
         # Initialize mouse click positions.
         self.currPosX = None
@@ -192,6 +190,7 @@ class PartyPi(object):
         self.tickcount = 0
         self.modeLoadCount = 0
         self.curr_level = 0
+        self.show_begin = False
         self.uploader = Uploader()
 
         # TODO: Place icons in a dictionary or object.
@@ -220,11 +219,8 @@ class PartyPi(object):
         #     self.cam.set(3, self.screenwidth)
         #     self.cam.set(4, self.screenheight)
         self.flash_on = False
-        self.showAnalyzing = False
-        self.currCount = None
-        # `self.static`: Used to indicate if emotion should stay on screen.
-        self.static = False
-        self.photoMode = False
+        self.show_analyzing = False
+        self.photo_mode = False
         cv2.namedWindow("PartyPi", cv2.WINDOW_NORMAL)
         cv2.setMouseCallback("PartyPi", self.mouse)
         cv2.resizeWindow("PartyPi", self.windowSize[0], self.windowSize[1])
@@ -250,7 +246,10 @@ class PartyPi(object):
                 try:
                     self.game_loop()
                 except Exception as e:
-                    print("Exception {} while looping.".format(e))
+                    print ("Exception in user code:")
+                    print ('-' * 60)
+                    traceback.print_exc()
+                    print ('-' * 60)
                     pass
 
     def game_loop(self):
@@ -335,17 +334,15 @@ class PartyPi(object):
         #     self.calibrated = True
 
     def play_mode(self):
-        """ Display emotion prompts, upload image, and display results.
+        """ Display emotion prompt, upload image, and display results.
 
         """
-        self.show_begin = False
-        bgr_image = self.capture_frame()
-        self.tickcount += 1
-        if self.raspberry:
-            self.tickcount += 1
-        timer = int(self.tickcount * REDUCTION_FACTOR)
-        self.prompt_emotion(bgr_image)
 
+        bgr_image = self.capture_frame()
+        self.tick()  # update tickcount
+        timer = self.tickcount
+        self.prompt_emotion(bgr_image)
+        print("a")
         # Show 'Begin' after some time
         if timer < 70:
             pass
@@ -355,95 +352,90 @@ class PartyPi(object):
         # Start count "3..."
         elif timer < 100:
             pass
-        elif timer >= 100 and timer <= 110:
+        elif timer >= 100 and timer < 110:  # 3...
             self.show_begin = False
-            self.currCount = 3
-            self.countx = self.screenwidth - (self.screenwidth / 5) * 4
-            print("DEBUG: Count 3 reached")
-        elif timer >= 110 and timer < 120:
-            self.currCount = 2
-            self.countx = self.screenwidth - (self.screenwidth / 5) * 3
-        elif timer >= 120 and timer < 130:
-            self.currCount = 1
-            self.countx = self.screenwidth - (self.screenwidth / 5) * 2
-
-        # Flash, and then show analyzing
-        elif timer >= 130 and timer < 136:
+            bgr_image = self.draw_countdown(bgr_image)
+        elif timer >= 110 and timer < 120:  # 2...
+            self.countdown = 2
+            bgr_image = self.draw_countdown(bgr_image)
+        elif timer >= 120 and timer < 130:  # 1...
+            self.countdown = 1
+            bgr_image = self.draw_countdown(bgr_image)
+        elif timer >= 130 and timer < 136:  # flash, save image, analyze
             self.flash_on = True
-            self.currCount = None
-            self.countx = -100  # make it disappear
             if not self.raspberry:
-                if timer >= 133 and timer < 134:
-                    self.photoMode = True
+                if timer == 133:  # take photo
+                    self.photo_mode = True
                     self.photo = bgr_image.copy()
-                    self.startProcess = True
+                    self.start_process = True
                 else:
-                    self.startProcess = False
-                    self.showAnalyzing = True
-            else:
-                # Raspberry-specific timing
-                if timer >= 133 and timer <= 134:
-                    self.photoMode = True
+                    self.start_process = False
+                    self.show_analyzing = True
+            else:  # Raspberry-specific timing
+                if timer == 133:
+                    self.photo_mode = True
                     self.photo = bgr_image.copy()
-                    self.startProcess = True
+                    self.start_process = True
                 else:
-                    self.startProcess = False
-                    self.showAnalyzing = True
-
-        # Else take photo at timer == 136.
-        else:
-            self.startProcess = False
+                    self.start_process = False
+                    self.show_analyzing = True
+        # Reset settings and increase level
+        elif timer == 136:
+            self.start_process = False
             self.flash_on = False
-            self.showAnalyzing = False
+            self.show_analyzing = False
             self.curr_level = 2
             self.click_point_y = None
-
-        # Draw the count "3..".
-        if self.currCount:
-            print("currCount:", self.currCount)
-            self.overlay = bgr_image.copy()
-            count_banner_x2 = int(self.screenheight * (4. / 5))
-            cv2.rectangle(self.overlay, (0, count_banner_x2),
-                          (self.screenwidth, self.screenheight), (224, 23, 101), -1)
-            cv2.addWeighted(self.overlay, OPACITY, bgr_image,
-                            1 - OPACITY, 0, bgr_image)
-            count_coord = (int(self.countx), int(self.screenheight * (7. / 8)))
-            draw_text(count_banner_x2, bgr_image, str(self.currCount))
-
+        print("b")
         # Draw other text and flash on screen.
         text_size = 2.8 if self.raspberry else 3.6
-        # Show "Begin!" announcement
-        if self.show_begin:
-            begin_coord = (self.screenwidth // 3, self.screenheight // 2)
-            draw_text(begin_coord, bgr_image, "Begin!")
-        # If flash is on
-        elif self.flash_on:
+
+        if self.flash_on:  # overlay white screen to add light
             cv2.rectangle(bgr_image, (0, 0), (self.screenwidth,
                                               self.screenheight), (255, 255, 255), -1)
-        if self.showAnalyzing:
-            text_size = 0.7 if self.raspberry else 1.7
-            caption = WAIT_CAPTIONS[self.current_caption_index % len(
-                WAIT_CAPTIONS)]
-            draw_text(self.uploading_caption_coord, bgr_image,
-                      caption, font_scale=text_size, color=(244, 23, 101))
-            # self.draw_christmas_logo(frame) # Only for christmas
-            if 'Error' in self.status:
-                error_coord = (self.uploading_caption_coord[
-                    0], self.uploading_caption_coord[1] + 80)
-                draw_text(error_coord, bgr_image, 'Please check your internet connection', color=(
-                    244, 23, 101), font_scale=text_size * 0.7)
-            else:
-                wait_coord = (self.uploading_caption_coord[
-                    0], self.uploading_caption_coord[1] + 80)
-                draw_text(wait_coord, bgr_image, 'Please wait',
-                          font_scale=text_size * 0.7, color=(244, 23, 101))
+        if self.show_analyzing:  # Show waiting text
+            bgr_image = self.draw_analyzing(bgr_image)
         # Display image.
         bgr_image = self.overlayUI(bgr_image)
         cv2.imshow('PartyPi', bgr_image)
-
-        if self.photoMode and self.startProcess:
-            print("take photo")
+        if self.photo_mode and self.start_process:
             self.take_photo()
+
+    def draw_analyzing(self, frame):
+        text_size = 0.7 if self.raspberry else 1.7
+        caption = WAIT_CAPTIONS[self.current_caption_index % len(
+            WAIT_CAPTIONS)]
+        draw_text(self.uploading_caption_coord, frame,
+                  caption, font_scale=text_size, color=(244, 23, 101))
+        # self.draw_christmas_logo(frame) # Only for christmas
+        if 'Error' in self.status:
+            error_coord = (self.uploading_caption_coord[
+                0], self.uploading_caption_coord[1] + 80)
+            draw_text(error_coord, frame, 'Please check your internet connection', color=(
+                244, 23, 101), font_scale=text_size * 0.7)
+        else:
+            wait_coord = (self.uploading_caption_coord[
+                0], self.uploading_caption_coord[1] + 80)
+            draw_text(wait_coord, frame, 'Please wait',
+                      font_scale=text_size * 0.7, color=(244, 23, 101))
+        return frame
+
+    def draw_countdown(self, frame):
+        # Draw the count "3..".
+        countdown_x_offset = 1 + self.countdown  # Offset from left edge
+        countdown_x = int(self.screenwidth -
+                          (self.screenwidth / 5) * countdown_x_offset)
+        self.overlay = frame.copy()
+        count_banner_y1 = int(self.screenheight * (4. / 5))
+        cv2.rectangle(self.overlay, (0, count_banner_y1),
+                      (self.screenwidth, self.screenheight), (224, 23, 101), -1)
+        cv2.addWeighted(self.overlay, OPACITY, frame,
+                        1 - OPACITY, 0, frame)
+        count_coord = (countdown_x, int(self.screenheight * (7. / 8)))
+        countdown_y = self.screenheight * 7. / 8
+        countdown_coord = (countdown_x, countdown_y)
+        draw_text(countdown_coord, frame, str(self.countdown))
+        return frame
 
     def present_mode(self):
         """ Show analyzing, then present photo, then reset game.
@@ -534,6 +526,11 @@ class PartyPi(object):
                 self.easy_mode = False
                 self.curr_level = 1
 
+    def tick(self):
+        self.tickcount += 1
+        # if self.raspberry: # FIXME: Test this
+        #     self.tickcount += 1
+
     def reset(self):
         """ Reset to beginning state.
 
@@ -546,8 +543,10 @@ class PartyPi(object):
         self.click_point_right_x = None
         self.current_emotion = EMOTIONS[1]
         self.tickcount = 0
-        self.static = False
+
         self.playIcon = self.playIconOriginal.copy()
+        self.show_begin = False
+        self.countdown = 3
 
     def draw_christmas_logo(self, frame):
         """ Draw Christmas logo on top right screen.
@@ -645,7 +644,6 @@ class PartyPi(object):
         # Get faces for Christmas hat.
         faces = detect_faces(face_detection, self.photo)
         self.faces = faces
-        print("FACES: ", faces)
 
         # TODO: Separate remote and local calls
         # if remote_API:
@@ -668,13 +666,14 @@ class PartyPi(object):
         #             self.status.append('ConnectionError')
         #     except:
         #         pass
-        emotion_data = []
+        player_data = []
         gray_image = cv2.cvtColor(self.photo, cv2.COLOR_RGB2GRAY)
+        emotion_idx_lookup = get_class_to_arg()
         for face_coordinates in faces:
 
             x1, x2, y1, y2 = apply_offsets(
                 face_coordinates, emotion_offsets)
-            print(x1, x2, y1, y2)
+            print("FC: ", x1, x2, y1, y2)
             gray_face = gray_image[y1:y2, x1:x2]
             try:
                 gray_face = cv2.resize(gray_face, emotion_target_size)
@@ -686,9 +685,10 @@ class PartyPi(object):
             gray_face = np.expand_dims(gray_face, 0)
             gray_face = np.expand_dims(gray_face, -1)
             emotion_prediction = emotion_classifier.predict(gray_face)
-            emotion_index = get_class_to_arg()[self.current_emotion]
+            emotion_index = emotion_idx_lookup[self.current_emotion]
             print("EMOTION INDEX: ", emotion_index, emotion_prediction)
             emotion_score = emotion_prediction[0][emotion_index]
+            self.current_emotion_score = emotion_score
 
             # if len(emotion_window) > frame_window:
             #     emotion_window.pop(0)
@@ -706,44 +706,37 @@ class PartyPi(object):
 
             x, y, w, h = face_coordinates
             face_dict = {'left': x, 'top': y, 'right': x + w, 'bottom': y + h}
-            print("EMO_PRED:", emotion_prediction)
-            emotion_data.append(
+            player_data.append(
                 {'faceRectangle': face_dict, 'scores': emotion_prediction[0]})
-            print(emotion_data)
         scores = []
         max_first_emo = None
         max_second_emo = None
         first_emotion = None
         if len(faces):  # if faces detected
             # Get lists of player points.
-            emotion_lookup = get_class_to_arg()
-            print(emotion_lookup, self.current_emotion)
-            current_emotion_index = emotion_lookup[self.current_emotion]
-            second_current_emotion_index = emotion_lookup[self.second_current_emotion]
-            first_emo_list = [
-                (round(x['scores'][current_emotion_index] * 100)) for x in emotion_data]
-            second_emo_list = [(round(
-                x['scores'][second_current_emotion_index] * 100)) for x in emotion_data]
-
+            current_emotion_index = emotion_idx_lookup[self.current_emotion]
+            second_current_emotion_index = emotion_idx_lookup[self.second_current_emotion]
+            first_emotion_scores = [
+                (round(x['scores'][current_emotion_index] * 100)) for x in player_data]
+            second_emotion_scores = [(round(
+                x['scores'][second_current_emotion_index] * 100)) for x in player_data]
             # Compute the scores into `scores_list`.
             scores_list = []
             if self.easy_mode:  # Easy mode is points for first emotion.
-                scores_list = first_emo_list  # playerNumber, scores
+                scores_list = first_emotion_scores  # playerNumber, scores
             # Hard mode scores are product of points of both emotions.
             else:
-                for i in range(len(first_emo_list)):
+                for i in range(len(first_emotion_scores)):
                     scores_list.append(
-                        (first_emo_list[i] + 1) * (second_emo_list[i] + 1))
-            print("scores_list:", scores_list)
+                        (first_emotion_scores[i] + 1) * (second_emotion_scores[i] + 1))
             text_size = 0.5 if self.raspberry else 0.8
             # Draw the scores for the faces.
-            print(emotion_data, " - PRINTING EMOTIONDATA")
-            for idx, currFace in enumerate(emotion_data):
+            for i, currFace in enumerate(player_data):
                 faceRectangle = currFace['faceRectangle']
 
                 # Get points for first emotion.
-                first_emotion = first_emo_list[idx]
-                sec_emotion = second_emo_list[idx]
+                first_emotion = first_emotion_scores[i]
+                second_emotion = second_emotion_scores[i]
 
                 # Format points.
                 if first_emotion == 1:
@@ -752,12 +745,12 @@ class PartyPi(object):
                 else:
                     text_to_write = "%i points: %s" % (
                         first_emotion, self.current_emotion)
-                if sec_emotion == 1:
+                if second_emotion == 1:
                     second_line = "%i point: %s" % (
-                        sec_emotion, self.second_current_emotion)
+                        second_emotion, self.second_current_emotion)
                 else:
                     second_line = "%i points: %s" % (
-                        sec_emotion, self.second_current_emotion)
+                        second_emotion, self.second_current_emotion)
 
                 # Display points.
                 score_height_offset = 10 if self.easy_mode else 40
@@ -787,93 +780,98 @@ class PartyPi(object):
                     if i == max_score:
                         tied_winners.append(ind)
 
-            print("Scores:", final_scores, "Winner:", winner)
-
             # Identify winner's face.
-            first_rect_left = emotion_data[winner]['faceRectangle']['left']
-            first_rect_top = emotion_data[winner]['faceRectangle']['top']
+            first_rect_left = player_data[winner]['faceRectangle']['left']
+            first_rect_top = player_data[winner]['faceRectangle']['top']
+            print("DEBUG", first_rect_left, first_rect_top)
             self.crown_over_faces = []
             if one_winner:
+                print("One winner")
                 tied_text_height_offset = 40 if self.easy_mode else 70
                 winner_coord = (first_rect_left, first_rect_top -
                                 tied_text_height_offset)
                 draw_text(winner_coord, self.photo,
-                          "Winner: ", text_size, blue_color)
+                          "Winner: ", color=blue_color, font_scale=text_size)
+                print("b")
                 self.crown_over_faces = [winner]
             else:
                 tied_text_height_offset = 40 if self.easy_mode else 70
-                print("tied_winners:", tied_winners)
+                print("Tied_winners:", tied_winners)
                 for winner in tied_winners:
                     # FIXME: show both
-                    first_rect_left = emotion_data[
+                    first_rect_left = player_data[
                         winner]['faceRectangle']['left']
-                    first_rect_top = emotion_data[winner]['faceRectangle']['top']
+                    first_rect_top = player_data[winner]['faceRectangle']['top']
                     tied_coord = (first_rect_left,
                                   first_rect_top - tied_text_height_offset)
                     draw_text(tied_coord, self.photo,
-                              "Tied: ", text_size, blue_color)
+                              "Tied: ", color=blue_color, font_scale=text_size)
                 self.crown_over_faces = tied_winners
 
-        self.display(emotion_data)
+        self.display(player_data)
 
-    def display(self, emotion_data):
+    def display(self, player_data):
         """ Display results of game on screen, with winner and scores for emotions.
 
         """
+        print("Display")
         scores = []
         max_first_emo = None
         max_second_emo = None
         first_emotion = None
+        emotion_idx_lookup = get_class_to_arg()
         # Get lists of player points.
-        first_emo_list = [
-            (round(x['scores'][self.current_emotion] * 100)) for x in emotion_data]
-        second_emo_list = [(round(
-            x['scores'][self.second_current_emotion] * 100)) for x in emotion_data]
+        first_emotion_idx = emotion_idx_lookup[self.current_emotion]
+        second_emotion_idx = emotion_idx_lookup[self.second_current_emotion]
+        first_emotion_scores = [
+            (round(x['scores'][first_emotion_idx] * 100)) for x in player_data]
+        second_emotion_scores = [(round(
+            x['scores'][second_emotion_idx] * 100)) for x in player_data]
 
-        # Compute the scores into `scores_list`.
+        # Collect scores into `scores_list`.
         scores_list = []
-        if self.easy_mode:  # Easy mode is points for first emotion.
-            scores_list = first_emo_list  # playerNumber, scores
-        # Hard mode scores are product of points of both emotions.
-        else:
-            for i in range(len(first_emo_list)):
+        if self.easy_mode:  # rank players by one emotion
+            scores_list = first_emotion_scores
+        else:  # hard mode scores are a product of percentage of both emotions
+            for i in range(len(first_emotion_scores)):
                 scores_list.append(
-                    (first_emo_list[i] + 1) * (second_emo_list[i] + 1))
+                    (first_emotion_scores[i] + 1) * (second_emotion_scores[i] + 1))
         print("scores_list:", scores_list)
         text_size = 0.5 if self.raspberry else 0.8
         # Draw the scores for the faces.
-        for idx, currFace in enumerate(emotion_data):
+        for i, currFace in enumerate(player_data):
             faceRectangle = currFace['faceRectangle']
 
             # Get points for first emotion.
-            first_emotion = first_emo_list[idx]
-            sec_emotion = second_emo_list[idx]
+            first_emotion = first_emotion_scores[i]
+            second_emotion = second_emotion_scores[i]
 
             # Format points.
-            if first_emotion == 1:
+            if first_emotion == 1:  # singular 'point'
                 text_to_write = "%i point: %s" % (
                     first_emotion, self.current_emotion)
             else:
                 text_to_write = "%i points: %s" % (
                     first_emotion, self.current_emotion)
-            if sec_emotion == 1:
+            if second_emotion == 1:  # singular 'point'
                 second_line = "%i point: %s" % (
-                    sec_emotion, self.second_current_emotion)
+                    second_emotion, self.second_current_emotion)
             else:
                 second_line = "%i points: %s" % (
-                    sec_emotion, self.second_current_emotion)
+                    second_emotion, self.second_current_emotion)
 
             # Display points.
             score_height_offset = 10 if self.easy_mode else 40
-            cv2.putText(self.photo, text_to_write, (faceRectangle['left'], faceRectangle[
-                'top'] - score_height_offset), FONT, text_size, blue_color, 2)
+            draw_text((faceRectangle['left'], faceRectangle['top'] -
+                       score_height_offset), self.photo, text_to_write, color=blue_color)
 
-            if not self.easy_mode:
+            if not self.easy_mode:  # second line
                 second_line_coord = (faceRectangle['left'], faceRectangle[
                     'top'] - 10)
                 draw_text(second_line_coord, self.photo, second_line,
-                          font_scale=text_size, color=blue_color)
+                          color=blue_color, font_scale=text_size)
 
+            print("Display winner")
             # Display 'Winner: ' above player with highest score.
             one_winner = True
             final_scores = scores_list
@@ -889,30 +887,27 @@ class PartyPi(object):
                     if i == max_score:
                         tied_winners.append(ind)
 
-            print("Scores:", final_scores, "Winner:",
-                  winner, "EMOTIONDATA:", emotion_data)
-
             # Identify winner's face.
-            first_rect_left = emotion_data[winner]['faceRectangle']['left']
-            first_rect_top = emotion_data[winner]['faceRectangle']['top']
+            first_rect_left = player_data[winner]['faceRectangle']['left']
+            first_rect_top = player_data[winner]['faceRectangle']['top']
             self.crown_over_faces = []
             if one_winner:
                 tied_text_height_offset = 40 if self.easy_mode else 70
                 draw_text((first_rect_left, first_rect_top -
-                           tied_text_height_offset), self.photo, "Winner: ", font_scale=text_size, color=blue_color)
+                           tied_text_height_offset), self.photo, "Winner: ", color=blue_color, font_scale=text_size)
                 self.crown_over_faces = [winner]
             else:
                 tied_text_height_offset = 40 if self.easy_mode else 70
                 print("tied_winners:", tied_winners)
                 for winner in tied_winners:
                     # FIXME: show both
-                    first_rect_left = emotion_data[
+                    first_rect_left = player_data[
                         winner]['faceRectangle']['left']
-                    first_rect_top = emotion_data[winner]['faceRectangle']['top']
+                    first_rect_top = player_data[winner]['faceRectangle']['top']
                     tied_coord = (first_rect_left,
                                   first_rect_top - tied_text_height_offset)
                     draw_text(tied_coord, self.photo, "Tied: ",
-                              font_scale=text_size, color=blue_color)
+                              color=blue_color, font_scale=text_size)
                 self.crown_over_faces = tied_winners
 
         else:
@@ -932,21 +927,21 @@ class PartyPi(object):
         """ Pick a random emotion from list of emotions.
 
         """
-        if self.tickcount * REDUCTION_FACTOR > 30 or self.static:
-            self.static = True
-            emotionString = str(
-                self.current_emotion) if self.easy_mode else self.current_emotion + '+' + self.second_current_emotion
-            return emotionString
-        else:
+        if self.tickcount < 30:  # generate random emotion
             self.current_emotion = random.choice(EMOTIONS)
             # Select another emotion for second emotion
-            randnum = (EMOTIONS.index(self.current_emotion) +
-                       random.choice(list(range(1, 7)))) % 8
-            self.second_current_emotion = EMOTIONS[randnum]
+            current_emotion_idx = EMOTIONS.index(self.current_emotion)
+            new_emotion_idx = (current_emotion_idx +
+                               random.choice(list(range(1, 7)))) % 7
+            self.second_current_emotion = EMOTIONS[new_emotion_idx]
             if self.easy_mode:
                 return self.current_emotion
             else:
                 return self.current_emotion + '+' + self.second_current_emotion
+        else:  # hold emotion for prompt
+            emotionString = str(
+                self.current_emotion) if self.easy_mode else self.current_emotion + '+' + self.second_current_emotion
+            return emotionString
 
     def listen_for_end(self, keypress):
         """ Listen for 'q', left, or right keys to end game.
