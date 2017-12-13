@@ -79,10 +79,11 @@ def new_image_path():
 
 class PartyPi(object):
 
-    def __init__(self, piCam=False, windowSize=(1200, 1024), resolution=(1280 // 2, 1024 // 2), gray=False):
+    def __init__(self, piCam=False, windowSize=(1200, 1024), resolution=(1280 // 2, 1024 // 2), gray=False, debug=False):
         self.piCam = piCam
         self.windowSize = windowSize
         self.gray = gray
+        self.debug = debug
 
         # TODO: Integrate into `EMOTIONS`.
         # EMOTIONS2 = ['psycho', 'John Cena', 'ecstasy', 'duckface']
@@ -613,14 +614,8 @@ class PartyPi(object):
         for face_coordinates in faces:
             x1, x2, y1, y2 = apply_offsets(
                 face_coordinates, emotion_offsets)
-            print("FC: ", x1, x2, y1, y2)
             gray_face = gray_image[y1:y2, x1:x2]
-            try:
-                gray_face = cv2.resize(gray_face, emotion_target_size)
-            except:
-                print("Exception: Cannot resize gray_face")
-                continue
-
+            gray_face = cv2.resize(gray_face, emotion_target_size)
             gray_face = preprocess_input(gray_face, True)
             gray_face = np.expand_dims(gray_face, 0)
             gray_face = np.expand_dims(gray_face, -1)
@@ -630,25 +625,22 @@ class PartyPi(object):
             emotion_score = emotion_prediction[0][emotion_index]
             self.current_emotion_score = emotion_score
 
-            # if len(emotion_window) > frame_window:
-            #     emotion_window.pop(0)
-            # try:
-            #     emotion_mode = mode(emotion_window)
-            # except:
-            #     continue
-
-            # for i in range(len(emotion_prediction[0])):
-            #     print(face_coordinates)
-            #     x, y, w, h = face_coordinates
-            #     emotion_text = emotion_labels[i]
-            #     emotion_score = "{}: {:.2f}".format(
-            #         emotion_text, emotion_prediction[0][i])
+            if self.debug:  # Show all emotions for each face
+                self.show_all_emotions(emotion_prediction, face_coordinates)
 
             x, y, w, h = face_coordinates
             face_dict = {'left': x, 'top': y, 'right': x + w, 'bottom': y + h}
             player_data.append(
                 {'faceRectangle': face_dict, 'scores': emotion_prediction[0]})
         return player_data
+
+    def show_all_emotions(self, emotion_prediction, face_coordinates):
+        emotion_labels = get_labels()
+        for i in range(len(emotion_prediction[0])):
+            x, y, w, h = face_coordinates
+            emotion_text = emotion_labels[i]
+            emotion_score = "{}: {:.2f}".format(
+                emotion_text, emotion_prediction[0][i])
 
     def rank_players(self, player_data):
         """ Rank players and display.
@@ -714,7 +706,6 @@ class PartyPi(object):
                 draw_text(second_emotion_coord, self.photo, second_emotion_caption,
                           color=BLUE, font_scale=text_size)
 
-            print("Display winner")
             # Display 'Winner: ' above player with highest score.
             one_winner = True
             final_scores = scores_list
@@ -762,7 +753,7 @@ class PartyPi(object):
         prompt_coord = (prompt_x0, 3 * (self.screenheight // 4))
         text = "Show " + self.random_emotion() + '_'
         draw_text(prompt_coord, img_array, text=text,
-                  color=(0, 255, 0))
+                  color=(10, 255, 10), font_scale=2)
 
     def random_emotion(self):
         """ Pick a random emotion from list of emotions.
