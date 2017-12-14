@@ -3,6 +3,7 @@ import os
 import traceback
 
 
+DEBUG = True
 OPACITY = 0.4
 remote_API = False
 BLUE = (232, 167, 35)

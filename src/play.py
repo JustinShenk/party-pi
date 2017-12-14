@@ -246,9 +246,12 @@ class PartyPi(object):
         # Draw faces.
         gray_image = cv2.cvtColor(bgr_image, cv2.COLOR_BGR2GRAY)
         faces = detect_faces(face_detection, gray_image)
-
         cv2.addWeighted(self.overlay, OPACITY, bgr_image,
                         1 - OPACITY, 0, bgr_image)
+
+        if DEBUG:
+            for face in faces:
+                draw_bounding_box(face, bgr_image, (255, 0, 0))
         # Draw Christmas logo.
         self.draw_hats(bgr_image, faces)
         self.draw_christmas_logo(bgr_image)  # Only for christmas
@@ -370,7 +373,7 @@ class PartyPi(object):
         reset_text_coord = (self.screenwidth // 2, int(
             self.screenheight * (6. / 7)))
         draw_text(reset_text_coord, self.photo,
-                  "[Press any button]", color=GREEN, font_scale=2)
+                  "[Press any button]", color=GREEN, font_scale=1)
 
         # Draw logo or title.
         self.photo = self.overlayUI(self.photo)
@@ -485,11 +488,8 @@ class PartyPi(object):
         frame_height, frame_width = frame.shape[:2]
 
         w_offset = 1.3
-        x_offset = 0
-        y_offset = 60
-        # Adjust offset for propeller hat
-        if 'prop' in hat_path:
-            y_offset = 30
+        x_offset = 7
+        y_offset = 40
 
         for ind, (x, y, w, h) in enumerate(faces):
             # if crowns is not None and ind in crowns:
@@ -753,7 +753,7 @@ class PartyPi(object):
             self.cam.release()
             quit_coord = (self.screenwidth // 4, self.screenheight // 3)
             draw_text(quit_coord, self.photo,
-                      "Press any key to quit_", font_scale=2)
+                      "Press any key to quit_", font_scale=1)
             # self.presentation(frame)
             self.photo = self.overlayUI(self.photo)
         else:
