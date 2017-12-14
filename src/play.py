@@ -265,9 +265,11 @@ class PartyPi(object):
 
         bgr_image = self.capture_frame()
         self.tick()  # update tickcount
-        timer = self.tickcount
+
         if SLOW:
-            timer -= 1
+            timer = self.tickcount // 2
+        else:
+            timer = self.tickcount
         self.prompt_emotion(bgr_image)
         times = [70, 80, 100, 110, 120, 130, 133, 136]
         # Show 'Begin' after some time
@@ -289,7 +291,7 @@ class PartyPi(object):
         elif timer >= 130 and timer < 136:  # flash, save image, analyze
             self.flash_on = True
             if not self.raspberry:
-                if timer == 133:  # take photo
+                if timer == 134:  # take photo
                     self.photo_mode = True
                     self.photo = bgr_image.copy()
                     self.start_process = True
@@ -297,7 +299,7 @@ class PartyPi(object):
                     self.start_process = False
                     self.show_analyzing = True
             else:  # Raspberry-specific timing
-                if timer == 133:
+                if timer == 134:
                     self.photo_mode = True
                     self.photo = bgr_image.copy()
                     self.start_process = True
