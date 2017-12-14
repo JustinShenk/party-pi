@@ -87,11 +87,14 @@ class PartyPi(object):
         cam = cv2.VideoCapture(0)
         frame = None
         while frame is None:
-            _, frame = cam.read()
-            # Update class variables.
-            self.screenheight, self.screenwidth = frame.shape[:2]
-            cam.set(3, self.screenwidth)
-            cam.set(4, self.screenheight)
+            try:
+                _, frame = cam.read()
+                # Update class variables.
+                self.screenheight, self.screenwidth = frame.shape[:2]
+                cam.set(3, self.screenwidth)
+                cam.set(4, self.screenheight)
+            except:
+                pass
         self.cam = cam
         return
 
