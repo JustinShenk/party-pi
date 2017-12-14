@@ -10,7 +10,6 @@ from keras.models import load_model
 from statistics import mode
 from uploader import Uploader
 from utils.inference import detect_faces
-from utils.inference import draw_text
 from utils.inference import draw_bounding_box
 from utils.inference import apply_offsets
 from utils.inference import load_detection_model
@@ -38,9 +37,6 @@ emotion_classifier = load_model(emotion_model_path, compile=False)
 # Get input model shapes for inference
 emotion_target_size = emotion_classifier.input_shape[1:3]
 
-# Start list for calculating modes
-emotion_window = []
-
 EMOTIONS = list(get_labels().values())
 
 # Load string constants from json file.
@@ -52,29 +48,6 @@ with open('emotions.json', 'r') as f:
 FONT = cv2.FONT_HERSHEY_SIMPLEX
 
 face_detection = load_detection_model()
-
-
-def new_image_path():
-    """
-    Get path for saving a new image.
-    """
-    img_prefix = 'img_'
-    extension = '.png'
-    nr = 0
-    photos_path = os.path.abspath('../photos')
-    if not os.path.exists(photos_path):
-        os.mkdir(photos_path)
-    for file in os.listdir(photos_path):
-        if file.endswith(extension):
-            file = file.replace(img_prefix, '')
-            file = file.replace(extension, '')
-            # print file
-            file_nr = int(file)
-            nr = max(nr, file_nr)
-    img_nr = nr + 1
-    image_path = os.path.join(photos_path, str(
-        img_prefix) + str(img_nr) + str(extension))
-    return image_path
 
 
 class PartyPi(object):
@@ -157,6 +130,7 @@ class PartyPi(object):
         self.click_point_right_y = None
 
         # Initialize settings
+        self.easy_mode = True
         self.current_caption_index = 0
         self.tickcount = 0
         self.curr_level = 0
@@ -165,13 +139,13 @@ class PartyPi(object):
 
         # Load images
         _paths = {'banner': 'images/partypi_banner.png',
-                  'santa_hat': 'images/christmas.png',
+                  'christmas': 'images/christmas.png',
                   'hat': 'images/hat.png'
                   }
         self.webBanner = cv2.imread(
             _paths['banner'], cv2.IMREAD_UNCHANGED)
-        self.santa_hat = cv2.imread(
-            _paths['santa_hat'], cv2.IMREAD_UNCHANGED)
+        self.christmas = cv2.imread(
+            _paths['christmas'], cv2.IMREAD_UNCHANGED)
         self.hat = cv2.imread(_paths['hat'], cv2.IMREAD_UNCHANGED)
         # FIXME: add crown for winner
         # self.crown = cv2.imread('images/crown.png', cv2.IMREAD_UNCHANGED)
@@ -186,15 +160,9 @@ class PartyPi(object):
         cv2.namedWindow("PartyPi", cv2.WINDOW_NORMAL)
         cv2.setMouseCallback("PartyPi", self.mouse)
         cv2.resizeWindow("PartyPi", self.windowSize[0], self.windowSize[1])
-        # FIXME: Inspect following code
-        # Returns - TypeError: Required argument 'prop_value' (pos 3) not found
-        # cv2.setWindowProperty(
-        #     "PartyPi", cv2.WND_PROP_FULLSCREEN)
-        # cv2.setWindowProperty("PartyPi", cv2.WND_PROP_AUTOSIZE,
-        #                       cv2.WINDOW_AUTOSIZE)
 
-        if self.piCam:
-            try:
+        try:
+            if self.piCam:
                 # Capture frames from the camera.
                 for _frame in self.piCamera.capture_continuous(self.rawCapture, format='bgr', use_video_port=True):
                     # frame = cv2.flip(_frame.array, 1)
@@ -202,16 +170,14 @@ class PartyPi(object):
                     frame.flags.writeable = True
                     self.pi_cam_frame = frame
                     self.screenheight, self.screenwidth = frame.shape[:2]
-            except:
-                print_traceback()
-        else:  # webcam
-            while True:
-                try:
+            else:  # webcam
+                while True:
                     callback_status = self.game_loop()
                     if callback_status == "END":
                         break
-                except:
-                    print_traceback()
+        except:
+            print_traceback()
+
         self.end_game()
 
     def game_loop(self):
@@ -267,7 +233,6 @@ class PartyPi(object):
             self.curr_level = 1
             self.click_point_x = None
             self.click_point_right_x = None
-
         if self.click_point_right_x:
             self.easy_mode = False
             self.tickcount = 0
@@ -282,7 +247,7 @@ class PartyPi(object):
         cv2.addWeighted(self.overlay, OPACITY, bgr_image,
                         1 - OPACITY, 0, bgr_image)
         # Draw Christmas logo.
-        self.draw_hat(bgr_image, faces)
+        self.draw_hats(bgr_image, faces)
         self.draw_christmas_logo(bgr_image)  # Only for christmas
         # Show image.
         cv2.imshow('PartyPi', bgr_image)
@@ -377,13 +342,13 @@ class PartyPi(object):
         countdown_x = int(self.screenwidth -
                           (self.screenwidth / 5) * countdown_x_offset)
         self.overlay = frame.copy()
-        count_banner_y1 = int(self.screenheight * (4. / 5))
-        cv2.rectangle(self.overlay, (0, count_banner_y1),
+        countdown_panel_y1 = int(self.screenheight * (4. / 5))
+        cv2.rectangle(self.overlay, (0, countdown_panel_y1),
                       (self.screenwidth, self.screenheight), (224, 23, 101), -1)
         cv2.addWeighted(self.overlay, OPACITY, frame,
                         1 - OPACITY, 0, frame)
-        count_coord = (countdown_x, int(self.screenheight * (7. / 8)))
-        countdown_y = self.screenheight * 7. / 8
+        countdown_y_offset = 20
+        countdown_y = int((self.screenheight * 7. / 8) + countdown_y_offset)
         countdown_coord = (countdown_x, countdown_y)
         draw_text(countdown_coord, frame, str(self.countdown))
         return frame
@@ -402,12 +367,12 @@ class PartyPi(object):
         reset_text_coord = (self.screenwidth // 2, int(
             self.screenheight * (6. / 7)))
         draw_text(reset_text_coord, self.photo,
-                  "[Press any button]", color=(62, 184, 144), font_scale=2)
+                  "[Press any button]", color=GREEN, font_scale=2)
 
         # Draw logo or title.
         self.photo = self.overlayUI(self.photo)
         self.draw_christmas_logo(self.photo)  # Only for Christmas
-        # self.draw_hat(self.photo, self.faces, crowns=crown_over_faces)
+        # self.draw_hats(self.photo, self.faces, crowns=crown_over_faces)
         cv2.imshow('PartyPi', self.photo)
 
     def overlayUI(self, frame):
@@ -462,6 +427,7 @@ class PartyPi(object):
             self.click_point_right_x, self.click_point_right_y = x, y
             if self.present_mode:
                 self.reset()
+                print("DEBUG RIGHT CLICK")
                 self.easy_mode = False
                 self.curr_level = 1
 
@@ -494,30 +460,30 @@ class PartyPi(object):
             y0 = 0
         else:
             y0 = (self.screenheight // 7) + 0
-        y1 = y0 + self.santa_hat.shape[0]
+        y1 = y0 + self.christmas.shape[0]
         if self.screenwidth < 700:
             x0 = 0
         else:
             x0 = 2 * self.screenwidth // 3
-        x1 = x0 + self.santa_hat.shape[1]
+        x1 = x0 + self.christmas.shape[1]
 
         # Remove black background from png image.
         for c in range(0, 3):
-            xmasSlice = self.santa_hat[:, :, c] * \
-                (self.santa_hat[:, :, 3] / 255.0)
+            xmasSlice = self.christmas[:, :, c] * \
+                (self.christmas[:, :, 3] / 255.0)
             backgroundSlice = frame[y0:y1, x0:x1, c] * \
-                (1.0 - self.santa_hat[:, :, 3] / 255.0)
+                (1.0 - self.christmas[:, :, 3] / 255.0)
             frame[y0:y1, x0:x1, c] = xmasSlice + backgroundSlice
 
-    def draw_hat(self, frame, faces, crowns=None):
+    def draw_hats(self, frame, faces, crowns=None):
         """ Draws hats above detected faces.
 
         """
         frame_height, frame_width = frame.shape[:2]
 
         w_offset = 1.3
-        x_offset = -20
-        y_offset = 80
+        x_offset = 0
+        y_offset = 60
         # Adjust offset for propeller hat
         if 'prop' in hat_path:
             y_offset = 30
@@ -577,39 +543,19 @@ class PartyPi(object):
         """ Take photo and prepare to write, then send to PyImgur (optional).
 
         """
-        image_path = new_image_path()
-
-        # Get faces for Christmas hat.
         faces = detect_faces(face_detection, self.photo)
-        self.faces = faces
-
-        # TODO: Separate remote and local calls
-        # if self.config['remote_API']:
-        #         # If internet connection is poor, use black and white image.
-        #     if self.gray:
-        #         bwphoto = cv2.cvtColor(self.photo, cv2.COLOR_BGR2GRAY)
-        #         cv2.imwrite(image_path, bwphoto)
-        #         # FIXME: Move to separate function
-        #         self.result, callback = self.uploader.upload_img(image_path)
-        #     else:
-        #         self.photo = self.overlayUI(self.photo)
-        #         # self.draw_christmas_logo(self.photo) # Only for christmas
-        #         self.draw_hat(self.photo, faces)
-        #         cv2.imwrite(image_path, self.photo)
-        #         # FIXME: Move to separate function
-        #         self.result, callback = self.uploader.upload_img(image_path)
-        #     try:
-        #         if callback is not None:
-        #             # Assume Connection Error for now
-        #             self.status.append('ConnectionError')
-        #     except:
-        #         pass
-        player_data = self.predict_emotions(faces)
-        self.rank_players(player_data)
-
-    def predict_emotions(self, faces):
-        player_data = []
         gray_image = cv2.cvtColor(self.photo, cv2.COLOR_RGB2GRAY)
+        self.draw_hats(self.photo, faces)
+        player_data = self.predict_emotions(faces, gray_image)
+        self.rank_players(player_data)
+        self.save_photo()
+
+    def save_photo(self):
+        image_path = new_image_path()
+        cv2.imwrite(image_path, self.photo)
+
+    def predict_emotions(self, faces, gray_image):
+        player_data = []
         emotion_idx_lookup = get_class_to_arg()
         for face_coordinates in faces:
             x1, x2, y1, y2 = apply_offsets(
@@ -669,7 +615,7 @@ class PartyPi(object):
             for i in range(len(first_emotion_scores)):
                 scores_list.append(
                     (first_emotion_scores[i] + 1) * (second_emotion_scores[i] + 1))
-        print("scores_list:", scores_list)
+        print("INFO: Scores_list:", scores_list)
         text_size = 0.5 if self.raspberry else 0.8
         # Draw the scores for the faces.
         for i, currFace in enumerate(player_data):
@@ -698,13 +644,13 @@ class PartyPi(object):
             first_emotion_coord = (faceRectangle['left'], faceRectangle['top'] -
                                    score_height_offset)
             draw_text(first_emotion_coord, self.photo, first_emotion_caption,
-                      font_scale=text_size, color=BLUE)
+                      font_scale=text_size, color=YELLOW)
 
             if not self.easy_mode:  # second line
                 second_emotion_coord = (faceRectangle['left'], faceRectangle[
                     'top'] - 10)
                 draw_text(second_emotion_coord, self.photo, second_emotion_caption,
-                          color=BLUE, font_scale=text_size)
+                          color=YELLOW, font_scale=text_size)
 
             # Display 'Winner: ' above player with highest score.
             one_winner = True
@@ -728,7 +674,7 @@ class PartyPi(object):
             if one_winner:
                 tied_text_height_offset = 40 if self.easy_mode else 70
                 draw_text((first_rect_left, first_rect_top -
-                           tied_text_height_offset), self.photo, "Winner: ", color=BLUE, font_scale=text_size)
+                           tied_text_height_offset), self.photo, "Winner: ", color=YELLOW, font_scale=text_size)
                 self.crown_over_faces = [winner]
             else:
                 tied_text_height_offset = 40 if self.easy_mode else 70
@@ -741,7 +687,7 @@ class PartyPi(object):
                     tied_coord = (first_rect_left,
                                   first_rect_top - tied_text_height_offset)
                     draw_text(tied_coord, self.photo, "Tied: ",
-                              color=BLUE, font_scale=text_size)
+                              color=YELLOW, font_scale=text_size)
                 self.crown_over_faces = tied_winners
 
     def prompt_emotion(self, img_array):
@@ -749,11 +695,11 @@ class PartyPi(object):
 
         """
         text_size = 1.0 if self.raspberry else 1.2
-        prompt_x0 = self.screenwidth // 5 if self.easy_mode else 10
+        prompt_x0 = self.screenwidth // 10
         prompt_coord = (prompt_x0, 3 * (self.screenheight // 4))
         text = "Show " + self.random_emotion() + '_'
         draw_text(prompt_coord, img_array, text=text,
-                  color=(10, 255, 10), font_scale=2)
+                  color=GREEN, font_scale=2)
 
     def random_emotion(self):
         """ Pick a random emotion from list of emotions.
