@@ -43,13 +43,13 @@ Install dependencies:
 
 .. code-block:: python
 
-    pip install -r requirements.txt
+    pip3 install -r requirements.txt
 
 If using Ubuntu, install tkinter with `sudo apt-get install python3-tk`
 
 .. code-block:: python
 
-    python main.py
+    python3 main.py
 
 Additional (optional)  arguments: ``--picam`` for piCamera module and ``--resolution`` to specify resolution.
 

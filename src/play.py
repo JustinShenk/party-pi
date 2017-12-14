@@ -160,7 +160,9 @@ class PartyPi(object):
         self.flash_on = False
         self.show_analyzing = False
         self.photo_mode = False
-        cv2.namedWindow("PartyPi", cv2.WINDOW_NORMAL)
+        cv2.namedWindow("PartyPi", cv2.WINDOW_GUI_NORMAL)
+        # cv2.setWindowProperty(
+        #     "PartyPi", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
         cv2.setMouseCallback("PartyPi", self.mouse)
         cv2.resizeWindow("PartyPi", self.windowSize[0], self.windowSize[1])
 
