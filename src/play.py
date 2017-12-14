@@ -271,7 +271,6 @@ class PartyPi(object):
         else:
             timer = self.tickcount
         self.prompt_emotion(bgr_image)
-        times = [70, 80, 100, 110, 120, 130, 133, 136]
         # Show 'Begin' after some time
         if timer < 70:
             pass
@@ -380,7 +379,7 @@ class PartyPi(object):
                   "[Press any button]", color=GREEN, font_scale=1)
 
         # Draw logo or title.
-        self.photo = self.overlayUI(self.photo)
+        # self.photo = self.overlayUI(self.photo)
         self.draw_christmas_logo(self.photo)  # Only for Christmas
         # self.draw_hats(self.photo, self.faces, crowns=crown_over_faces)
         cv2.imshow('PartyPi', self.photo)
@@ -761,7 +760,7 @@ class PartyPi(object):
             draw_text(quit_coord, self.photo,
                       "Press any key to quit_", font_scale=1)
             # self.presentation(frame)
-            self.photo = self.overlayUI(self.photo)
+            # self.photo = self.overlayUI(self.photo)
         else:
             self.piCamera.close()
 
