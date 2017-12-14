@@ -214,7 +214,7 @@ class PartyPi(object):
             self.tickcount += 1
         bgr_image = self.capture_frame()
         # Draw "Easy" and "Hard".
-        bgr_image = self.overlayUI(bgr_image)
+        # bgr_image = self.overlayUI(bgr_image)
         easy_coord = (self.screenwidth // 8, (self.screenheight * 3) // 4)
         draw_text(easy_coord, bgr_image, "Easy", font_scale=3)
         hard_coord = (self.screenwidth // 2, (self.screenheight * 3) // 4)
@@ -266,6 +266,8 @@ class PartyPi(object):
         bgr_image = self.capture_frame()
         self.tick()  # update tickcount
         timer = self.tickcount
+        if SLOW:
+            timer -= 1
         self.prompt_emotion(bgr_image)
         times = [70, 80, 100, 110, 120, 130, 133, 136]
         # Show 'Begin' after some time
@@ -318,7 +320,7 @@ class PartyPi(object):
             bgr_image = self.draw_analyzing(bgr_image)
 
         # Display image.
-        bgr_image = self.overlayUI(bgr_image)
+        # bgr_image = self.overlayUI(bgr_image)
         cv2.imshow('PartyPi', bgr_image)
         if self.photo_mode and self.start_process:
             self.take_photo()
