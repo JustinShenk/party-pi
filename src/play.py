@@ -287,7 +287,7 @@ class PartyPi(object):
         elif timer >= 120 and timer < 130:  # 1...
             self.countdown = 1
             bgr_image = self.draw_countdown(bgr_image)
-        elif timer >= 130 and timer < 136:  # flash, save image, analyze
+        elif timer >= 130 and timer < 138:  # flash, save image, analyze
             self.flash_on = True
             if not self.raspberry:
                 if timer == 134:  # take photo
@@ -305,7 +305,7 @@ class PartyPi(object):
                 else:
                     self.start_process = False
                     self.show_analyzing = True
-        elif timer == 136:  # reset settings and increase level
+        elif timer == 138:  # reset settings and increase level
             self.start_process = False
             self.flash_on = False
             self.show_analyzing = False
@@ -331,7 +331,7 @@ class PartyPi(object):
         caption = WAIT_CAPTIONS[self.current_caption_index % len(
             WAIT_CAPTIONS)]
         draw_text(self.uploading_caption_coord, frame,
-                  caption, font_scale=text_size, color=(244, 23, 101))
+                  caption, font_scale=text_size, color=(244, 23, 101), font_scale=1)
         # self.draw_christmas_logo(frame) # Only for christmas
         if 'Error' in self.status:
             error_coord = (self.uploading_caption_coord[
