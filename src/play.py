@@ -327,11 +327,11 @@ class PartyPi(object):
             self.take_photo()
 
     def draw_analyzing(self, frame):
-        text_size = 0.7 if self.raspberry else 1.7
+        text_size = 0.7 if self.raspberry else 1
         caption = WAIT_CAPTIONS[self.current_caption_index % len(
             WAIT_CAPTIONS)]
         draw_text(self.uploading_caption_coord, frame,
-                  caption, font_scale=text_size, color=(244, 23, 101), font_scale=1)
+                  caption, font_scale=text_size, color=(244, 23, 101))
         # self.draw_christmas_logo(frame) # Only for christmas
         if 'Error' in self.status:
             error_coord = (self.uploading_caption_coord[
