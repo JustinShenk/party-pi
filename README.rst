@@ -45,7 +45,7 @@ Install dependencies:
 
     pip install -r requirements.txt
 
-Change ``config.json.example`` to ``config.json`` and add your Emotion_API and Imgur keys. Then start the game:
+If using Ubuntu, install tkinter with `sudo apt-get install python3-tk`
 
 .. code-block:: python
 
