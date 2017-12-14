@@ -62,8 +62,6 @@ class PartyPi(object):
         # EMOTIONS2 = ['psycho', 'John Cena', 'ecstasy', 'duckface']
         self.screenwidth, self.screenheight = self.windowSize
         self.resolution = resolution
-
-        # Setup for Raspberry Pi.
         self.initialize_webcam()
 
         # Reinitialize screenwidth and height in case changed by system.
@@ -704,7 +702,9 @@ class PartyPi(object):
         prompt_coord = (prompt_x0, 3 * (self.screenheight // 4))
         text = "Show " + self.random_emotion() + '_'
         draw_text(prompt_coord, img_array, text=text,
-                  color=GREEN, font_scale=2)
+                  color=GREEN, font_scale=1.5)
+        draw_text(prompt_coord, img_array, text=text,
+                  color=GREEN, font_scale=1.5, thickness=2)
 
     def random_emotion(self):
         """ Pick a random emotion from list of emotions.
