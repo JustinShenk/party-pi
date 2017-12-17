@@ -8,7 +8,6 @@ import time
 
 from keras.models import load_model
 from statistics import mode
-from uploader import Uploader
 from utils.inference import detect_faces
 from utils.inference import draw_bounding_box
 from utils.inference import apply_offsets
@@ -136,7 +135,6 @@ class PartyPi(object):
         self.tickcount = 0
         self.curr_level = 0
         self.show_begin = False
-        self.uploader = Uploader()
 
         # Load images
         _paths = {'banner': 'images/partypi_banner.png',

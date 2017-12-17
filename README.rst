@@ -21,13 +21,6 @@ Install
 =======
 Install OpenCV3 with python3 bindings
 
-Get Authorization Keys
-======================
-
-`Microsoft/Oxford Emotion API Reference <https://dev.projectoxford.ai/docs/services/5639d931ca73072154c1ce89>`_
-
-- Place your subscription key in config.json: "Ocp-Apim-Subscription-Key: {subscription key}"
-
 
 Getting Started
 ===============
