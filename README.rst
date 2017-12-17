@@ -3,23 +3,19 @@ Party Pi
 
 |license| |nbsp| |PyPi|
 
-Emotion detection game for parties using computer vision.
+Emotion detection party game using computer vision.
 
 Description
 ===========
 
-Interactive game that prompts players to show an emotion (eg, "Show surprise"), and displays the winner. Can be used on raspberry pi with piCamera module.
+Interactive game that ranks players by their ability to show an emotion (eg, "Show surprise"). Can be used on raspberry pi with piCamera module or with laptop.
 
 Demo
 ====
 
 `Screenshot <https://www.partypi.net/img/demo.png>`_
 
-`Pics from a demo at the Institute of Cognitive Science Christmas Party <https://coxi.partypi.net>`_
-
-Install
-=======
-Install OpenCV3 with python3 bindings
+`Pics from a demo at the Institute of Cognitive Science 2016 Christmas Party <https://coxi.partypi.net>`_
 
 
 Getting Started
@@ -45,7 +41,7 @@ If using Ubuntu, install tkinter with `sudo apt-get install python3-tk`
     cd src/
     python3 main.py
 
-Additional (optional)  arguments: ``--picam`` for piCamera module and ``--resolution`` to specify resolution.
+Additional (optional)  arguments: ``--picam`` for piCamera module and ``--slow`` to slow down the countdown.
 
 Select Easy or Hard Mode (left or right arrow keys).
 
@@ -55,7 +51,7 @@ TODO
 - Redesign mode selection boxes
 - Add PyQT for font and sizing support
 - Add Python 2 compatibility
-- Add camera detection feature to recognize if raspberry pi
+- Add camera detection feature to recognize if piCamera
 
 Author
 ======
