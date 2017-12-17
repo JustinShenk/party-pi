@@ -51,11 +51,11 @@ face_detection = load_detection_model()
 
 class PartyPi(object):
 
-    def __init__(self, piCam=False, windowSize=(1200, 1024), resolution=(1280 // 2, 1024 // 2), gray=False, debug=False):
-        self.piCam = piCam
+    def __init__(self, windowSize=(1200, 1024), resolution=(1280 // 2, 1024 // 2), **kwargs):
+        self.piCam = kwargs['picam']
+        self.debug = kwargs['debug']
+        self.slow = kwargs['slow']
         self.windowSize = windowSize
-        self.gray = gray
-        self.debug = debug
 
         # TODO: Integrate into `EMOTIONS`.
         # EMOTIONS2 = ['psycho', 'John Cena', 'ecstasy', 'duckface']
@@ -150,8 +150,9 @@ class PartyPi(object):
         # self.crown = cv2.imread('images/crown.png', cv2.IMREAD_UNCHANGED)
 
         if self.hat is None:
+            hat_abs_path = os.path.abspath(_paths['hat'])
             raise ValueError(
-                'No hat image found at `{}`'.format(hat_path))
+                'No hat image found at `{}`'.format(hat_abs_path))
         print("Camera initialized")
         self.flash_on = False
         self.show_analyzing = False
@@ -247,7 +248,7 @@ class PartyPi(object):
         cv2.addWeighted(self.overlay, OPACITY, bgr_image,
                         1 - OPACITY, 0, bgr_image)
 
-        if DEBUG:
+        if self.debug:
             for face in faces:
                 draw_bounding_box(face, bgr_image, (255, 0, 0))
         # Draw Christmas logo.
@@ -264,7 +265,7 @@ class PartyPi(object):
         bgr_image = self.capture_frame()
         self.tick()  # update tickcount
 
-        if SLOW:
+        if self.slow:
             timer = self.tickcount // 2
         else:
             timer = self.tickcount
@@ -755,8 +756,11 @@ class PartyPi(object):
         if not self.piCam:
             self.cam.release()
             quit_coord = (self.screenwidth // 4, self.screenheight // 3)
-            draw_text(quit_coord, self.photo,
-                      "Press any key to quit_", font_scale=1)
+            try:
+                draw_text(quit_coord, self.photo,
+                          "Press any key to quit_", font_scale=1)
+            except AttributeError:
+                cv2.destroyAllWindows()
             # self.presentation(frame)
             # self.photo = self.overlayUI(self.photo)
         else:
@@ -768,11 +772,17 @@ class PartyPi(object):
         cv2.destroyAllWindows()
 
 
-def main():
-    """ Run application.
-    """
-    app = PartyPi()
-
-
 if __name__ == '__main__':
-    main()
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-s", "--slow", default=False, help="slow countdown timer (for faster devices)",
+                        type=bool)
+    parser.add_argument("-d", "--debug", default=False, help="debug mode",
+                        type=bool)
+    parser.add_argument("-p", "--picam", default=False, help="piCamera",
+                        type=bool)
+
+    args = {k: v for k, v in vars(
+        parser.parse_args()).items() if v is not None}
+    # Run application
+    app = PartyPi(**args)
