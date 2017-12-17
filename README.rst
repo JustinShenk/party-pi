@@ -34,7 +34,7 @@ Install dependencies:
 
     pip3 install -r requirements.txt
 
-If using Ubuntu, install tkinter with `sudo apt-get install python3-tk`
+If using Ubuntu, install tkinter with ``sudo apt-get install python3-tk``
 
 .. code-block:: python
 
