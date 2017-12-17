@@ -15,7 +15,6 @@ from utils.inference import load_detection_model
 from utils.inference import get_class_to_arg
 from utils.inference import get_labels
 from utils.misc import *
-from utils.preprocessor import preprocess_input
 
 np.set_printoptions(formatter={'float': '{: 0.3f}'.format})
 
@@ -435,7 +434,6 @@ class PartyPi(object):
             self.click_point_right_x, self.click_point_right_y = x, y
             if self.present_mode:
                 self.reset()
-                print("DEBUG RIGHT CLICK")
                 self.easy_mode = False
                 self.curr_level = 1
 
@@ -620,7 +618,6 @@ class PartyPi(object):
             for i in range(len(first_emotion_scores)):
                 scores_list.append(
                     (first_emotion_scores[i] + 1) * (second_emotion_scores[i] + 1))
-        print("INFO: Scores_list:", scores_list)
         text_size = 0.5 if self.raspberry else 0.8
         # Draw the scores for the faces.
         for i, currFace in enumerate(player_data):

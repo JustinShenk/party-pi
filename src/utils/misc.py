@@ -22,6 +22,15 @@ def print_traceback():
     pass
 
 
+def preprocess_input(x, v2=True):
+    x = x.astype('float32')
+    x = x / 255.0
+    if v2:
+        x = x - 0.5
+        x = x * 2.0
+    return x
+
+
 def draw_text(coordinates, image_array, text, color=(255, 255, 255), x_offset=0, y_offset=0,
               font_scale=2, thickness=1):
     x, y = coordinates[:2]

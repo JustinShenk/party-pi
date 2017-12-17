@@ -42,6 +42,7 @@ If using Ubuntu, install tkinter with `sudo apt-get install python3-tk`
 
 .. code-block:: python
 
+    cd src/
     python3 main.py
 
 Additional (optional)  arguments: ``--picam`` for piCamera module and ``--resolution`` to specify resolution.
