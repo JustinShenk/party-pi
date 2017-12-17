@@ -1,2 +1,4 @@
 numpy
-requests
+scipy
+keras
+tensorflow>=1.3
