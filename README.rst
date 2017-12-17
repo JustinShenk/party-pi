@@ -15,7 +15,7 @@ Demo
 
 `Screenshot <https://www.partypi.net/img/demo.png>`_
 
-`Pics from a demo at the Institute of Cognitive Science 2016 Christmas Party <https://coxi.partypi.net>`_
+`Pics from a demo at the Institute of Cognitive Science 2016 Christmas Party <http://coxi.partypi.net>`_
 
 
 Getting Started
