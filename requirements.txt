@@ -1,4 +1,5 @@
-numpy
+opencv-contrib-python
 scipy
 keras
 tensorflow>=1.3
+h5py
