@@ -10,7 +10,7 @@ Description
 
 Interactive game that ranks players by their ability to show an emotion (eg, "Show surprise"). Can be used on Raspberry Pi with piCamera module or with laptop.
 
-Emotion detection is accomplished using an Inception-based neural network trained in TensorFlow.
+Emotion detection is accomplished using an Inception-based neural network trained in TensorFlow. Face detection is accomplished using OpenCV's Haar cascade.
 
 Demo
 ====
