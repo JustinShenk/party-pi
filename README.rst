@@ -3,12 +3,14 @@ Party Pi
 
 |license| |nbsp| |PyPi|
 
-Emotion detection party game using computer vision.
+Emotion detection game using computer vision.
 
 Description
 ===========
 
-Interactive game that ranks players by their ability to show an emotion (eg, "Show surprise"). Can be used on raspberry pi with piCamera module or with laptop.
+Interactive game that ranks players by their ability to show an emotion (eg, "Show surprise"). Can be used on Raspberry Pi with piCamera module or with laptop.
+
+Emotion detection is accomplished using an Inception-based neural network trained in TensorFlow.
 
 Demo
 ====
@@ -44,6 +46,11 @@ If using Ubuntu, install tkinter with ``sudo apt-get install python3-tk``
 Additional (optional)  arguments: ``--picam`` for piCamera module and ``--slow`` to slow down the countdown.
 
 Select Easy or Hard Mode (left or right arrow keys).
+
+Awards, Press, Demos
+====================
+
+Party Pi was `featured <https://software.intel.com/en-us/blogs/2017/08/23/intel-developer-mesh-editor-s-picks-august-2017>`_ in the Intel Developer Mesh Editor's Picks (August 2017), was awarded the 2017 Intel Hack Challenge prize, and the technology was demonstrated at Intel's AI booth at NIPS 2017. It was demoed for students and faculty present at the 2016 and 2017 University of Osnabrueck Institute of Cognitive Science Christmas Parties.
 
 TODO
 ====
