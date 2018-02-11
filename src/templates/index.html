@@ -1,0 +1,549 @@
+<html>
+<!-- <script type='text/javascript' src='{{ url_for('static', filename='shuffler.js') }}'></script> -->
+<style>
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: Helvetica, Arial, sans-serif;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  h1{
+	margin-top:0;
+}
+
+body{
+	margin:0;
+	overflow:hidden;
+	background:#222;
+	font-family: monospace;
+}
+
+button{
+	font-family: monospace;
+	border:2px solid tomato;
+	background:transparent;
+	width:250px;
+	font-size:1.2em;
+	padding : 10px 0;
+	border-radius:5px;
+	display:block;
+  cursor:pointer;
+	margin:1em auto;
+}
+article{
+	width:80%;
+	margin:auto;
+	font-size:2em;
+	top:50%;
+	position:relative;
+	transform:translateY(-50%);
+}
+
+  #myProgress {
+    width: 100%;
+    background-color: grey;
+}
+#countdownBar {
+    width: 1%;
+    height: 30px;
+    background-color: tomato;
+}
+
+  /* .container {
+    border: 1px solid #575757;
+    width: 100%;
+    height: 320px;
+    overflow: hidden;
+    position: absolute;
+  } */
+
+  #container {
+    /* margin: 0px auto; */
+    /* width: 500px;
+    height: 375px; */
+    text-align: center;
+    border: 10px #333 solid;
+  }
+
+  /* #video {
+    width: 500px;
+    height: 375px;
+    background-color: #666;
+} */
+.video-container {
+  position: relative;
+}
+.overlay-desc {
+  background: rgba(0,0,0,0);
+  position: absolute;
+  top: 0; right: 0; bottom: 0; left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+  video {
+    position: relative;
+    z-index: -1;
+  }
+
+  #show_emotion {
+    position: absolute;
+    color: rgb(230, 200, 98);
+    z-index: 1;
+  }
+
+  #headline{
+    /* margin-top: -100px; */
+    top: -275px;
+    position: relative;
+  }
+  #text{
+    top:18px;
+    position: relative;
+    z-index: 100;
+  }
+</style>
+<h1>Party Pi</h1> {{ size }}
+<!-- <div><img id="image" src="{{ url_for('video_feed') }}" /> -->
+<div id='container'>
+  <div class='video-container'>
+    <video height=480 width=600 autoplay="true" id="videoElement"></video>
+
+    <div class="overlay-desc">
+      <article>
+      <h1 id="headline">Emotion Detection Game</h1>
+      <p id="text">Show happiness_</p>
+      <button id="play" download="player.jpg">Play</button>
+  </article>
+  </div>
+  </div>
+    <div id="myProgress">
+  <div id="countdownBar"></div>
+</div>
+  </div>
+
+</div>
+
+<div>
+  <!-- NAVIGATION BAR -->
+  <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+    <!-- <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation"> -->
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <a class="navbar-brand navbar-link " href="/">Party Pi</a>
+    <!-- <form action="/select_mode" method="post">
+    <button type="select_mode" id="selectMode" value="Select_mode" />
+</form> -->
+  </nav>
+</div>
+<div class="container-fluid">
+  <div class="starter-template">
+    <div>
+      <!-- <button id="capture" download="player.jpg" value="Play" style="">Capture</button> -->
+      <!-- <input type="button" id="offButton" value="Find faces (off)" style=""> -->
+    </div>
+  </div>
+</div>
+<!-- <div id="show_emotion">Show happiness_</div> -->
+<div id="output"></div>
+
+
+<script src="https://code.jquery.com/jquery-3.2.1.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script>
+<!-- <script src="{{url_for('static',filename='index.js')}}"></script> -->
+<script type="text/javascript">
+  // $(".onButton").click(function() {
+  //   var image = document.getElementById('image');
+  //   image.src = "{{ url_for('none') }}";
+  // });
+  // $(".offButton").click(function() {
+  //   var image = document.getElementById('image');
+  //   image.src = "{{ url_for('video_feed') }}";
+  // });
+
+  // $(function() {
+  //   $('.selectMode').click(function() {
+  //     $.ajax({
+  //       url: '/select_mode',
+  //       data: 'selected',
+  //       cache: false,
+  //       async: false,
+  //       type: 'POST',
+  //       success: function(response) {
+  //         console.log("Success selecting.");
+  //       },
+  //       error: function(error) {
+  //         console.log(error);
+  //       }
+  //     });
+  //   });
+  // });
+
+  var video = document.querySelector("#videoElement");
+  var $vid = $('video', '#container');
+  // var $msg = $('#show_emotion');
+
+  // var ctx = canvas.getContext('2d');
+  // video.addEventListener('loadedmetadata', function() {
+  //           ctx.translate(video.videoWidth, 0);
+  //           ctx.scale(-1, 1);
+  //        });
+
+  // $msg.css({
+  //   top: $vid.offset().top + (5 * ($vid.height() / 2) - ($msg.height() / 2)),
+  //   left: $vid.offset().left + (0.2 * ($vid.width() / 2) - ($msg.width() / 2)),
+  //   "font-family": "sans-serif"
+  // });
+  navigator.mediaDevices.getUserMedia = navigator.mediaDevices.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.oGetUserMedia;
+
+  if (navigator.getUserMedia) {
+    navigator.getUserMedia({
+      video: true,
+      audio: false
+    }, handleVideo, videoError);
+  }
+
+  function handleVideo(stream) {
+    video.src = window.URL.createObjectURL(stream);
+    video.onloadedmetadata = function(e) {
+      //
+    }
+  }
+
+  function videoError(e) {
+    console.log("Error: " + e);
+  }
+
+  (function() {
+    "use strict";
+
+    var video, $output;
+    var scale = 0.7;
+
+    var initialize = function() {
+      video = $("#videoElement").get(0);
+      $("#play").click(function() {
+        move();
+        setTimeout(captureImage,3000);
+      });
+    };
+
+    var captureImage = function() {
+      // setTimeout(move, 3000);
+
+      var canvas = document.createElement("canvas");
+      canvas.width = video.videoWidth * scale;
+      canvas.height = video.videoHeight * scale;
+      canvas.getContext('2d')
+        .drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      var img = document.createElement("img");
+      var dataURL = canvas.toDataURL();
+      document.querySelector('#play').href = dataURL;
+
+      // img.src = canvas.toDataURL();
+      // $output.prepend(img);
+      $.ajax({
+        type: "POST",
+        url: "{{ url_for('image') }}",
+        data: {
+          imageBase64: dataURL
+        },
+        // timeout: 3000
+      }).done(function(data) {
+        // var toType = function(obj) {
+        //   return ({}).toString.call(obj).match(/\s([a-zA-Z]+)/)[1].toLowerCase()
+        // }
+        console.log("Capture Image completed: " + data.substring(0, 40));
+        // console.log(o)
+        $output = $("#output");
+        var img = document.createElement('img')
+        img.src = "data:image/jpeg;base64," + data;
+        $output.prepend(img);
+      });
+    };
+
+    $(initialize);
+
+  }());
+
+  //
+  // $output = $("#output");
+  // video_0 = $("#video").get(0);
+  // $("#capture").click(captureImage);
+  // var captureImage = function() {
+  //         var canvas = document.createElement("canvas");
+  //         canvas.width = video.videoWidth * scale;
+  //         canvas.height = video.videoHeight * scale;
+  //         alert(canvas.height);
+  //         canvas.getContext('2d')
+  //               .drawImage(video_0, 0, 0, canvas.width, canvas.height);
+  //
+  //         var img = document.createElement("img");
+  //         img.src = canvas.toDataURL();
+  //         $output.prepend(img);
+  //     };
+
+  <!-- PROGRESS BAR -->
+  function move() {
+    var elem = document.getElementById("countdownBar");
+    var width = 1;
+    var id = setInterval(frame, 37);
+    function frame() {
+        if (width >= 100) {
+            clearInterval(id);
+        } else {
+            width++;
+            elem.style.width = width + '%';
+        }
+    }
+}
+
+function WordShuffler(holder,opt){
+  var that = this;
+  var time = 0;
+  this.now;
+  this.then = Date.now();
+
+  this.delta;
+  this.currentTimeOffset = 0;
+
+  this.word = null;
+  this.currentWord = null;
+  this.currentCharacter = 0;
+  this.currentWordLength = 0;
+
+
+  var options = {
+    fps : 20,
+    timeOffset : 5,
+    textColor : '#000',
+    fontSize : "50px",
+    useCanvas : false,
+    mixCapital : false,
+    mixSpecialCharacters : false,
+    needUpdate : true,
+    colors : [
+      '#f44336','#e91e63','#9c27b0',
+      '#673ab7','#3f51b5','#2196f3',
+      '#03a9f4','#00bcd4','#009688',
+      '#4caf50','#8bc34a','#cddc39',
+      '#ffeb3b','#ffc107','#ff9800',
+      '#ff5722','#795548','#9e9e9e',
+      '#607d8b'
+    ]
+  }
+
+  if(typeof opt != "undefined"){
+    for(key in opt){
+      options[key] = opt[key];
+    }
+  }
+
+
+
+  this.needUpdate = true;
+  this.fps = options.fps;
+  this.interval = 1000/this.fps;
+  this.timeOffset = options.timeOffset;
+  this.textColor = options.textColor;
+  this.fontSize = options.fontSize;
+  this.mixCapital = options.mixCapital;
+  this.mixSpecialCharacters = options.mixSpecialCharacters;
+  this.colors = options.colors;
+
+   this.useCanvas = options.useCanvas;
+
+  this.chars = [
+    'A','B','C','D',
+    'E','F','G','H',
+    'I','J','K','L',
+    'M','N','O','P',
+    'Q','R','S','T',
+    'U','V','W','X',
+    'Y','Z'
+  ];
+  this.specialCharacters = [
+    '!','§','$','%',
+    '&','/','(',')',
+    '=','?','_','<',
+    '>','^','°','*',
+    '#','-',':',';','~'
+  ]
+
+  if(this.mixSpecialCharacters){
+    this.chars = this.chars.concat(this.specialCharacters);
+  }
+
+  this.getRandomColor = function () {
+    var randNum = Math.floor( Math.random() * this.colors.length );
+    return this.colors[randNum];
+  }
+
+  //if Canvas
+
+  this.position = {
+    x : 0,
+    y : 50
+  }
+
+  //if DOM
+  if(typeof holder != "undefined"){
+    this.holder = holder;
+  }
+
+  if(!this.useCanvas && typeof this.holder == "undefined"){
+    console.warn('Holder must be defined in DOM Mode. Use Canvas or define Holder');
+  }
+
+
+  this.getRandCharacter = function(characterToReplace){
+    if(characterToReplace == " "){
+      return ' ';
+    }
+    var randNum = Math.floor(Math.random() * this.chars.length);
+    var lowChoice =  -.5 + Math.random();
+    var picketCharacter = this.chars[randNum];
+    var choosen = picketCharacter.toLowerCase();
+    if(this.mixCapital){
+      choosen = lowChoice < 0 ? picketCharacter.toLowerCase() : picketCharacter;
+    }
+    return choosen;
+
+  }
+
+  this.writeWord = function(word){
+    this.word = word;
+    this.currentWord = word.split('');
+    this.currentWordLength = this.currentWord.length;
+
+  }
+
+  this.generateSingleCharacter = function (color,character) {
+    var span = document.createElement('span');
+    span.style.color = color;
+    span.innerHTML = character;
+    return span;
+  }
+
+  this.updateCharacter = function (time) {
+
+      this.now = Date.now();
+      this.delta = this.now - this.then;
+
+      if (this.delta > this.interval) {
+        this.currentTimeOffset++;
+
+        var word = [];
+
+        if(this.currentTimeOffset === this.timeOffset && this.currentCharacter !== this.currentWordLength){
+          this.currentCharacter++;
+          this.currentTimeOffset = 0;
+        }
+        for(var k=0;k<this.currentCharacter;k++){
+          word.push(this.currentWord[k]);
+        }
+
+        for(var i=0;i<this.currentWordLength - this.currentCharacter;i++){
+          word.push(this.getRandCharacter(this.currentWord[this.currentCharacter+i]));
+        }
+
+
+        if(that.useCanvas){
+          c.clearRect(0,0,stage.x * stage.dpr , stage.y * stage.dpr);
+          c.font = that.fontSize + " sans-serif";
+          var spacing = 0;
+          word.forEach(function (w,index) {
+            if(index > that.currentCharacter){
+              c.fillStyle = that.getRandomColor();
+            }else{
+              c.fillStyle = that.textColor;
+            }
+            c.fillText(w, that.position.x + spacing, that.position.y);
+            spacing += c.measureText(w).width;
+          });
+        }else{
+
+          if(that.currentCharacter === that.currentWordLength){
+            that.needUpdate = false;
+          }
+          this.holder.innerHTML = '';
+          word.forEach(function (w,index) {
+            var color = null
+            if(index > that.currentCharacter){
+              color = that.getRandomColor();
+            }else{
+              color = that.textColor;
+            }
+            that.holder.appendChild(that.generateSingleCharacter(color, w));
+          });
+        }
+        this.then = this.now - (this.delta % this.interval);
+      }
+  }
+
+  this.restart = function () {
+    this.currentCharacter = 0;
+    this.needUpdate = true;
+  }
+
+  function update(time) {
+    time++;
+    if(that.needUpdate){
+      that.updateCharacter(time);
+    }
+    requestAnimationFrame(update);
+  }
+
+  this.writeWord(this.holder.innerHTML);
+
+  console.log(this.currentWord);
+  update(time);
+}
+
+var headline = document.getElementById('headline');
+var text = document.getElementById('text');
+var shuffler = document.getElementById('play');
+
+var headText = new WordShuffler(headline,{
+  textColor : '#fff',
+  timeOffset : 1, // was 18
+  mixCapital : true,
+  mixSpecialCharacters : true
+});
+
+var pText = new WordShuffler(text,{
+  textColor : '#fff',
+  timeOffset : 2
+});
+
+var buttonText = new WordShuffler(shuffler,{
+  textColor : 'tomato',
+  timeOffset : 10
+});
+
+shuffler.addEventListener('click',function () {
+  // headText.restart();
+  pText.restart();
+  // var text = document.getElementById('text');
+  // text.html('Show happiness_');
+  // var pText = new WordShuffler(text,{
+  //   textColor : '#fff',
+  //   timeOffset : 2
+  // });
+  buttonText.restart();
+});
+
+</script>
+
+<!-- <script src="https://code.jquery.com/jquery-3.2.1.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script> -->
+<!-- <script src="{{url_for('static',filename='index.js')}}"></script>
+	<script  type="text/javascript">
+		document.getElementById("image").src = "data:image/png;base64," + {{ image }};
+	</script> -->
+
+</html>
