@@ -107,11 +107,17 @@ article{
     position: relative;
     z-index: 100;
   }
+  #gallery img {
+    margin: 20px;
+    height: 200px;
+    width: 260px;
+  }
 </style>
 <h1>Party Pi</h1> {{ size }}
 <!-- <div><img id="image" src="{{ url_for('video_feed') }}" /> -->
 <div id='container'>
   <div class='video-container'>
+    <div id='output'></div>
     <video height=480 width=600 autoplay="true" id="videoElement"></video>
 
     <div class="overlay-desc">
@@ -126,6 +132,7 @@ article{
   <div id="countdownBar"></div>
 </div>
   </div>
+<div id='gallery'></div>
 
 </div>
 
@@ -134,8 +141,7 @@ article{
   <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
     <!-- <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation"> -->
       <span class="navbar-toggler-icon"></span>
-    </button>
-    <a class="navbar-brand navbar-link " href="/">Party Pi</a>
+    <a class="navbar-brand navbar-link " href="/"></a>
     <!-- <form action="/select_mode" method="post">
     <button type="select_mode" id="selectMode" value="Select_mode" />
 </form> -->
@@ -150,8 +156,6 @@ article{
   </div>
 </div>
 <!-- <div id="show_emotion">Show happiness_</div> -->
-<div id="output"></div>
-
 
 <script src="https://code.jquery.com/jquery-3.2.1.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script>
 <!-- <script src="{{url_for('static',filename='index.js')}}"></script> -->
@@ -187,18 +191,14 @@ article{
   var $vid = $('video', '#container');
   // var $msg = $('#show_emotion');
 
-  // var ctx = canvas.getContext('2d');
-  // video.addEventListener('loadedmetadata', function() {
-  //           ctx.translate(video.videoWidth, 0);
-  //           ctx.scale(-1, 1);
-  //        });
-
   // $msg.css({
   //   top: $vid.offset().top + (5 * ($vid.height() / 2) - ($msg.height() / 2)),
   //   left: $vid.offset().left + (0.2 * ($vid.width() / 2) - ($msg.width() / 2)),
   //   "font-family": "sans-serif"
   // });
   navigator.mediaDevices.getUserMedia = navigator.mediaDevices.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.oGetUserMedia;
+
+  function startWebcam() {
 
   if (navigator.getUserMedia) {
     navigator.getUserMedia({
@@ -210,13 +210,14 @@ article{
   function handleVideo(stream) {
     video.src = window.URL.createObjectURL(stream);
     video.onloadedmetadata = function(e) {
-      //
+      window.localStream = stream;
     }
   }
 
   function videoError(e) {
     console.log("Error: " + e);
   }
+}
 
   (function() {
     "use strict";
@@ -226,8 +227,22 @@ article{
 
     var initialize = function() {
       video = $("#videoElement").get(0);
+      startWebcam();
       $("#play").click(function() {
+        // Move photos below
+        $('#output img').each(function(i) {
+          $(this).attr('class', 'gallery');
+          $(this).appendTo("#gallery");
+        });
+        // $("#output img").appendTo("#gallery")
+        // Show and start webcam
+        $("#videoElement").show();
+        startWebcam();
+        // var track = window.localStream.getTracks()[0];
+        // track.start();
+        // Start timer
         move();
+        // Capture image and load image
         setTimeout(captureImage,3000);
       });
     };
@@ -258,12 +273,15 @@ article{
         // var toType = function(obj) {
         //   return ({}).toString.call(obj).match(/\s([a-zA-Z]+)/)[1].toLowerCase()
         // }
-        console.log("Capture Image completed: " + data.substring(0, 40));
-        // console.log(o)
+        // Add photo to top
         $output = $("#output");
         var img = document.createElement('img')
+        // img.setAttribute('id', 'photo');
         img.src = "data:image/jpeg;base64," + data;
         $output.prepend(img);
+        // var track = window.localStream.getTracks()[0];
+        // track.stop()
+        $("#videoElement").hide();
       });
     };
 
@@ -302,7 +320,7 @@ article{
         }
     }
 }
-
+  <!-- TEXT SHUFFLER -->
 function WordShuffler(holder,opt){
   var that = this;
   var time = 0;
@@ -343,8 +361,6 @@ function WordShuffler(holder,opt){
       options[key] = opt[key];
     }
   }
-
-
 
   this.needUpdate = true;
   this.fps = options.fps;
