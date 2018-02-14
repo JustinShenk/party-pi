@@ -1,12 +1,11 @@
 <html>
 <!-- <script type='text/javascript' src='{{ url_for('static', filename='shuffler.js') }}'></script> -->
 <style>
-  html,
+  /* html,
   body {
-    margin: 0;
     padding: 0;
     font-family: Helvetica, Arial, sans-serif;
-  }
+  } */
 
   * {
     box-sizing: border-box;
@@ -18,7 +17,7 @@
 
 body{
 	margin:0;
-	overflow:hidden;
+	/* overflow:hidden; */
 	background:#222;
 	font-family: monospace;
 }
@@ -113,7 +112,8 @@ article{
     width: 260px;
   }
 </style>
-<h1>Party Pi</h1> {{ size }}
+<body>
+<h1></h1>
 <!-- <div><img id="image" src="{{ url_for('video_feed') }}" /> -->
 <div id='container'>
   <div class='video-container'>
@@ -132,29 +132,9 @@ article{
   <div id="countdownBar"></div>
 </div>
   </div>
+
 <div id='gallery'></div>
-
-</div>
-
-<div>
-  <!-- NAVIGATION BAR -->
-  <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-    <!-- <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation"> -->
-      <span class="navbar-toggler-icon"></span>
-    <a class="navbar-brand navbar-link " href="/"></a>
-    <!-- <form action="/select_mode" method="post">
-    <button type="select_mode" id="selectMode" value="Select_mode" />
-</form> -->
-  </nav>
-</div>
-<div class="container-fluid">
-  <div class="starter-template">
-    <div>
-      <!-- <button id="capture" download="player.jpg" value="Play" style="">Capture</button> -->
-      <!-- <input type="button" id="offButton" value="Find faces (off)" style=""> -->
-    </div>
-  </div>
-</div>
+</body>
 <!-- <div id="show_emotion">Show happiness_</div> -->
 
 <script src="https://code.jquery.com/jquery-3.2.1.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script>
@@ -232,7 +212,7 @@ article{
         // Move photos below
         $('#output img').each(function(i) {
           $(this).attr('class', 'gallery');
-          $(this).appendTo("#gallery");
+          $(this).prependTo("#gallery");
         });
         // $("#output img").appendTo("#gallery")
         // Show and start webcam

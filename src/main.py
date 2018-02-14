@@ -29,7 +29,7 @@ face_detector = load_detection_model()
 # Get input model shapes for inference
 emotion_target_size = emotion_classifier.input_shape[1:3]
 EMOTIONS = list(get_labels().values())
-8current_emotion = EMOTIONS[3]
+current_emotion = EMOTIONS[3]
 
 
 def rank_players(player_data, photo):
@@ -284,4 +284,4 @@ def none():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, threaded=True)
+    app.run(debug=False, threaded=True)

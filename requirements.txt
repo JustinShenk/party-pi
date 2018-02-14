@@ -1,5 +1,11 @@
 opencv-contrib-python
+Flask
+gunicorn
+itsdangerous
+Jinja2
 scipy
+six
+Werkzeug
 keras
 tensorflow>=1.3
 h5py
