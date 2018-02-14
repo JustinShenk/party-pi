@@ -5,6 +5,7 @@ import numpy as np
 import random
 import re
 import tensorflow as tf
+import uuid
 
 from flask import Flask, Response, request, render_template, send_file
 from io import BytesIO
@@ -24,7 +25,8 @@ app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 # party_pi = PartyPi(web=True)
 print("Game loaded")
 face_detector = load_detection_model()
-
+if not os.path.exists('static/images'):
+    os.mkdir('static/images')
 
 # Get input model shapes for inference
 emotion_target_size = emotion_classifier.input_shape[1:3]
@@ -190,6 +192,7 @@ def predict_emotions(faces, gray_image):
 def readb64(base64_string):
     sbuf = BytesIO()
     sbuf.write(base64.b64decode(base64_string))
+    sbuf.seek(0)
     pimg = Image.open(sbuf)
     return cv2.cvtColor(np.array(pimg), cv2.COLOR_RGB2BGR)
 
@@ -210,21 +213,27 @@ def image():
     image_b64 = request.values['imageBase64']
     image_data = re.sub('^data:image/.+;base64,', '',
                         image_b64)
-    img = readb64(image_data)
-    app.logger.debug(img.shape)
-    cv2.imwrite('player.jpg', img)
-    gray_image = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-    faces = detect_faces(face_detector, gray_image)
-    app.logger.debug("Faces: ", len(faces))
-    player_data = predict_emotions(faces, gray_image)
-    photo = rank_players(player_data, img)
-    # photo = party_pi.photo
-    cv2.imwrite('static/photo.jpg', photo)
-    #
-    # _, img_encoded = cv2.imencode('.jpg', photo)
-    # print("OUTPUT:", img_encoded.tostring())
-    with open('static/photo.jpg', 'rb') as image_file:
-        encoded_string = base64.b64encode(image_file.read())
+    try:
+        img = readb64(image_data)
+        app.logger.debug(img.shape)
+        # cv2.imwrite('player.jpg', img)
+        gray_image = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+        faces = detect_faces(face_detector, gray_image)
+        app.logger.debug("Faces: ", len(faces))
+        player_data = predict_emotions(faces, gray_image)
+        photo = rank_players(player_data, img)
+        # photo = party_pi.photo
+        photo_path = 'static/images/{}.jpg'.format(str(uuid.uuid4()))
+        cv2.imwrite(photo_path, photo)
+        print("Saved image to {}".format(photo_path))
+        #
+        # _, img_encoded = cv2.imencode('.jpg', photo)
+        # print("OUTPUT:", img_encoded.tostring())
+        with open(photo_path, 'rb') as image_file:
+            encoded_string = base64.b64encode(image_file.read())
+    except Exception as e:
+        print("ERROR:", e)
+        return ''
     return encoded_string
 
 
