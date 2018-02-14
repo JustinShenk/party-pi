@@ -124,7 +124,7 @@ article{
       <article>
       <h1 id="headline">Emotion Detection Game</h1>
       <p id="text">Show happiness_</p>
-      <button id="play" download="player.jpg">Play</button>
+      <button id="play">Play</button>
   </article>
   </div>
   </div>
@@ -168,7 +168,7 @@ article{
   // });
 
   var video = document.querySelector("#videoElement");
-  var $vid = $('video', '#container');
+  // var $vid = $('video', '#container');
   // var $msg = $('#show_emotion');
 
   // $msg.css({
@@ -176,15 +176,18 @@ article{
   //   left: $vid.offset().left + (0.2 * ($vid.width() / 2) - ($msg.width() / 2)),
   //   "font-family": "sans-serif"
   // });
-  navigator.mediaDevices.getUserMedia = navigator.mediaDevices.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.oGetUserMedia;
+
 
   function startWebcam() {
 
-  if (navigator.getUserMedia) {
-    navigator.getUserMedia({
+    navigator.mediaDevices.getUserMedia = navigator.mediaDevices.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.oGetUserMedia;
+  if (navigator.mediaDevices.getUserMedia) {
+    navigator.mediaDevices.getUserMedia({
       video: true,
       audio: false
     }, handleVideo, videoError);
+  } else {
+    console.log("getUserMedia not supported")
   }
 
   function handleVideo(stream) {
