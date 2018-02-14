@@ -126,8 +126,10 @@
   <h1></h1>
   <div id='container'>
     <div class='video-container'>
-      <div id='output'></div>
-      <video height=480 width=600 autoplay="true" id="videoElement"></video>
+      <div id='output'>
+      </div>
+      <image id="loadingImage" src="{{ url_for('static', filename='loading.jpg')}}" height="480px" width="600px"/>
+      <video height=480px width=600px autoplay="true" id="videoElement"></video>
 
       <div class="overlay-desc">
         <article>
@@ -173,7 +175,7 @@
   }
 
   var webcam;
-  var debug = false;
+  var debug = true;
 
   function startWebcam() {
     if (debug | location.protocol === 'https:') {
@@ -253,6 +255,9 @@
 
     var captureImage = function() {
       // setTimeout(move, 3000);
+      // Loading screen
+      $("#loadingImage").show();
+
       video = $("#videoElement").get(0);
       var canvas = document.createElement("canvas");
       canvas.width = video.videoWidth * scale;
@@ -260,7 +265,6 @@
       canvas.getContext('2d')
         .drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      var img = document.createElement("img");
       var dataURL = canvas.toDataURL();
       document.querySelector('#play').href = dataURL;
 
@@ -283,6 +287,7 @@
         $output.prepend(img);
         // var track = window.localStream.getTracks()[0];
         // track.stop()
+        $("#loadingImage").hide();
         $("#videoElement").hide();
       });
     };
