@@ -1,5 +1,4 @@
 <html>
-<!-- <script type='text/javascript' src='{{ url_for('static', filename='shuffler.js') }}'></script> -->
 <style>
   /* html,
   body {
@@ -11,47 +10,49 @@
     box-sizing: border-box;
   }
 
-  h1{
-	margin-top:0;
-}
+  h1 {
+    margin-top: 0;
+  }
 
-body{
-	margin:0;
-	/* overflow:hidden; */
-	background:#222;
-	font-family: monospace;
-}
+  body {
+    margin: 0;
+    /* overflow:hidden; */
+    background: #222;
+    font-family: monospace;
+  }
 
-button{
-	font-family: monospace;
-	border:2px solid tomato;
-	background:transparent;
-	width:250px;
-	font-size:1.2em;
-	padding : 10px 0;
-	border-radius:5px;
-	display:block;
-  cursor:pointer;
-	margin:1em auto;
-}
-article{
-	width:80%;
-	margin:auto;
-	font-size:2em;
-	top:50%;
-	position:relative;
-	transform:translateY(-50%);
-}
+  button {
+    font-family: monospace;
+    border: 2px solid tomato;
+    background: transparent;
+    width: 250px;
+    font-size: 1.2em;
+    padding: 10px 0;
+    border-radius: 5px;
+    display: block;
+    cursor: pointer;
+    margin: 1em auto;
+  }
+
+  article {
+    width: 80%;
+    margin: auto;
+    font-size: 2em;
+    top: 50%;
+    position: relative;
+    transform: translateY(-50%);
+  }
 
   #myProgress {
     width: 100%;
     background-color: grey;
-}
-#countdownBar {
+  }
+
+  #countdownBar {
     width: 1%;
     height: 30px;
     background-color: tomato;
-}
+  }
 
   /* .container {
     border: 1px solid #575757;
@@ -74,17 +75,23 @@ article{
     height: 375px;
     background-color: #666;
 } */
-.video-container {
-  position: relative;
-}
-.overlay-desc {
-  background: rgba(0,0,0,0);
-  position: absolute;
-  top: 0; right: 0; bottom: 0; left: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+
+  .video-container {
+    position: relative;
+  }
+
+  .overlay-desc {
+    background: rgba(0, 0, 0, 0);
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   video {
     position: relative;
     z-index: -1;
@@ -96,58 +103,51 @@ article{
     z-index: 1;
   }
 
-  #headline{
+  #headline {
     /* margin-top: -100px; */
     top: -275px;
     position: relative;
   }
-  #text{
-    top:18px;
+
+  #text {
+    top: 18px;
     position: relative;
     z-index: 100;
   }
+
   #gallery img {
     margin: 20px;
     height: 200px;
     width: 260px;
   }
 </style>
+
 <body>
-<h1></h1>
-<!-- <div><img id="image" src="{{ url_for('video_feed') }}" /> -->
-<div id='container'>
-  <div class='video-container'>
-    <div id='output'></div>
-    <video height=480 width=600 autoplay="true" id="videoElement"></video>
+  <h1></h1>
+  <div id='container'>
+    <div class='video-container'>
+      <div id='output'></div>
+      <video height=480 width=600 autoplay="true" id="videoElement"></video>
 
-    <div class="overlay-desc">
-      <article>
-      <h1 id="headline">Emotion Detection Game</h1>
-      <p id="text">Show happiness_</p>
-      <button id="play">Play</button>
-  </article>
-  </div>
-  </div>
+      <div class="overlay-desc">
+        <article>
+          <h1 id="headline">Emotion Detection Game</h1>
+          <p id="text">Show happiness_</p>
+          <button id="play">Play</button>
+        </article>
+      </div>
+    </div>
     <div id="myProgress">
-  <div id="countdownBar"></div>
-</div>
+      <div id="countdownBar"></div>
+    </div>
   </div>
 
-<div id='gallery'></div>
+  <div id='gallery'></div>
 </body>
-<!-- <div id="show_emotion">Show happiness_</div> -->
 
 <script src="https://code.jquery.com/jquery-3.2.1.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script>
-<!-- <script src="{{url_for('static',filename='index.js')}}"></script> -->
+
 <script type="text/javascript">
-  // $(".onButton").click(function() {
-  //   var image = document.getElementById('image');
-  //   image.src = "{{ url_for('none') }}";
-  // });
-  // $(".offButton").click(function() {
-  //   var image = document.getElementById('image');
-  //   image.src = "{{ url_for('video_feed') }}";
-  // });
 
   // $(function() {
   //   $('.selectMode').click(function() {
@@ -167,40 +167,64 @@ article{
   //   });
   // });
 
-  var video = document.querySelector("#videoElement");
-  // var $vid = $('video', '#container');
-  // var $msg = $('#show_emotion');
+  function errorMessage(message, e) {
+    console.error(message, typeof e == 'undefined' ? '' : e);
+    //alert(message);
+  }
 
-  // $msg.css({
-  //   top: $vid.offset().top + (5 * ($vid.height() / 2) - ($msg.height() / 2)),
-  //   left: $vid.offset().left + (0.2 * ($vid.width() / 2) - ($msg.width() / 2)),
-  //   "font-family": "sans-serif"
-  // });
-
+  var webcam;
+  var debug = false;
 
   function startWebcam() {
+    if (debug | location.protocol === 'https:') {
 
-    navigator.mediaDevices.getUserMedia = navigator.mediaDevices.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.oGetUserMedia;
-  if (navigator.mediaDevices.getUserMedia) {
-    navigator.mediaDevices.getUserMedia({
-      video: true,
-      audio: false
-    }, handleVideo, videoError);
-  } else {
-    console.log("getUserMedia not supported")
-  }
+      navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.oGetUserMedia;
 
-  function handleVideo(stream) {
-    video.src = window.URL.createObjectURL(stream);
-    video.onloadedmetadata = function(e) {
-      window.localStream = stream;
-    }
-  }
+      if (navigator.getUserMedia) {
+        navigator.getUserMedia({
+          video: true,
+          audio: false
+        }, handleVideo, videoError);
+      } else {
+        console.log("getUserMedia not supported")
+      }
 
-  function videoError(e) {
-    console.log("Error: " + e);
+      function handleVideo(stream) {
+        var video = $("#videoElement").get(0);
+        video.src = window.URL.createObjectURL(stream);
+        var mediaStreamTrack = stream.getVideoTracks()[0];
+        if (typeof mediaStreamTrack != "undefined") {
+          mediaStreamTrack.onended = function() { //for Chrome.
+            errorMessage('Your webcam is busy!')
+          }
+        } else errorMessage('Permission denied!');
+      }
+
+      function videoError(e) {
+        var message;
+        switch (e.name) {
+          case 'NotFoundError':
+          case 'DevicesNotFoundError':
+            message = 'Please setup your webcam first.';
+            break;
+          case 'SourceUnavailableError':
+            message = 'Your webcam is busy';
+            break;
+          case 'PermissionDeniedError':
+          case 'SecurityError':
+            message = 'Permission denied!';
+            break;
+          default:
+            errorMessage('Reeeejected!', e);
+            return;
+        }
+        errorMessage(message);
+      }
+
+      // video.onloadedmetadata = function(e) {
+      // webcam = stream;
+    } else errorMessage('Use https protocol for open this page.')
   }
-}
 
   (function() {
     "use strict";
@@ -209,7 +233,6 @@ article{
     var scale = 0.7;
 
     var initialize = function() {
-      video = $("#videoElement").get(0);
       startWebcam();
       $("#play").click(function() {
         // Move photos below
@@ -221,18 +244,16 @@ article{
         // Show and start webcam
         $("#videoElement").show();
         startWebcam();
-        // var track = window.localStream.getTracks()[0];
-        // track.start();
         // Start timer
-        move();
+        setTimeout(move);
         // Capture image and load image
-        setTimeout(captureImage,3000);
+        setTimeout(captureImage, 3000);
       });
     };
 
     var captureImage = function() {
       // setTimeout(move, 3000);
-
+      video = $("#videoElement").get(0);
       var canvas = document.createElement("canvas");
       canvas.width = video.videoWidth * scale;
       canvas.height = video.videoHeight * scale;
@@ -243,8 +264,6 @@ article{
       var dataURL = canvas.toDataURL();
       document.querySelector('#play').href = dataURL;
 
-      // img.src = canvas.toDataURL();
-      // $output.prepend(img);
       $.ajax({
         type: "POST",
         url: "{{ url_for('image') }}",
@@ -272,164 +291,148 @@ article{
 
   }());
 
-  //
-  // $output = $("#output");
-  // video_0 = $("#video").get(0);
-  // $("#capture").click(captureImage);
-  // var captureImage = function() {
-  //         var canvas = document.createElement("canvas");
-  //         canvas.width = video.videoWidth * scale;
-  //         canvas.height = video.videoHeight * scale;
-  //         alert(canvas.height);
-  //         canvas.getContext('2d')
-  //               .drawImage(video_0, 0, 0, canvas.width, canvas.height);
-  //
-  //         var img = document.createElement("img");
-  //         img.src = canvas.toDataURL();
-  //         $output.prepend(img);
-  //     };
-
   <!-- PROGRESS BAR -->
   function move() {
     var elem = document.getElementById("countdownBar");
     var width = 1;
     var id = setInterval(frame, 37);
+
     function frame() {
-        if (width >= 100) {
-            clearInterval(id);
-        } else {
-            width++;
-            elem.style.width = width + '%';
-        }
+      if (width >= 100) {
+        clearInterval(id);
+      } else {
+        width++;
+        elem.style.width = width + '%';
+      }
     }
-}
+  }
   <!-- TEXT SHUFFLER -->
-function WordShuffler(holder,opt){
-  var that = this;
-  var time = 0;
-  this.now;
-  this.then = Date.now();
+  function WordShuffler(holder, opt) {
+    var that = this;
+    var time = 0;
+    this.now;
+    this.then = Date.now();
 
-  this.delta;
-  this.currentTimeOffset = 0;
+    this.delta;
+    this.currentTimeOffset = 0;
 
-  this.word = null;
-  this.currentWord = null;
-  this.currentCharacter = 0;
-  this.currentWordLength = 0;
+    this.word = null;
+    this.currentWord = null;
+    this.currentCharacter = 0;
+    this.currentWordLength = 0;
 
 
-  var options = {
-    fps : 20,
-    timeOffset : 5,
-    textColor : '#000',
-    fontSize : "50px",
-    useCanvas : false,
-    mixCapital : false,
-    mixSpecialCharacters : false,
-    needUpdate : true,
-    colors : [
-      '#f44336','#e91e63','#9c27b0',
-      '#673ab7','#3f51b5','#2196f3',
-      '#03a9f4','#00bcd4','#009688',
-      '#4caf50','#8bc34a','#cddc39',
-      '#ffeb3b','#ffc107','#ff9800',
-      '#ff5722','#795548','#9e9e9e',
-      '#607d8b'
+    var options = {
+      fps: 20,
+      timeOffset: 5,
+      textColor: '#000',
+      fontSize: "50px",
+      useCanvas: false,
+      mixCapital: false,
+      mixSpecialCharacters: false,
+      needUpdate: true,
+      colors: [
+        '#f44336', '#e91e63', '#9c27b0',
+        '#673ab7', '#3f51b5', '#2196f3',
+        '#03a9f4', '#00bcd4', '#009688',
+        '#4caf50', '#8bc34a', '#cddc39',
+        '#ffeb3b', '#ffc107', '#ff9800',
+        '#ff5722', '#795548', '#9e9e9e',
+        '#607d8b'
+      ]
+    }
+
+    if (typeof opt != "undefined") {
+      for (key in opt) {
+        options[key] = opt[key];
+      }
+    }
+
+    this.needUpdate = true;
+    this.fps = options.fps;
+    this.interval = 1000 / this.fps;
+    this.timeOffset = options.timeOffset;
+    this.textColor = options.textColor;
+    this.fontSize = options.fontSize;
+    this.mixCapital = options.mixCapital;
+    this.mixSpecialCharacters = options.mixSpecialCharacters;
+    this.colors = options.colors;
+
+    this.useCanvas = options.useCanvas;
+
+    this.chars = [
+      'A', 'B', 'C', 'D',
+      'E', 'F', 'G', 'H',
+      'I', 'J', 'K', 'L',
+      'M', 'N', 'O', 'P',
+      'Q', 'R', 'S', 'T',
+      'U', 'V', 'W', 'X',
+      'Y', 'Z'
+    ];
+    this.specialCharacters = [
+      '!', '§', '$', '%',
+      '&', '/', '(', ')',
+      '=', '?', '_', '<',
+      '>', '^', '°', '*',
+      '#', '-', ':', ';', '~'
     ]
-  }
 
-  if(typeof opt != "undefined"){
-    for(key in opt){
-      options[key] = opt[key];
+    if (this.mixSpecialCharacters) {
+      this.chars = this.chars.concat(this.specialCharacters);
     }
-  }
 
-  this.needUpdate = true;
-  this.fps = options.fps;
-  this.interval = 1000/this.fps;
-  this.timeOffset = options.timeOffset;
-  this.textColor = options.textColor;
-  this.fontSize = options.fontSize;
-  this.mixCapital = options.mixCapital;
-  this.mixSpecialCharacters = options.mixSpecialCharacters;
-  this.colors = options.colors;
-
-   this.useCanvas = options.useCanvas;
-
-  this.chars = [
-    'A','B','C','D',
-    'E','F','G','H',
-    'I','J','K','L',
-    'M','N','O','P',
-    'Q','R','S','T',
-    'U','V','W','X',
-    'Y','Z'
-  ];
-  this.specialCharacters = [
-    '!','§','$','%',
-    '&','/','(',')',
-    '=','?','_','<',
-    '>','^','°','*',
-    '#','-',':',';','~'
-  ]
-
-  if(this.mixSpecialCharacters){
-    this.chars = this.chars.concat(this.specialCharacters);
-  }
-
-  this.getRandomColor = function () {
-    var randNum = Math.floor( Math.random() * this.colors.length );
-    return this.colors[randNum];
-  }
-
-  //if Canvas
-
-  this.position = {
-    x : 0,
-    y : 50
-  }
-
-  //if DOM
-  if(typeof holder != "undefined"){
-    this.holder = holder;
-  }
-
-  if(!this.useCanvas && typeof this.holder == "undefined"){
-    console.warn('Holder must be defined in DOM Mode. Use Canvas or define Holder');
-  }
-
-
-  this.getRandCharacter = function(characterToReplace){
-    if(characterToReplace == " "){
-      return ' ';
+    this.getRandomColor = function() {
+      var randNum = Math.floor(Math.random() * this.colors.length);
+      return this.colors[randNum];
     }
-    var randNum = Math.floor(Math.random() * this.chars.length);
-    var lowChoice =  -.5 + Math.random();
-    var picketCharacter = this.chars[randNum];
-    var choosen = picketCharacter.toLowerCase();
-    if(this.mixCapital){
-      choosen = lowChoice < 0 ? picketCharacter.toLowerCase() : picketCharacter;
+
+    //if Canvas
+
+    this.position = {
+      x: 0,
+      y: 50
     }
-    return choosen;
 
-  }
+    //if DOM
+    if (typeof holder != "undefined") {
+      this.holder = holder;
+    }
 
-  this.writeWord = function(word){
-    this.word = word;
-    this.currentWord = word.split('');
-    this.currentWordLength = this.currentWord.length;
+    if (!this.useCanvas && typeof this.holder == "undefined") {
+      console.warn('Holder must be defined in DOM Mode. Use Canvas or define Holder');
+    }
 
-  }
 
-  this.generateSingleCharacter = function (color,character) {
-    var span = document.createElement('span');
-    span.style.color = color;
-    span.innerHTML = character;
-    return span;
-  }
+    this.getRandCharacter = function(characterToReplace) {
+      if (characterToReplace == " ") {
+        return ' ';
+      }
+      var randNum = Math.floor(Math.random() * this.chars.length);
+      var lowChoice = -.5 + Math.random();
+      var picketCharacter = this.chars[randNum];
+      var choosen = picketCharacter.toLowerCase();
+      if (this.mixCapital) {
+        choosen = lowChoice < 0 ? picketCharacter.toLowerCase() : picketCharacter;
+      }
+      return choosen;
 
-  this.updateCharacter = function (time) {
+    }
+
+    this.writeWord = function(word) {
+      this.word = word;
+      this.currentWord = word.split('');
+      this.currentWordLength = this.currentWord.length;
+
+    }
+
+    this.generateSingleCharacter = function(color, character) {
+      var span = document.createElement('span');
+      span.style.color = color;
+      span.innerHTML = character;
+      return span;
+    }
+
+    this.updateCharacter = function(time) {
 
       this.now = Date.now();
       this.delta = this.now - this.then;
@@ -439,43 +442,43 @@ function WordShuffler(holder,opt){
 
         var word = [];
 
-        if(this.currentTimeOffset === this.timeOffset && this.currentCharacter !== this.currentWordLength){
+        if (this.currentTimeOffset === this.timeOffset && this.currentCharacter !== this.currentWordLength) {
           this.currentCharacter++;
           this.currentTimeOffset = 0;
         }
-        for(var k=0;k<this.currentCharacter;k++){
+        for (var k = 0; k < this.currentCharacter; k++) {
           word.push(this.currentWord[k]);
         }
 
-        for(var i=0;i<this.currentWordLength - this.currentCharacter;i++){
-          word.push(this.getRandCharacter(this.currentWord[this.currentCharacter+i]));
+        for (var i = 0; i < this.currentWordLength - this.currentCharacter; i++) {
+          word.push(this.getRandCharacter(this.currentWord[this.currentCharacter + i]));
         }
 
 
-        if(that.useCanvas){
-          c.clearRect(0,0,stage.x * stage.dpr , stage.y * stage.dpr);
+        if (that.useCanvas) {
+          c.clearRect(0, 0, stage.x * stage.dpr, stage.y * stage.dpr);
           c.font = that.fontSize + " sans-serif";
           var spacing = 0;
-          word.forEach(function (w,index) {
-            if(index > that.currentCharacter){
+          word.forEach(function(w, index) {
+            if (index > that.currentCharacter) {
               c.fillStyle = that.getRandomColor();
-            }else{
+            } else {
               c.fillStyle = that.textColor;
             }
             c.fillText(w, that.position.x + spacing, that.position.y);
             spacing += c.measureText(w).width;
           });
-        }else{
+        } else {
 
-          if(that.currentCharacter === that.currentWordLength){
+          if (that.currentCharacter === that.currentWordLength) {
             that.needUpdate = false;
           }
           this.holder.innerHTML = '';
-          word.forEach(function (w,index) {
+          word.forEach(function(w, index) {
             var color = null
-            if(index > that.currentCharacter){
+            if (index > that.currentCharacter) {
               color = that.getRandomColor();
-            }else{
+            } else {
               color = that.textColor;
             }
             that.holder.appendChild(that.generateSingleCharacter(color, w));
@@ -483,60 +486,59 @@ function WordShuffler(holder,opt){
         }
         this.then = this.now - (this.delta % this.interval);
       }
-  }
-
-  this.restart = function () {
-    this.currentCharacter = 0;
-    this.needUpdate = true;
-  }
-
-  function update(time) {
-    time++;
-    if(that.needUpdate){
-      that.updateCharacter(time);
     }
-    requestAnimationFrame(update);
+
+    this.restart = function() {
+      this.currentCharacter = 0;
+      this.needUpdate = true;
+    }
+
+    function update(time) {
+      time++;
+      if (that.needUpdate) {
+        that.updateCharacter(time);
+      }
+      requestAnimationFrame(update);
+    }
+
+    this.writeWord(this.holder.innerHTML);
+
+    console.log(this.currentWord);
+    update(time);
   }
 
-  this.writeWord(this.holder.innerHTML);
+  var headline = document.getElementById('headline');
+  var text = document.getElementById('text');
+  var shuffler = document.getElementById('play');
 
-  console.log(this.currentWord);
-  update(time);
-}
+  var headText = new WordShuffler(headline, {
+    textColor: '#fff',
+    timeOffset: 1, // was 18
+    mixCapital: true,
+    mixSpecialCharacters: true
+  });
 
-var headline = document.getElementById('headline');
-var text = document.getElementById('text');
-var shuffler = document.getElementById('play');
+  var pText = new WordShuffler(text, {
+    textColor: '#fff',
+    timeOffset: 2
+  });
 
-var headText = new WordShuffler(headline,{
-  textColor : '#fff',
-  timeOffset : 1, // was 18
-  mixCapital : true,
-  mixSpecialCharacters : true
-});
+  var buttonText = new WordShuffler(shuffler, {
+    textColor: 'tomato',
+    timeOffset: 10
+  });
 
-var pText = new WordShuffler(text,{
-  textColor : '#fff',
-  timeOffset : 2
-});
-
-var buttonText = new WordShuffler(shuffler,{
-  textColor : 'tomato',
-  timeOffset : 10
-});
-
-shuffler.addEventListener('click',function () {
-  // headText.restart();
-  pText.restart();
-  // var text = document.getElementById('text');
-  // text.html('Show happiness_');
-  // var pText = new WordShuffler(text,{
-  //   textColor : '#fff',
-  //   timeOffset : 2
-  // });
-  buttonText.restart();
-});
-
+  shuffler.addEventListener('click', function() {
+    // headText.restart();
+    pText.restart();
+    // var text = document.getElementById('text');
+    // text.html('Show happiness_');
+    // var pText = new WordShuffler(text,{
+    //   textColor : '#fff',
+    //   timeOffset : 2
+    // });
+    buttonText.restart();
+  });
 </script>
 
 <!-- <script src="https://code.jquery.com/jquery-3.2.1.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script> -->
