@@ -1,17 +1,20 @@
 <html>
-<style>
-  /* html,
-  body {
-    padding: 0;
-    font-family: Helvetica, Arial, sans-serif;
-  } */
 
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+<!-- jQuery library -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<!-- Latest compiled JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<style>
   * {
     box-sizing: border-box;
   }
 
   h1 {
-    margin-top: 0;
+    margin-top: 20px;
   }
 
   body {
@@ -21,25 +24,17 @@
     font-family: monospace;
   }
 
-  button {
-    font-family: monospace;
-    border: 2px solid tomato;
-    background: transparent;
-    width: 250px;
-    font-size: 1.2em;
-    padding: 10px 0;
-    border-radius: 5px;
-    display: block;
-    cursor: pointer;
-    margin: 1em auto;
-  }
 
   article {
     width: 80%;
     margin: auto;
-    font-size: 2em;
-    top: 50%;
+    height: 480px;
     position: relative;
+    top: 100%;
+    text-align: center;
+    font-size: 2em;
+    /* top: 50%; */
+    /* position: relative; */
     transform: translateY(-50%);
   }
 
@@ -54,14 +49,6 @@
     background-color: tomato;
   }
 
-  /* .container {
-    border: 1px solid #575757;
-    width: 100%;
-    height: 320px;
-    overflow: hidden;
-    position: absolute;
-  } */
-
   #container {
     /* margin: 0px auto; */
     /* width: 500px;
@@ -70,24 +57,22 @@
     border: 10px #333 solid;
   }
 
-  /* #video {
-    width: 500px;
-    height: 375px;
-    background-color: #666;
-} */
-
   .video-container {
     position: relative;
   }
 
-  .overlay-desc {
+  .ui {
     background: rgba(0, 0, 0, 0);
-    position: absolute;
+    width: 600px;
+    text-align: center;
+    font-size: 2em;
+    /* position: absolute; */
     top: 0;
     right: 0;
     bottom: 0;
     left: 0;
-    display: flex;
+    /* display: flex; */
+    position: absolute;
     align-items: center;
     justify-content: center;
   }
@@ -97,22 +82,43 @@
     z-index: -1;
   }
 
-  #show_emotion {
-    position: absolute;
-    color: rgb(230, 200, 98);
-    z-index: 1;
-  }
-
   #headline {
     /* margin-top: -100px; */
-    top: -275px;
-    position: relative;
+    text-align: center;
+    top: 70px;
   }
 
   #text {
-    top: 18px;
+    top: 246px;
+    /* top: 40%; */
     position: relative;
+    color: rgb(230, 200, 98);
+    text-align: center;
     z-index: 100;
+  }
+
+  button {
+    font-family: monospace;
+    border: 2px solid tomato;
+    background: transparent;
+    width: 250px;
+    font-size: 1.2em;
+    padding: 10px 0;
+    border-radius: 5px;
+    display: block;
+    cursor: pointer;
+    margin: 1em auto;
+    position:relative;
+    bottom: -210px;
+    text-align: center;
+  }
+  #output img {
+    width: 600px;
+    height: 470px;
+  }
+  #gallery div {
+    margin: 20px;
+    padding-left: 30px;
   }
 
   #gallery img {
@@ -120,23 +126,43 @@
     height: 200px;
     width: 260px;
   }
+
+  #gallery h1 {
+    color: white;
+    margin: auto;
+  }
+
+  #secretImages {
+    visibility: hidden;
+    height: 0px;
+    width: 0px;
+  }
+
+  #purchaseNote {
+    color: white;
+    margin: auto;
+  }
 </style>
 
 <body>
-  <h1></h1>
   <div id='container'>
     <div class='video-container'>
       <div id='output'>
+        <image id="loadingImage" src="{{ url_for('static', filename='loading.jpg')}}" height="480px" width="600px" hidden=true />
       </div>
-      <image id="loadingImage" src="{{ url_for('static', filename='loading.jpg')}}" height="480px" width="600px"/>
       <video height=480px width=600px autoplay="true" id="videoElement"></video>
-
-      <div class="overlay-desc">
-        <article>
+      <div class="ui container-fluid">
+        <!-- <article> -->
+        <div class='row'>
           <h1 id="headline">Emotion Detection Game</h1>
+        </div>
+          <div class='row'>
           <p id="text">Show happiness_</p>
+        </div>
+        <div class='row'>
           <button id="play">Play</button>
-        </article>
+          </div>
+        <!-- </article> -->
       </div>
     </div>
     <div id="myProgress">
@@ -144,13 +170,17 @@
     </div>
   </div>
 
-  <div id='gallery'></div>
+  <div id='gallery'>
+    <h1>Gallery</h1>
+    <div id='galleryImages'></div>
+    <p id='purchaseNote'></p>
+    <div id='secretImages'></div>
+  </div>
 </body>
 
 <script src="https://code.jquery.com/jquery-3.2.1.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script>
 
 <script type="text/javascript">
-
   // $(function() {
   //   $('.selectMode').click(function() {
   //     $.ajax({
@@ -168,14 +198,28 @@
   //     });
   //   });
   // });
+  var emotionArray = [
+    'happy',
+    'angry',
+    'sad',
+    'disgust',
+    'fear',
+    'surprise',
+    'neutral'
+  ]
+
+  function getRandomEmotion() {
+    var randomNumber = Math.floor(Math.random() * emotionArray.length);
+    return emotionArray[randomNumber];
+  }
 
   function errorMessage(message, e) {
     console.error(message, typeof e == 'undefined' ? '' : e);
-    //alert(message);
   }
 
   var webcam;
   var debug = true;
+  var currentEmotion = 'happy';
 
   function startWebcam() {
     if (debug | location.protocol === 'https:') {
@@ -228,7 +272,7 @@
     } else errorMessage('Use https protocol for open this page.')
   }
 
-  (function() {
+  $(document).ready(function () {
     "use strict";
 
     var video, $output;
@@ -240,14 +284,24 @@
         // Move photos below
         $('#output img').each(function(i) {
           $(this).attr('class', 'gallery');
-          $(this).prependTo("#gallery");
+          $(this).prependTo("#galleryImages");
+        });
+        // Hide image overflow
+        $('#galleryImages img').each(function(i) {
+          if (i > 2) {
+            $(this).prependTo("#secretImages");
+            $("#purchaseNote").text('Sign up to see more photos.')
+          }
         });
         // $("#output img").appendTo("#gallery")
         // Show and start webcam
         $("#videoElement").show();
         startWebcam();
+        $("#text").text("Show " + currentEmotion + "_");
+        // Hide button
+        $(this).hide();
         // Start timer
-        setTimeout(move);
+        move();
         // Capture image and load image
         setTimeout(captureImage, 3000);
       });
@@ -267,18 +321,16 @@
 
       var dataURL = canvas.toDataURL();
       document.querySelector('#play').href = dataURL;
-
       $.ajax({
         type: "POST",
         url: "{{ url_for('image') }}",
         data: {
-          imageBase64: dataURL
+          imageBase64: dataURL,
+          emotion: currentEmotion
         },
-        // timeout: 3000
+        timeout: 10000
       }).done(function(data) {
-        // var toType = function(obj) {
-        //   return ({}).toString.call(obj).match(/\s([a-zA-Z]+)/)[1].toLowerCase()
-        // }
+        console.log('this data');
         // Add photo to top
         $output = $("#output");
         var img = document.createElement('img')
@@ -289,12 +341,13 @@
         // track.stop()
         $("#loadingImage").hide();
         $("#videoElement").hide();
+        $("button#play").show();
       });
     };
 
     $(initialize);
 
-  }());
+  });
 
   <!-- PROGRESS BAR -->
   function move() {
@@ -325,7 +378,6 @@
     this.currentWord = null;
     this.currentCharacter = 0;
     this.currentWordLength = 0;
-
 
     var options = {
       fps: 20,
@@ -494,6 +546,9 @@
     }
 
     this.restart = function() {
+      //   if (this.holder.id === 'text') {
+      //   this.holder = document.getElementById('text');
+      // }
       this.currentCharacter = 0;
       this.needUpdate = true;
     }
@@ -508,7 +563,6 @@
 
     this.writeWord(this.holder.innerHTML);
 
-    console.log(this.currentWord);
     update(time);
   }
 
@@ -535,13 +589,11 @@
 
   shuffler.addEventListener('click', function() {
     // headText.restart();
+    // Get random emotion
+    var emotion = getRandomEmotion();
+    currentEmotion = emotion;
+    pText.currentWord = 'Show ' + currentEmotion + '_            '
     pText.restart();
-    // var text = document.getElementById('text');
-    // text.html('Show happiness_');
-    // var pText = new WordShuffler(text,{
-    //   textColor : '#fff',
-    //   timeOffset : 2
-    // });
     buttonText.restart();
   });
 </script>
