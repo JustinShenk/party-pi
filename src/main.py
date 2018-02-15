@@ -30,11 +30,12 @@ if not os.path.exists('static/images'):
 
 # Get input model shapes for inference
 emotion_target_size = emotion_classifier.input_shape[1:3]
+
+# Get emotions
 EMOTIONS = list(get_labels().values())
-current_emotion = EMOTIONS[3]
 
 
-def rank_players(player_data, photo):
+def rank_players(player_data, photo, current_emotion='happy'):
     """ Rank players and display.
 
     Args:
@@ -161,8 +162,8 @@ def random_emotion():
     #     return emotionString
 
 
-def predict_emotions(faces, gray_image):
-    global graph, current_emotion
+def predict_emotions(faces, gray_image, current_emotion='happy'):
+    global graph
     player_data = []
     # Hyperparameters for bounding box
     emotion_offsets = (20, 40)
@@ -178,9 +179,8 @@ def predict_emotions(faces, gray_image):
         with graph.as_default():
             emotion_prediction = emotion_classifier.predict(gray_face)
         emotion_index = emotion_idx_lookup[current_emotion]
-        print("EMOTION INDEX: ", emotion_index, emotion_prediction)
+        app.logger.debug("EMOTION INDEX: ", emotion_index)
         emotion_score = emotion_prediction[0][emotion_index]
-        current_emotion_score = emotion_score
 
         x, y, w, h = face_coordinates
         face_dict = {'left': x, 'top': y, 'right': x + w, 'bottom': y + h}
@@ -209,10 +209,12 @@ def get_face(frame):
 
 @app.route('/image', methods=['POST', 'GET'])
 def image():
-    # data = request.data
+    # Get image
     image_b64 = request.values['imageBase64']
     image_data = re.sub('^data:image/.+;base64,', '',
                         image_b64)
+    # Get emotion
+    emotion = request.values['emotion']
     try:
         img = readb64(image_data)
         app.logger.debug(img.shape)
@@ -220,8 +222,9 @@ def image():
         gray_image = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
         faces = detect_faces(face_detector, gray_image)
         app.logger.debug("Faces: ", len(faces))
-        player_data = predict_emotions(faces, gray_image)
-        photo = rank_players(player_data, img)
+        player_data = predict_emotions(
+            faces, gray_image, emotion)
+        photo = rank_players(player_data, img, emotion)
         # photo = party_pi.photo
         photo_path = 'static/images/{}.jpg'.format(str(uuid.uuid4()))
         cv2.imwrite(photo_path, photo)
