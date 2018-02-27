@@ -48,7 +48,11 @@ Select Easy or Hard Mode (left or right arrow keys).
 Awards, Press, Demos
 ====================
 
-Party Pi was `featured <https://software.intel.com/en-us/blogs/2017/08/23/intel-developer-mesh-editor-s-picks-august-2017>`_ in the Intel Developer Mesh Editor's Picks (August 2017), was awarded the 2017 Intel Hack Challenge prize, and the technology was demonstrated at Intel's AI booth at NIPS 2017. It was demoed for students and faculty present at the 2016 and 2017 University of Osnabrueck Institute of Cognitive Science Christmas Parties.
+- `Featured <https://software.intel.com/en-us/blogs/2017/08/23/intel-developer-mesh-editor-s-picks-august-2017>`_ in the Intel Developer Mesh Editor's Picks (August 2017)
+- Awarded the 2017 Intel Hack Challenge prize
+- The technology was demonstrated at Intel's AI booth at NIPS 2017
+- Party Pi was demoed for students and faculty at the 2016 and 2017 Osnabrück University Institute of Cognitive Science Christmas parties
+- Received the 2018 Open Source Software Prize from Intevation GmbH
 
 TODO
 ====
