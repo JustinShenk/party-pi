@@ -15,9 +15,7 @@ Emotion detection is accomplished using an Inception-based neural network traine
 Demo
 ====
 
-`Screenshot <https://www.partypi.net/img/demo.png>`_
-
-`Pics from a demo at the Institute of Cognitive Science 2016 Christmas Party <http://coxi.partypi.net>`_
+`Pics from a demo at the Institute of Cognitive Science 2016 Christmas Party <https://imgur.com/a/zzf6O>`_
 
 
 Getting Started
