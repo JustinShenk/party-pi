@@ -63,6 +63,7 @@
 
     .video-container {
       position: relative;
+      height: 480px;
     }
 
     .ui {
@@ -82,7 +83,6 @@
     }
 
     video {
-      position: relative;
       z-index: -1;
     }
 
@@ -123,9 +123,13 @@
       text-align: center;
     }
 
+    input {
+      z-index: 200
+    }
+
     #output img {
       width: 600px;
-      height: 470px;
+      height: 480px;
     }
 
     #gallery div {
@@ -165,6 +169,7 @@
           <image id="loadingImage" src="{{ url_for('static', filename='loading.jpg')}}" height="480px" width="600px" hidden=true />
         </div>
         <video height=480px width=600px autoplay="true" id="videoElement"></video>
+        <image id='placeholder' src="{{ url_for('static', filename='loading.jpg')}}" height="480px" width="600px"></image>
       </div>
     </div>
 
@@ -276,7 +281,6 @@
           }
         });
 
-
         $.ajax({
           type: "POST",
           url: "{{ url_for('image') }}",
@@ -332,7 +336,9 @@
           video: true,
           audio: false
         }, handleVideo, videoError);
-        // $('#imageInputLabel').hide();
+        $('#placeholder').hide();
+        $('#imageInput').filestyle('destroy');
+        $('#imageInput').hide();
       } else {
         // alert("Your device is not yet supported. Please try on desktop Chrome.") // getUserMedia not supported
         $('#videoElement').hide();
@@ -441,6 +447,7 @@
         // img.setAttribute('id', 'photo');
         img.src = "data:image/jpeg;base64," + data;
         $output.prepend(img);
+        $("#play").show();
       });
     };
 
