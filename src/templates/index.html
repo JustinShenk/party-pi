@@ -1,5 +1,5 @@
 <html>
-
+<head>
 <!-- Latest compiled and minified CSS -->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 
@@ -8,6 +8,9 @@
 
 <!-- Latest compiled JavaScript -->
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+<script src="https://code.jquery.com/jquery-3.2.1.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script>
+
 <style>
   * {
     box-sizing: border-box;
@@ -143,6 +146,7 @@
     margin: auto;
   }
 </style>
+</head>
 
 <body>
   <div id='container'>
@@ -151,6 +155,7 @@
         <image id="loadingImage" src="{{ url_for('static', filename='loading.jpg')}}" height="480px" width="600px" hidden=true />
       </div>
       <video height=480px width=600px autoplay="true" id="videoElement"></video>
+      <input type="file" accept="image/*;" capture="camera">
       <div class="ui container-fluid">
         <!-- <article> -->
         <div class='row'>
@@ -178,7 +183,6 @@
   </div>
 </body>
 
-<script src="https://code.jquery.com/jquery-3.2.1.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script>
 
 <script type="text/javascript">
   // $(function() {
@@ -198,6 +202,18 @@
   //     });
   //   });
   // });
+
+//   function readURL(input) {
+//     if (input.files && input.files[0]) {
+//         var reader = new FileReader();
+//
+//         reader.onload = function (e) {
+//             $('#blah').attr('src', e.target.result);
+//         }
+//
+//         reader.readAsDataURL(input.files[0]);
+//     }
+// }
   var emotionArray = [
     'happy',
     'angry',
@@ -232,7 +248,7 @@
           audio: false
         }, handleVideo, videoError);
       } else {
-        console.log("getUserMedia not supported")
+        alert("Your device is not yet supported. Please try on desktop Chrome.") // getUserMedia not supported
       }
 
       function handleVideo(stream) {
