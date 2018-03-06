@@ -155,7 +155,10 @@
         <image id="loadingImage" src="{{ url_for('static', filename='loading.jpg')}}" height="480px" width="600px" hidden=true />
       </div>
       <video height=480px width=600px autoplay="true" id="videoElement"></video>
-      <input type="file" accept="image/*;" capture="camera">
+      <center>
+        <label id='imageInputLabel' for="imageInput" class="btn btn-block btn-outlined">Take Photo</label>
+        <input id='imageInput' style="visibility:hidden; display: none" type="file" accept="image/*;" capture="camera">
+      </center>
       <div class="ui container-fluid">
         <!-- <article> -->
         <div class='row'>
@@ -223,6 +226,27 @@
     'surprise',
     'neutral'
   ]
+  // Image upload for mobile device
+  var fileupload = $("#imageInput");
+
+  function readURL(input) {
+
+    if (input.files && input.files[0]) {
+      var reader = new FileReader();
+
+      reader.onload = function(e) {
+        $('#loadingImage').attr('src', e.target.result);
+      }
+
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+
+  fileupload.on('change', function(){
+    readURL(this);
+  })
+
+  // end image upload
 
   function getRandomEmotion() {
     var randomNumber = Math.floor(Math.random() * emotionArray.length);
@@ -247,8 +271,11 @@
           video: true,
           audio: false
         }, handleVideo, videoError);
+        $('#imageInputLabel').hide();
       } else {
-        alert("Your device is not yet supported. Please try on desktop Chrome.") // getUserMedia not supported
+        // alert("Your device is not yet supported. Please try on desktop Chrome.") // getUserMedia not supported
+        $('#videoElement').hide();
+        $('#play').hide();
       }
 
       function handleVideo(stream) {
