@@ -1,181 +1,199 @@
 <html>
+
 <head>
-<!-- Latest compiled and minified CSS -->
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous" />
 
-<!-- jQuery library -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <!-- jQuery library -->
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+  <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.3.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='bootstrap-filestyle.js') }}">
+  </script>
 
-<!-- Latest compiled JavaScript -->
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-<script src="https://code.jquery.com/jquery-3.2.1.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script>
+    h1 {
+      margin-top: 20px;
+    }
 
-<style>
-  * {
-    box-sizing: border-box;
-  }
-
-  h1 {
-    margin-top: 20px;
-  }
-
-  body {
-    margin: 0;
-    /* overflow:hidden; */
-    background: #222;
-    font-family: monospace;
-  }
+    body {
+      margin: 0 auto;
+      /* overflow:hidden; */
+      /* background: #222; */
+      font-family: monospace;
+    }
 
 
-  article {
-    width: 80%;
-    margin: auto;
-    height: 480px;
-    position: relative;
-    top: 100%;
-    text-align: center;
-    font-size: 2em;
-    /* top: 50%; */
-    /* position: relative; */
-    transform: translateY(-50%);
-  }
+    article {
+      width: 80%;
+      margin: auto;
+      height: 480px;
+      position: relative;
+      top: 100%;
+      text-align: center;
+      font-size: 2em;
+      /* top: 50%; */
+      /* position: relative; */
+      transform: translateY(-50%);
+    }
 
-  #myProgress {
-    width: 100%;
-    background-color: grey;
-  }
+    #myProgress {
+      width: 100%;
+      background-color: grey;
+    }
 
-  #countdownBar {
-    width: 1%;
-    height: 30px;
-    background-color: tomato;
-  }
+    #countdownBar {
+      width: 1%;
+      height: 30px;
+      background-color: tomato;
+    }
 
-  #container {
-    /* margin: 0px auto; */
-    /* width: 500px;
+    #container {
+      /* margin: 0px auto; */
+      /* width: 500px;
     height: 375px; */
-    text-align: center;
-    border: 10px #333 solid;
-  }
+      text-align: center;
+      border: 10px #333 solid;
+    }
 
-  .video-container {
-    position: relative;
-  }
+    .video-container {
+      position: relative;
+    }
 
-  .ui {
-    background: rgba(0, 0, 0, 0);
-    width: 600px;
-    text-align: center;
-    font-size: 2em;
-    /* position: absolute; */
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    /* display: flex; */
-    position: absolute;
-    align-items: center;
-    justify-content: center;
-  }
+    .ui {
+      /* background: rgba(255,255, 255, 0.8); */
+      width: 600px;
+      text-align: center;
+      font-size: 2em;
+      /* position: absolute; */
+      top: 0;
+      right: 0;
+      /* bottom: 0; */
+      left: 0;
+      /* display: flex; */
+      position: absolute;
+      align-items: center;
+      justify-content: center;
+    }
 
-  video {
-    position: relative;
-    z-index: -1;
-  }
+    video {
+      position: relative;
+      z-index: -1;
+    }
 
-  #headline {
-    /* margin-top: -100px; */
-    text-align: center;
-    top: 70px;
-  }
+    #headline {
+      /* margin-top: -100px; */
+      text-align: center;
+      top: 70px;
+    }
 
-  #text {
-    top: 246px;
-    /* top: 40%; */
-    position: relative;
-    color: rgb(230, 200, 98);
-    text-align: center;
-    z-index: 100;
-  }
+    #text {
+      top: 246px;
+      /* top: 40%; */
+      position: relative;
+      color: rgb(20, 20, 98);
+      text-align: center;
+      z-index: 100;
+    }
 
-  button {
-    font-family: monospace;
-    border: 2px solid tomato;
-    background: transparent;
-    width: 250px;
-    font-size: 1.2em;
-    padding: 10px 0;
-    border-radius: 5px;
-    display: block;
-    cursor: pointer;
-    margin: 1em auto;
-    position:relative;
-    bottom: -210px;
-    text-align: center;
-  }
-  #output img {
-    width: 600px;
-    height: 470px;
-  }
-  #gallery div {
-    margin: 20px;
-    padding-left: 30px;
-  }
+    #formDiv {
+      text-align: center;
+      margin: auto;
+      width: 50%
+    }
 
-  #gallery img {
-    margin: 20px;
-    height: 200px;
-    width: 260px;
-  }
+    button {
+      font-family: monospace;
+      border: 2px solid tomato;
+      background: transparent;
+      width: 250px;
+      font-size: 1.2em;
+      padding: 10px 0;
+      border-radius: 5px;
+      display: block;
+      cursor: pointer;
+      margin: 1em auto;
+      position: relative;
+      bottom: -210px;
+      text-align: center;
+    }
 
-  #gallery h1 {
-    color: white;
-    margin: auto;
-  }
+    #output img {
+      width: 600px;
+      height: 470px;
+    }
 
-  #secretImages {
-    visibility: hidden;
-    height: 0px;
-    width: 0px;
-  }
+    #gallery div {
+      margin: 20px;
+      padding-left: 30px;
+    }
 
-  #purchaseNote {
-    color: white;
-    margin: auto;
-  }
-</style>
+    #gallery img {
+      margin: 20px;
+      height: 200px;
+      width: 260px;
+    }
+
+    #gallery h1 {
+      color: white;
+      margin: auto;
+    }
+
+    #secretImages {
+      visibility: hidden;
+      height: 0px;
+      width: 0px;
+    }
+
+    #purchaseNote {
+      color: white;
+      margin: auto;
+    }
+  </style>
 </head>
 
 <body>
   <div id='container'>
     <div class='video-container'>
-      <div id='output'>
-        <image id="loadingImage" src="{{ url_for('static', filename='loading.jpg')}}" height="480px" width="600px" hidden=true />
-      </div>
-      <video height=480px width=600px autoplay="true" id="videoElement"></video>
-      <center>
-        <label id='imageInputLabel' for="imageInput" class="btn btn-block btn-outlined">Take Photo</label>
-        <input id='imageInput' style="visibility:hidden; display: none" type="file" accept="image/*;" capture="camera">
-      </center>
-      <div class="ui container-fluid">
-        <!-- <article> -->
-        <div class='row'>
-          <h1 id="headline">Emotion Detection Game</h1>
+      <div class='row justify-content-md-center'>
+        <div id='output'>
+          <image id="loadingImage" src="{{ url_for('static', filename='loading.jpg')}}" height="480px" width="600px" hidden=true />
         </div>
-          <div class='row'>
-          <p id="text">Show happiness_</p>
-        </div>
-        <div class='row'>
-          <button id="play">Play</button>
-          </div>
-        <!-- </article> -->
+        <video height=480px width=600px autoplay="true" id="videoElement"></video>
       </div>
     </div>
-    <div id="myProgress">
-      <div id="countdownBar"></div>
+
+      <div class='row'>
+        <div class='mx-auto col-md-2 col-md-offset-5'>
+        <form>
+          <!-- <label id='imageInputLabel' for="imageInput" class="btn btn-default">Take Photo</label> -->
+          <!-- <input type="button" id="loadFileXml" value="loadXml" onclick="document.getElementById('file').click();" /> -->
+          <input id='imageInput' type="file" class="filestyle" data-classButton="btn btn-primary" data-classIcon="icon-plus" data-input="false" accept="image/*;" capture="camera">
+        </form>
+      </div>
+
+    <div class="ui container-fluid">
+      <!-- <article> -->
+      <div class='row'>
+        <h1 id="headline">Emotion Detection Game</h1>
+      </div>
+      <div class='row'>
+        <p id="text">Show happiness_</p>
+      </div>
+      <div class='row'>
+        <button id="play">Play</button>
+      </div>
+      <!-- </article> -->
     </div>
+  </div>
+  <div id="myProgress">
+    <div id="countdownBar"></div>
+  </div>
   </div>
 
   <div id='gallery'>
@@ -184,10 +202,17 @@
     <p id='purchaseNote'></p>
     <div id='secretImages'></div>
   </div>
+
 </body>
 
 
 <script type="text/javascript">
+  $(":file").filestyle({
+    input: false,
+    text: "Take photo",
+    size: 'lg'
+  });
+
   // $(function() {
   //   $('.selectMode').click(function() {
   //     $.ajax({
@@ -206,17 +231,17 @@
   //   });
   // });
 
-//   function readURL(input) {
-//     if (input.files && input.files[0]) {
-//         var reader = new FileReader();
-//
-//         reader.onload = function (e) {
-//             $('#blah').attr('src', e.target.result);
-//         }
-//
-//         reader.readAsDataURL(input.files[0]);
-//     }
-// }
+  //   function readURL(input) {
+  //     if (input.files && input.files[0]) {
+  //         var reader = new FileReader();
+  //
+  //         reader.onload = function (e) {
+  //             $('#blah').attr('src', e.target.result);
+  //         }
+  //
+  //         reader.readAsDataURL(input.files[0]);
+  //     }
+  // }
   var emotionArray = [
     'happy',
     'angry',
@@ -226,6 +251,7 @@
     'surprise',
     'neutral'
   ]
+
   // Image upload for mobile device
   var fileupload = $("#imageInput");
 
@@ -235,14 +261,49 @@
       var reader = new FileReader();
 
       reader.onload = function(e) {
+        $('#loadingImage').show();
         $('#loadingImage').attr('src', e.target.result);
-      }
+
+        $('#output img').each(function(i) {
+          $(this).attr('class', 'gallery');
+          $(this).prependTo("#galleryImages");
+        });
+        // Hide image overflow
+        $('#galleryImages img').each(function(i) {
+          if (i > 2) {
+            $(this).prependTo("#secretImages");
+            $("#purchaseNote").text('Sign up to see more photos.')
+          }
+        });
+
+
+        $.ajax({
+          type: "POST",
+          url: "{{ url_for('image') }}",
+          data: {
+            imageBase64: e.target.result,
+            emotion: currentEmotion
+          },
+          timeout: 10000
+        }).done(function(data) {
+          console.log('this data');
+          // Add photo to top
+          $output = $("#output");
+          var img = document.createElement('img')
+          // img.setAttribute('id', 'photo');
+          img.src = "data:image/jpeg;base64," + data;
+          $output.prepend(img);
+          // var track = window.localStream.getTracks()[0];
+          // track.stop()
+        });
+      };
 
       reader.readAsDataURL(input.files[0]);
+
     }
   }
 
-  fileupload.on('change', function(){
+  fileupload.on('change', function() {
     readURL(this);
   })
 
@@ -271,7 +332,7 @@
           video: true,
           audio: false
         }, handleVideo, videoError);
-        $('#imageInputLabel').hide();
+        // $('#imageInputLabel').hide();
       } else {
         // alert("Your device is not yet supported. Please try on desktop Chrome.") // getUserMedia not supported
         $('#videoElement').hide();
@@ -315,7 +376,7 @@
     } else errorMessage('Use https protocol for open this page.')
   }
 
-  $(document).ready(function () {
+  $(document).ready(function() {
     "use strict";
 
     var video, $output;
@@ -380,11 +441,6 @@
         // img.setAttribute('id', 'photo');
         img.src = "data:image/jpeg;base64," + data;
         $output.prepend(img);
-        // var track = window.localStream.getTracks()[0];
-        // track.stop()
-        $("#loadingImage").hide();
-        $("#videoElement").hide();
-        $("button#play").show();
       });
     };
 
