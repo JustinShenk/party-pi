@@ -8,6 +8,7 @@ import tensorflow as tf
 import uuid
 
 from flask import Flask, Response, request, render_template, send_file
+from flask_sslify import SSLify
 from io import BytesIO
 from keras.models import load_model
 from keras import backend as K

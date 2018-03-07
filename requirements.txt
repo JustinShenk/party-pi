@@ -1,6 +1,7 @@
 opencv-contrib-python==3.3.0.9
 pillow
 Flask
+Flask-SSLify
 gunicorn
 itsdangerous
 Jinja2
