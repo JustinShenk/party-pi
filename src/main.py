@@ -193,8 +193,9 @@ def readb64(base64_string):
     sbuf = BytesIO()
     sbuf.write(base64.b64decode(base64_string))
     sbuf.seek(0)
-    pimg = Image.open(sbuf)
-    return cv2.cvtColor(np.array(pimg), cv2.COLOR_RGB2BGR)
+    pil_img = Image.open(sbuf).convert('RGB')
+    np_img = np.array(pil_img)
+    return cv2.cvtColor(np_img, cv2.COLOR_RGB2BGR)
 
 
 def get_face(frame):
@@ -211,15 +212,13 @@ def get_face(frame):
 def image():
     # Get image
     image_b64 = request.values['imageBase64']
-    image_data = re.sub('^data:image/.+;base64,', '',
-                        image_b64)
+    image_data = re.sub('^data:image/.+;base64,', '', image_b64)
     # Get emotion
     emotion = request.values['emotion']
     try:
         img = readb64(image_data)
         app.logger.debug(img.shape)
-        # cv2.imwrite('player.jpg', img)
-        gray_image = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+        gray_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         faces = detect_faces(face_detector, gray_image)
         app.logger.debug("Faces: ", len(faces))
         player_data = predict_emotions(
@@ -296,4 +295,4 @@ def none():
 
 
 if __name__ == '__main__':
-    app.run(debug=False, threaded=True)
+    app.run(debug=True, threaded=True)

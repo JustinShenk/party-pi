@@ -1,0 +1,163 @@
+
+h1 {
+  /* margin-top: 20px; */
+}
+
+body {
+  /* margin: 0 auto; */
+  /* overflow:hidden; */
+  /* background: #222; */
+  /* font-family: monospace; */
+}
+
+
+
+article {
+  width: 80%;
+  margin: auto;
+  height: 480px;
+  position: relative;
+  top: 100%;
+  text-align: center;
+  font-size: 2em;
+  /* top: 50%; */
+  /* position: relative; */
+  transform: translateY(-50%);
+}
+
+#myProgress {
+  width: 100%;
+  background-color: grey;
+}
+
+#countdownBar {
+  width: 1%;
+  height: 30px;
+  background-color: tomato;
+}
+
+#container {
+  /* margin: 0px auto; */
+  /* width: 500px;
+height: 375px; */
+  /* text-align: center;
+  border: 10px #333 solid;
+  background: lightgray; */
+}
+
+.video-container {
+  position: relative;
+  height: 480px;
+}
+
+#jumbo{
+  padding: 0px;
+}
+.ui {
+  /* background: rgba(255,255, 255, 0.8); */
+  width: 640px;
+  text-align: center;
+  font-size: 2em;
+  /* position: absolute; */
+  top: 0;
+  right: 0;
+  /* bottom: 0; */
+  left: 0;
+  /* display: flex; */
+  position: absolute;
+  align-items: center;
+  justify-content: center;
+}
+
+#videoElement {
+  z-index: 0;
+  transform: rotateY(180deg);
+  -webkit-transform: rotateY(180deg);
+  /* Safari and Chrome */
+  -moz-transform: rotateY(180deg);
+  /* Firefox */
+}
+
+#headline {
+  /* margin-top: -100px; */
+  text-align: center;
+  /* top: 70px; */
+}
+
+#text {
+  /* top: 246px; */
+  /* position: relative; */
+  /* color: rgb(20, 20, 98); */
+  margin: 310px 0 20px 0;
+  font-size: 2em;
+  text-align: center;
+  z-index: 100;
+}
+
+#formDiv {
+  text-align: center;
+  margin: auto;
+  width: 50%
+}
+
+#play {
+  font-family: monospace;
+  border: 2px solid tomato;
+  background: transparent;
+  width: 250px;
+  font-size: 2em;
+  /* font-size: 1.2em; */
+  padding: 10px 0;
+  border-radius: 5px;
+  /* display: block; */
+  cursor: pointer;
+  /* margin: auto; */
+  position: relative;
+  /* bottom: -210px; */
+  text-align: center;
+}
+
+input {
+  z-index: 200
+}
+
+#output img {
+  width: 640px;
+  height: 480px;
+}
+
+#gallery div {
+  /* margin: 20px;
+  padding-left: 30px; */
+}
+
+#gallery img {
+  /* margin: 20px;
+  height: 200px;
+  width: 260px; */
+}
+
+#gallery h1 {
+  /* color: white; */
+  margin: auto;
+}
+
+#secretImages {
+  visibility: hidden;
+  height: 0px;
+  width: 0px;
+}
+
+#purchaseNote {
+  /* color: white; */
+  margin: auto;
+}
+
+#photo {
+  padding: 10 auto;
+}
+
+#uiContainer{
+  position:absolute;
+  z-index: 100;
+}
