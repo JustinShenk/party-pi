@@ -84,7 +84,7 @@
     <div class='row'>
       <div class='mx-auto col-md-2 col-md-offset-5'>
         <form>
-          <input id='imageInput' type="file" accept="image/*;" capture="camera">
+          <input id='imageInput' type="file" accept="image/*;" capture="camera" style="display: none">
         </form>
       </div>
     </div>
@@ -162,16 +162,6 @@
 
           });
 
-
-
-          // Hide image overflow
-          // $('#galleryImages img').each(function(i) {
-          //   if (i > 2) {
-          //     $(this).prependTo("#secretImages");
-          //     $("#purchaseNote").text('Sign up to see more photos.')
-          //   }
-          // });
-
           $.ajax({
             type: "POST",
             url: "{{ url_for('image') }}",
@@ -216,13 +206,13 @@
     }
 
     var webcam;
-    var debug = true;
+    var debug = false;
     var currentEmotion = 'happy';
 
     function startWebcam() {
       if (debug | location.protocol === 'https:') {
 
-        navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.oGetUserMedia;
+        navigator.getUserMedia = navigator.getUserMedia || navigator.mediaDevices.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.oGetUserMedia;
 
         if (navigator.getUserMedia) {
           navigator.getUserMedia({
@@ -234,6 +224,7 @@
           $('#imageInput').hide();
         } else {
           // alert("Your device is not yet supported. Please try on desktop Chrome.") // getUserMedia not supported
+          $('#imageInput').show();
           $('#videoElement').hide();
           $('#play').hide();
         }
