@@ -222,39 +222,6 @@
           });
         }
       }
-
-        // var mediaStreamTrack = stream.getVideoTracks()[0];
-        // if (typeof mediaStreamTrack != "undefined") {
-        //   mediaStreamTrack.onended = function() { //for Chrome.
-        //     errorMessage('Your webcam is busy!')
-        //   }
-        // } else errorMessage('Permission denied!');
-
-      })
-      .catch(function(e) {
-        var message;
-        switch (e.name) {
-          case 'NotFoundError':
-          case 'DevicesNotFoundError':
-            message = 'Please setup your webcam first.';
-            break;
-          case 'SourceUnavailableError':
-            message = 'Your webcam is busy';
-            break;
-          case 'PermissionDeniedError':
-          case 'SecurityError':
-            message = 'Permission denied!';
-            break;
-          default:
-            errorMessage('Reeeejected!', e);
-            return;
-        }
-        $('#imageInput').show();
-        $('#videoElement').hide();
-        $('#play').hide();
-
-        errorMessage(message);
-      });
     }
 
     function startWebcam() {
@@ -283,11 +250,36 @@
           video.onloadedmetadata = function(e) {
             video.play();
           };
+        })
+        .catch(function(e) {
+          var message;
+          switch (e.name) {
+            case 'NotFoundError':
+            case 'DevicesNotFoundError':
+              message = 'Please setup your webcam first.';
+              break;
+            case 'SourceUnavailableError':
+              message = 'Your webcam is busy';
+              break;
+            case 'PermissionDeniedError':
+            case 'SecurityError':
+              message = 'Permission denied!';
+              break;
+            default:
+              errorMessage('Reeeejected!', e);
+              return;
+          }
+          $('#imageInput').show();
+          $('#videoElement').hide();
+          $('#play').hide();
 
+          errorMessage(message);
+        });
       } else {
         console.log('HTTPS not found');
       }
     };
+    // end startWebcam
 
     $(document).ready(function() {
       "use strict";
