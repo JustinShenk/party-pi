@@ -76,13 +76,41 @@ height: 375px; */
   justify-content: center;
 }
 
+.loader {
+    margin-top: 50px;
+    border: 16px solid #f3f3f3; /* Light grey */
+    border-top: 16px solid #3498db; /* Blue */
+    border-radius: 50%;
+    width: 220px;
+    height: 220px;
+    animation: spin 2s linear infinite;
+    z-index: 1000;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";       /* IE 8 */
+    filter: alpha(opacity=50);  /* IE 5-7 */
+    -moz-opacity: 0.5;          /* Netscape */
+    -khtml-opacity: 0.5;        /* Safari 1.x */
+    opacity: 0.5;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
 #videoElement {
   z-index: 0;
-  transform: rotateY(180deg);
+  /* transform: rotateY(180deg);
   -webkit-transform: rotateY(180deg);
   /* Safari and Chrome */
-  -moz-transform: rotateY(180deg);
+  /* -moz-transform: rotateY(180deg); */ */
   /* Firefox */
+  -moz-transform: scale(-1, 1);
+  -webkit-transform: scale(-1, 1);
+  -o-transform: scale(-1, 1);
+  transform: scale(-1, 1);
+  filter: FlipH;
+  width: 100%    !important;
+  height: auto   !important;
 }
 
 #headline {

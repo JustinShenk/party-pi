@@ -61,16 +61,16 @@
     <section id='jumbo' class="jumbotron text-center">
       <div class='video-container'>
         <div class='row justify-content-md-center'>
-          <div id='output'>
+          <div id='output' class='loader'>
             <!-- <image id="loadingImage" src="{{ url_for('static', filename='loading.jpg')}}" height="480px" width="640px" hidden=true /> -->
           </div>
-          <video height=480px width=640px autoplay="true" id="videoElement"></video>
+          <video height=auto width=100% autoplay="true" id="videoElement" playsinline ></video>
           <div id="uiContainer">
             <div class='row'>
               <h1 id="headline"></h1>
             </div>
             <div class='row'>
-              <p id="text">Click play_</p>
+              <p id="text">Click play_           </p>
             </div>
             <div class='row'>
               <button id="play">Play</button>
@@ -136,8 +136,8 @@
         var reader = new FileReader();
 
         reader.onload = function(e) {
-          $('#loadingImage').show();
-          $('#loadingImage').attr('src', e.target.result);
+          // $('#loadingImage').show();
+          // $('#loadingImage').attr('src', e.target.result);
 
           // Move photo to gallery
           $('#output img').each(function(i) {
@@ -227,14 +227,13 @@
     function startWebcam() {
       if (debug | location.protocol === 'https:') {
         // navigator.getUserMedia = navigator.getUserMedia || navigator.mediaDevices.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.oGetUserMedia;
-        getWebcam();
 
         // Prefer camera resolution nearest to 640x480.
         var constraints = { audio: false, video: { width: 640, height: 480 } };
 
         navigator.mediaDevices.getUserMedia(constraints)
         .then(function(stream) {
-
+          $("#videoElement").show();
           $('#placeholder').hide();
           $('#imageInput').filestyle('destroy');
           $('#imageInput').hide();
@@ -284,7 +283,7 @@
     $(document).ready(function() {
       "use strict";
 
-      console.log("ready");
+      $("#output").removeClass('loader');
       $("#imageInput").filestyle({
         input: false,
         text: "Take photo",
@@ -296,6 +295,7 @@
       var scale = 1;
 
       var initialize = function() {
+        getWebcam();
         startWebcam();
         $("#play").click(function() {
           // Move photos below
@@ -333,9 +333,8 @@
 
           // Show and start webcam
           $("#videoElement").show();
-          startWebcam();
           $("#text").text("Show " + currentEmotion + "_");
-          // Hide button
+          // Hide play button
           $(this).hide();
           // Start timer
           move();
@@ -347,9 +346,14 @@
       var captureImage = function() {
         // setTimeout(move, 3000);
         // Loading screen
-        $("#loadingImage").show();
+        // var loadingImage = document.createElement('img');
+        // loadingImage.setAttribute('id', 'loadingImage');
+        // loadingImage.setAttribute('src', "{{ url_for('static', filename='loading.jpg')}}");
+        // loadingImage.setAttribute('height',"480px")
+        // loadingImage.setAttribute('width',"640px")
 
         video = $("#videoElement").get(0);
+
         var canvas = document.createElement("canvas");
         canvas.width = video.videoWidth * scale;
         canvas.height = video.videoHeight * scale;
@@ -360,6 +364,10 @@
 
         // var image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");  // here is the most important part because if you dont replace you will get a DOM 18 exception.
         // window.location.href=image;
+        $("#videoElement").hide();
+        // video.style.visibility = 'hidden';
+        $output = $("#output");
+        $("#output").addClass("loader");
 
         var dataURL = canvas.toDataURL();
         document.querySelector('#play').href = dataURL;
@@ -372,14 +380,13 @@
           },
           timeout: 10000
         }).done(function(data) {
-          console.log('this data');
+          $("#output").removeClass("loader");
+
           // Add photo to top
-          $output = $("#output");
           var img = document.createElement('img')
           // img.setAttribute('id', 'photo');
           img.src = "data:image/jpeg;base64," + data;
           $output.prepend(img);
-          $('#videoElement').hide();
           $("#play").show();
 
           // Show gallery
