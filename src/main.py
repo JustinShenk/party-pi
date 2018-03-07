@@ -22,8 +22,9 @@ from PIL import Image
 emotion_classifier = load_model('../emotion_model.hdf5', compile=False)
 graph = K.get_session().graph
 app = Flask(__name__)
-sslify = SSLify(app)
-
+debug = False
+if not debug:
+    sslify = SSLify(app)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 # party_pi = PartyPi(web=True)
 print("Game loaded")
@@ -284,7 +285,8 @@ def index():
     # send http request with image and receive response
     # response = requests.post(
     #     test_url, data=img_encoded.tostring(), headers=headers)
-    return render_template('index.html')
+    debug_js = 'true' if debug else 'false'
+    return render_template('index.html', debug=debug_js)
 
     # response = {'message': '<h1>Hello world</h1>' + img, ''}
     # response_pickled = jsonpickle.encode(response)
@@ -298,4 +300,7 @@ def none():
 
 
 if __name__ == '__main__':
-    app.run(debug=False, threaded=True)
+    if os.path.exists('cert.pem'):  # local environment only
+        app.run(ssl_context=('cert.pem', 'key.pem'), debug=debug)
+    else:
+        app.run(debug=debug)

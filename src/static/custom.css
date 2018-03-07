@@ -50,6 +50,13 @@ height: 375px; */
   height: 480px;
 }
 
+#imageInput {
+  visibility: false;
+}
+.view-btn{
+  display: none;
+}
+
 #jumbo{
   padding: 0px;
 }
