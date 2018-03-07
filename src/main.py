@@ -22,6 +22,8 @@ from PIL import Image
 emotion_classifier = load_model('../emotion_model.hdf5', compile=False)
 graph = K.get_session().graph
 app = Flask(__name__)
+sslify = SSLify(app)
+
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 # party_pi = PartyPi(web=True)
 print("Game loaded")
