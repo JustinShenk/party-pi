@@ -59,18 +59,19 @@
   <main role="main">
 
     <section id='jumbo' class="jumbotron text-center">
+      <h3> Currently tested on desktop Chrome.</h3>
       <div class='video-container'>
         <div class='row justify-content-md-center'>
           <div id='output' class='loader'>
             <!-- <image id="loadingImage" src="{{ url_for('static', filename='loading.jpg')}}" height="480px" width="640px" hidden=true /> -->
           </div>
-          <video height=auto width=100% autoplay="true" id="videoElement" playsinline ></video>
+          <video width='640' autoplay="true" id="videoElement" >Your browser does not support HTML5 video.</video>
           <div id="uiContainer">
             <div class='row'>
               <h1 id="headline"></h1>
             </div>
             <div class='row'>
-              <p id="text">Click play_           </p>
+              <p id="text">Show happiness_</p>
             </div>
             <div class='row'>
               <button id="play">Play</button>
