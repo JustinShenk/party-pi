@@ -22,7 +22,7 @@ from PIL import Image
 emotion_classifier = load_model('../emotion_model.hdf5', compile=False)
 graph = K.get_session().graph
 app = Flask(__name__)
-debug = False
+debug = True
 if not debug:
     sslify = SSLify(app)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
@@ -183,7 +183,8 @@ def predict_emotions(faces, gray_image, current_emotion='happy'):
         with graph.as_default():
             emotion_prediction = emotion_classifier.predict(gray_face)
         emotion_index = emotion_idx_lookup[current_emotion]
-        app.logger.debug("EMOTION INDEX: ", emotion_index)
+        print("EMOTION_INDEX", emotion_index)
+        # app.logger.debug("EMOTION INDEX: ", emotion_index)
         emotion_score = emotion_prediction[0][emotion_index]
 
         x, y, w, h = face_coordinates
@@ -212,7 +213,7 @@ def get_face(frame):
     return frame
 
 
-@app.route('/image', methods=['POST', 'GET'])
+@app.route('/image', methods=['POST'])
 def image():
     # Get image
     image_b64 = request.values['imageBase64']
@@ -224,7 +225,7 @@ def image():
         app.logger.debug(img.shape)
         gray_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         faces = detect_faces(face_detector, gray_image)
-        app.logger.debug("Faces: ", len(faces))
+        print("FACES: ", faces)
         player_data = predict_emotions(
             faces, gray_image, emotion)
         photo = rank_players(player_data, img, emotion)
