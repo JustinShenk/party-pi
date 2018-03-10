@@ -45,7 +45,7 @@ height: 375px; */
 }
 
 .video-container {
-  max-height: 480px;
+  height: 480px;
 }
 
 #imageInput {
@@ -161,8 +161,8 @@ input {
 }
 
 #output {
-  max-width: 600 !important;
-  max-height: 480 !important;
+  max-width: 600px !important;
+  max-height: 480px !important;
   position: relative;
 	/* padding-bottom: 56.25%; /* 16:9 */ */
 	/* padding-top: 25px; */
@@ -211,5 +211,6 @@ input {
 }
 
 #spinner{
-  margin: 0 auto;
+  /* margin: 0 auto; */
+  margin-top: 180px;
 }
