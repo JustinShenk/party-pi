@@ -60,7 +60,7 @@
   <main role="main">
 
     <section id='jumbo' class="jumbotron text-center">
-      <h3> Currently tested on desktop Chrome and Firefox.</h3>
+      <h3> Currently tested on desktop Chrome, Firefox and Safari.</h3>
       <div class='video-container'>
         <div class='row justify-content-md-center'>
           <div id='output'>
@@ -341,7 +341,6 @@
             // $(this).attr('class', 'gallery');
             // $(this).prependTo("#galleryImages");
             var img_src = $(this).attr('src');
-            console.log(img_src)
             $(this).remove();
             var galleryLength = $(".card-img-top").length;
 
