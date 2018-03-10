@@ -38,7 +38,7 @@
             <ul class="list-unstyled">
               <li><a href="https://github.com/justinshenk/party-pi" class="text-white">Get the code</a></li>
               <li><a href="https://linkedin.com/in/justinshenk" class="text-white">Connect on LinkedIn</a></li>
-              <li><a href="mailto:shenk.justin?subject=Party-Pi@gmail.com" class="text-white">Email me</a></li>
+              <li><a href="mailto:shenk.justin@gmail.com?subject=Party-Pi" class="text-white">Email me</a></li>
             </ul>
           </div>
         </div>
@@ -102,6 +102,7 @@
         <h1>Gallery</h1>
         <br>
         <div class='row' id='galleryImages'>
+          <canvas id="c" style="display:none"/>
           <!-- <p id='purchaseNote'></p>
         <div id='secretImages'></div> -->
         </div>
@@ -170,6 +171,25 @@
             myCard.prependTo('#galleryImages');
 
           });
+          // var canvas = document.getElementById('c');
+          // var context = canvas.getContext("2d");
+          // var img = new Image();
+          // img.src = e.target.result;
+				  // context.drawImage(img,0,0);
+          // var exif = EXIF.readFromBinaryFile(new BinaryFile(this.result));
+          //
+          //    switch(exif.Orientation){
+          //
+          //       case 8:
+          //           ctx.rotate(90*Math.PI/180);
+          //           break;
+          //       case 3:
+          //           ctx.rotate(180*Math.PI/180);
+          //           break;
+          //       case 6:
+          //           ctx.rotate(-90*Math.PI/180);
+          //           break;
+          //    }
 
           $.ajax({
             type: "POST",
@@ -285,6 +305,13 @@
               errorMessage('Reeeejected!', e);
               return;
           }
+          console.log("HTML5 input not available, switching to file input.")
+          $("#imageInput").filestyle({
+            input: false,
+            text: "Take photo",
+            size: 'lg',
+            btnClass: "btn btn-primary"
+          });
           $('#imageInput').show();
           $('#videoElement').hide();
           $('#play').hide();
@@ -301,12 +328,6 @@
       "use strict";
 
       $("#spinner").removeClass('loader');
-      $("#imageInput").filestyle({
-        input: false,
-        text: "Take photo",
-        size: 'lg',
-        btnClass: "btn btn-primary"
-      });
 
       var video, $output;
       var scale = 1;
