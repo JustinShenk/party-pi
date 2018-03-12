@@ -46,9 +46,13 @@ def rank_players(player_data, photo, current_emotion='happy'):
         player_data : list of dicts
         photo : numpy nd array
     """
+
+    text_size = 0.8
+    if len(player_data) < 1:
+        draw_text((145, 180), photo, "No faces found - try again!",
+                  font_scale=text_size, color=YELLOW)
+        return photo
     scores = []
-    max_first_emo = None
-    max_second_emo = None
     first_emotion = None
     easy_mode = True
     emotion_idx_lookup = get_class_to_arg()
@@ -57,18 +61,12 @@ def rank_players(player_data, photo, current_emotion='happy'):
     # second_emotion_idx = emotion_idx_lookup[second_current_emotion]
     first_emotion_scores = [
         (round(x['scores'][first_emotion_idx] * 100)) for x in player_data]
-    # second_emotion_scores = [(round(
-    #     x['scores'][second_emotion_idx] * 100)) for x in player_data]
 
     # Collect scores into `scores_list`.
     scores_list = []
     # if easy_mode:  # rank players by one emotion
     scores_list = first_emotion_scores
-    # else:  # hard mode scores are a product of percentage of both emotions
-    #     for i in range(len(first_emotion_scores)):
-    #         scores_list.append(
-    #             (first_emotion_scores[i] + 1) * (second_emotion_scores[i] + 1))
-    text_size = 0.8
+
     # Draw the scores for the faces.
     for i, currFace in enumerate(player_data):
         faceRectangle = currFace['faceRectangle']
@@ -84,26 +82,13 @@ def rank_players(player_data, photo, current_emotion='happy'):
         else:
             first_emotion_caption = "%i points: %s" % (
                 first_emotion, current_emotion)
-        # if second_emotion == 1:  # singular 'point'
-        #     second_emotion_caption = "%i point: %s" % (
-        #         second_emotion, second_current_emotion)
-        # else:
-        #     second_emotion_caption = "%i points: %s" % (
-        #         second_emotion, second_current_emotion)
         #
         # Display points.
-        # score_height_offset = 10 if easy_mode else 40
         score_height_offset = 10
         first_emotion_coord = (faceRectangle['left'], faceRectangle['top'] -
                                score_height_offset)
         draw_text(first_emotion_coord, photo, first_emotion_caption,
                   font_scale=text_size, color=YELLOW)
-
-        # if not easy_mode:  # second line
-        #     second_emotion_coord = (faceRectangle['left'], faceRectangle[
-        #         'top'] - 10)
-        #     draw_text(second_emotion_coord, photo, second_emotion_caption,
-        #               color=YELLOW, font_scale=text_size)
 
         # Display 'Winner: ' above player with highest score.
         one_winner = True
@@ -176,7 +161,11 @@ def predict_emotions(faces, gray_image, current_emotion='happy'):
         x1, x2, y1, y2 = apply_offsets(
             face_coordinates, emotion_offsets)
         gray_face = gray_image[y1:y2, x1:x2]
-        gray_face = cv2.resize(gray_face, emotion_target_size)
+        try:
+            gray_face = cv2.resize(gray_face, emotion_target_size)
+        except Exception as e:
+            print("Exception:", e)
+            return player_data
         gray_face = preprocess_input(gray_face, True)
         gray_face = np.expand_dims(gray_face, 0)
         gray_face = np.expand_dims(gray_face, -1)
@@ -206,8 +195,12 @@ def readb64(base64_string):
 def get_face(frame):
     detection_model_path = './face.xml'
     face_detection = load_detection_model(detection_model_path)
-    gray_image = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    faces = detect_faces(face_detection, gray_image)
+    try:
+        gray_image = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        faces = detect_faces(face_detection, gray_image)
+    except Exception as e:
+        print("Exception:", e)
+        return frame
     for face in faces:
         draw_bounding_box(face, frame, (255, 0, 0))
     return frame
@@ -225,7 +218,6 @@ def image():
         app.logger.debug(img.shape)
         gray_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         faces = detect_faces(face_detector, gray_image)
-        print("FACES: ", faces)
         player_data = predict_emotions(
             faces, gray_image, emotion)
         photo = rank_players(player_data, img, emotion)
@@ -236,12 +228,35 @@ def image():
         #
         # _, img_encoded = cv2.imencode('.jpg', photo)
         # print("OUTPUT:", img_encoded.tostring())
-        with open(photo_path, 'rb') as image_file:
-            encoded_string = base64.b64encode(image_file.read())
+        # with open(photo_path, 'rb') as image_file:
+        #     encoded_string = base64.b64encode(image_file.read())
     except Exception as e:
         print("ERROR:", e)
-        return ''
-    return encoded_string
+        # response = jsonify({'image': photo_path,
+        #                     'score': False})
+        # response.status_code = 500
+        return jsonify({
+            'image': photo_path,
+            'score': is_score
+        })
+
+    is_score = len(player_data) > 0
+    # base64_string = base64.urlsafe_b64decode(encoded_string.as_string())
+    # data = {
+    #     'image': base64_string,
+    #     'score': is_score
+    # }
+    # response = jsonify(data)
+    # response.status_code = 200
+    # return response
+    # response = make_response(send_file(photo_path,
+    #                                    attachment_filename='player.jpg',
+    #                                    mimetype='image/jpg'))
+    # response.headers['Score'] = 'Yes'
+    return jsonify({
+        'image': photo_path,
+        'score': is_score
+    })
 
 
 def get_image(empty=False, face=False):
