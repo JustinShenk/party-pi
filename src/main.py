@@ -1,6 +1,7 @@
 import base64
 import cv2
 import io
+import logging
 import numpy as np
 import random
 import re
@@ -16,10 +17,14 @@ from utils.inference import load_detection_model, detect_faces, draw_bounding_bo
 from utils.inference import get_class_to_arg, apply_offsets, get_labels
 from utils.misc import *
 from PIL import Image
-# from play import PartyPi
+
+# logging for heroku
+if 'DYNO' in os.environ:
+    app.logger.addHandler(logging.StreamHandler(sys.stdout))
+    app.logger.setLevel(logging.INFO)
 
 # tf.keras.backend.clear_session()
-emotion_classifier = load_model('../emotion_model.hdf5', compile=False)
+emotion_classifier = load_model('../emotion_model.hdf5')
 graph = K.get_session().graph
 app = Flask(__name__)
 debug = False
@@ -314,6 +319,23 @@ def index():
 def none():
     Response(get_image(empty=True),
              mimetype='multipart/x-mixed-replace; boundary=frame')
+
+# HTTP Errors handlers
+
+
+@app.errorhandler(404)
+def url_error(e):
+    return """
+    Wrong URL!
+    <pre>{}</pre>""".format(e), 404
+
+
+@app.errorhandler(500)
+def server_error(e):
+    return """
+    An internal error occurred: <pre>{}</pre>
+    See logs for full stacktrace.
+    """.format(e), 500
 
 
 if __name__ == '__main__':
