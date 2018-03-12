@@ -7,7 +7,7 @@ import re
 import tensorflow as tf
 import uuid
 
-from flask import Flask, Response, request, render_template, send_file
+from flask import Flask, Response, request, render_template, jsonify
 from flask_sslify import SSLify
 from io import BytesIO
 from keras.models import load_model
@@ -22,7 +22,7 @@ from PIL import Image
 emotion_classifier = load_model('../emotion_model.hdf5', compile=False)
 graph = K.get_session().graph
 app = Flask(__name__)
-debug = True
+debug = False
 if not debug:
     sslify = SSLify(app)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
@@ -175,7 +175,8 @@ def predict_emotions(faces, gray_image, current_emotion='happy'):
         print("EMOTION_INDEX", emotion_index)
         # app.logger.debug("EMOTION INDEX: ", emotion_index)
         emotion_score = emotion_prediction[0][emotion_index]
-
+        print("EMOTION_SCORE:", emotion_score)
+        print("EMOTION_PREDICTION[0]:", emotion_prediction[0])
         x, y, w, h = face_coordinates
         face_dict = {'left': x, 'top': y, 'right': x + w, 'bottom': y + h}
         player_data.append(
