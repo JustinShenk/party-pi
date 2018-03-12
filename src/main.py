@@ -24,8 +24,10 @@ if 'DYNO' in os.environ:
     app.logger.setLevel(logging.INFO)
 
 # tf.keras.backend.clear_session()
-emotion_classifier = load_model('../emotion_model.hdf5')
-graph = K.get_session().graph
+graph = tf.get_default_graph()
+
+emotion_classifier = load_model('../emotion_model.hdf5', compile=False)
+
 app = Flask(__name__)
 debug = False
 if not debug:
@@ -157,7 +159,6 @@ def random_emotion():
 
 
 def predict_emotions(faces, gray_image, current_emotion='happy'):
-    global graph
     player_data = []
     # Hyperparameters for bounding box
     emotion_offsets = (20, 40)
@@ -242,7 +243,7 @@ def image():
         #                     'score': False})
         # response.status_code = 500
         return jsonify({
-            'image': photo_path,
+            'image': '',
             'score': is_score
         })
 
@@ -340,6 +341,7 @@ def server_error(e):
 
 if __name__ == '__main__':
     if os.path.exists('cert.pem'):  # local environment only
-        app.run(ssl_context=('cert.pem', 'key.pem'), debug=debug)
+        app.run(host='0.0.0.0', ssl_context=(
+            'cert.pem', 'key.pem'), debug=debug)
     else:
         app.run(debug=debug)
