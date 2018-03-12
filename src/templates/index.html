@@ -64,11 +64,13 @@
       <div class='video-container'>
         <div class='row justify-content-md-center'>
           <div id='output'>
+            <video width='640' height='480' autoplay="true" id="videoElement" >Your browser does not support HTML5 video.</video>
             <div id='spinner' class='loader'>
             <!-- <image id="loadingImage" src="{{ url_for('static', filename='loading.jpg')}}" height="480px" width="640px" hidden=true /> -->
 </div>
+
           </div>
-          <video width='640' height='480' autoplay="true" id="videoElement" >Your browser does not support HTML5 video.</video>
+
           <div id="uiContainer">
             <div class='row'>
               <h1 id="headline"></h1>
@@ -204,7 +206,7 @@
             $output = $("#output");
             var img = document.createElement('img')
             img.setAttribute('id', 'photo');
-            img.src = "data:image/jpeg;base64," + data;
+            img.src = data.image;
             $output.prepend(img);
             // $(this).prependTo("#galleryImages");
             // $('#galleryImages').prepend(myCard);
@@ -419,15 +421,13 @@
           timeout: 10000
         }).done(function(data) {
           $("#spinner").removeClass("loader");
-
+          var img_data = data.image;
           // Add photo to top
           var img = document.createElement('img')
-          // img.setAttribute('id', 'photo');
-          img.src = "data:image/jpeg;base64," + data;
+          img.src = img_data;
           $output.prepend(img);
           $("#play").show();
-
-          // Show gallery
+          // Show gallery first time
           $('#gallery').css("display", "block");
         });
       }; // end captureImage
