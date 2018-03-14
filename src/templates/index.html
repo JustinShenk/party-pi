@@ -16,6 +16,7 @@
   <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='adapter-latest.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='bootstrap-filestyle.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='exif.js') }}"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
   <script src="{{ url_for('static', filename='holder.min.js') }}"></script>
   <link href="{{ url_for('static', filename='album.css') }}" rel="stylesheet"/>
@@ -65,12 +66,11 @@
         <div class='row justify-content-md-center'>
           <div id='output'>
             <video width='640' height='480' autoplay="true" id="videoElement" >Your browser does not support HTML5 video.</video>
+            <img id="myImg" class="img-responsive" crossorigin="anonymous" src="" hidden='true'/>
+            <canvas id="myCanvas"></canvas>
             <div id='spinner' class='loader'>
-            <!-- <image id="loadingImage" src="{{ url_for('static', filename='loading.jpg')}}" height="480px" width="640px" hidden=true /> -->
-</div>
-
+            </div>
           </div>
-
           <div id="uiContainer">
             <div class='row'>
               <h1 id="headline"></h1>
@@ -146,6 +146,68 @@
       a.click();
       document.body.removeChild(a);
     }
+
+
+		// Function to check orientation of image from EXIF metadatas and draw canvas
+    function orientation(img, canvas) {
+
+        // Set variables
+        var ctx = canvas.getContext("2d");
+        var exifOrientation = '';
+        var width = img.width,
+            height = img.height;
+
+            console.log(width);
+            console.log(height);
+
+        // Check orientation in EXIF metadatas
+        EXIF.getData(img, function() {
+            var allMetaData = EXIF.getAllTags(this);
+            exifOrientation = allMetaData.Orientation;
+            console.log('Exif orientation: ' + exifOrientation);
+        });
+
+        // set proper canvas dimensions before transform & export
+        if (jQuery.inArray(exifOrientation, [5, 6, 7, 8]) > -1) {
+            canvas.width = height;
+            canvas.height = width;
+        } else {
+            canvas.width = width;
+            canvas.height = height;
+        }
+
+        // transform context before drawing image
+        switch (exifOrientation) {
+            case 2:
+                ctx.transform(-1, 0, 0, 1, width, 0);
+                break;
+            case 3:
+                ctx.transform(-1, 0, 0, -1, width, height);
+                break;
+            case 4:
+                ctx.transform(1, 0, 0, -1, 0, height);
+                break;
+            case 5:
+                ctx.transform(0, 1, 1, 0, 0, 0);
+                break;
+            case 6:
+                ctx.transform(0, 1, -1, 0, height, 0);
+                break;
+            case 7:
+                ctx.transform(0, -1, -1, 0, height, width);
+                break;
+            case 8:
+                ctx.transform(0, -1, 1, 0, 0, width);
+                break;
+            default:
+                ctx.transform(1, 0, 0, 1, 0, 0);
+        }
+
+        // Draw img into canvas
+        ctx.drawImage(img, 0, 0, width, height);
+
+    }
+
     // Image upload for mobile device
     var fileupload = $("#imageInput");
 
@@ -154,13 +216,25 @@
       if (input.files && input.files[0]) {
         var reader = new FileReader();
 
-        reader.onload = function(e) {
+        reader.onloadend = function(e) {
           // $('#loadingImage').show();
           // $('#loadingImage').attr('src', e.target.result);
+          $("#myImg").attr('src', e.target.result).show();
+
+          // Use EXIF library to handle the loaded image exif orientation
+		      EXIF.getData(input.files[0], function() {
+
+  			    // Fetch image tag
+            var img = $("#myImg").get(0);
+            // Fetch canvas
+  			    var canvas = $("#myCanvas").get(0);
+  				// run orientation on img in canvas
+            orientation(img, canvas);
+			    });
 
           // Move photo to gallery
-          $('#output img').each(function(i) {
-            // // Create card for image
+          $('#output img:visible').each(function(i) {
+            // Create card for image
             var img_src = $(this).attr('src');
             $(this).remove();
 
@@ -169,30 +243,10 @@
             var myCard = $('<div class="col-md-4"><div class="card mb-4 box-shadow"><img id="img_' + galleryLength + '" class="card-img-top" src="' + img_src +
               '" alt="Card image cap"><div class="card-body"><div class="d-flex justify-content-between align-items-center"><div class="btn-group"><button type="button" id="btn_' + i +
               '" class="btn btn-sm btn-outline-secondary view-btn" onclick="saveMe('+img_src+','+galleryLength + ')"><i class="fas fa-download"></i></button></div><small class="text-muted"></small></div></div></div>');
-            // $(this).prependTo("#galleryImages");
             myCard.prependTo('#galleryImages');
-
           });
-          // var canvas = document.getElementById('c');
-          // var context = canvas.getContext("2d");
-          // var img = new Image();
-          // img.src = e.target.result;
-				  // context.drawImage(img,0,0);
-          // var exif = EXIF.readFromBinaryFile(new BinaryFile(this.result));
-          //
-          //    switch(exif.Orientation){
-          //
-          //       case 8:
-          //           ctx.rotate(90*Math.PI/180);
-          //           break;
-          //       case 3:
-          //           ctx.rotate(180*Math.PI/180);
-          //           break;
-          //       case 6:
-          //           ctx.rotate(-90*Math.PI/180);
-          //           break;
-          //    }
 
+          // send image to API
           $.ajax({
             type: "POST",
             url: "{{ url_for('image') }}",
@@ -208,10 +262,6 @@
             img.setAttribute('id', 'photo');
             img.src = data.image;
             $output.prepend(img);
-            // $(this).prependTo("#galleryImages");
-            // $('#galleryImages').prepend(myCard);
-            // var track = window.localStream.getTracks()[0];
-            // track.stop()
           });
         };
         reader.readAsDataURL(input.files[0]);
@@ -339,7 +389,7 @@
         startWebcam();
         $("#play").click(function() {
           // Move photos below
-          $('#output img').each(function(i) {
+          $("#output img:visible").each(function(i) {
             // $(this).attr('class', 'gallery');
             // $(this).prependTo("#galleryImages");
             var img_src = $(this).attr('src');
