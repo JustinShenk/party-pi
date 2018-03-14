@@ -125,7 +125,7 @@
   <script type="text/javascript">
   if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Silk|Opera Mini/i.test(navigator.userAgent)) {
       // Take the user to a different screen here.
-      alert("Mobile devices are not yet supported. Try desktop Chrome instead.")
+      alert("Mobile devices are still in developmental stage. For the best experience try desktop Chrome.")
   }
     var emotionArray = [
       'happy',
@@ -358,13 +358,14 @@
               return;
           }
           console.log("HTML5 input not available, switching to file input.")
+          $('#imageInput').show();
           $("#imageInput").filestyle({
             input: false,
             text: "Take photo",
             size: 'lg',
             btnClass: "btn btn-primary"
           });
-          $('#imageInput').show();
+          alert("Showing image input.")
           $('#videoElement').hide();
           $('#play').hide();
 
@@ -434,13 +435,6 @@
       };
 
       var captureImage = function() {
-        // setTimeout(move, 3000);
-        // Loading screen
-        // var loadingImage = document.createElement('img');
-        // loadingImage.setAttribute('id', 'loadingImage');
-        // loadingImage.setAttribute('src', "{{ url_for('static', filename='loading.jpg')}}");
-        // loadingImage.setAttribute('height',"480px")
-        // loadingImage.setAttribute('width',"640px")
 
         video = $("#videoElement").get(0);
 
