@@ -1,1 +1,1 @@
-web: cd src && gunicorn main:app -w 3 --timeout 10 --max-requests 800 --log-file=-
+web: gunicorn --chdir=src main:app -w 2 --log-file=-
