@@ -123,10 +123,17 @@
   </footer>
 
   <script type="text/javascript">
+
+  const isMobile;
+
   if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Silk|Opera Mini/i.test(navigator.userAgent)) {
       // Take the user to a different screen here.
-      alert("Mobile devices are still in developmental stage. For the best experience try desktop Chrome.")
+      alert("Support for mobile devices is still in developmental stage. For the best experience try desktop Chrome.");
+      isMobile = true;
+  } else {
+    isMobile = false;
   }
+
     var emotionArray = [
       'happy',
       'angry',
@@ -147,6 +154,21 @@
       document.body.removeChild(a);
     }
 
+    function moveToGallery() {
+      // Move photo to gallery
+      $('#output img:visible').each(function(i) {
+        // Create card for image
+        var img_src = $(this).attr('src');
+        $(this).remove();
+
+        var galleryLength = $(".card-img-top").length;
+
+        var myCard = $('<div class="col-md-4"><div class="card mb-4 box-shadow"><img id="img_' + galleryLength + '" class="card-img-top" src="' + img_src +
+          '" alt="Card image cap"><div class="card-body"><div class="d-flex justify-content-between align-items-center"><div class="btn-group"><button type="button" id="btn_' + galleryLength +
+          '" class="btn btn-sm btn-outline-secondary view-btn" onclick="saveMe(img_'+ galleryLength + ')"><i class="fas fa-download"></i></button></div><small class="text-muted"></small></div></div></div>');
+        myCard.prependTo('#galleryImages');
+      });
+    }
 
 		// Function to check orientation of image from EXIF metadatas and draw canvas
     function orientation(img, canvas) {
@@ -211,6 +233,26 @@
     // Image upload for mobile device
     var fileupload = $("#imageInput");
 
+    function sendFile(imageData) {
+      // send image to API
+      $.ajax({
+        type: "POST",
+        url: "{{ url_for('image') }}",
+        data: {
+          imageBase64: imageData,
+          emotion: currentEmotion
+        },
+        timeout: 10000
+      }).done(function(data) {
+        // Add photo to top
+        $output = $("#output");
+        var img = document.createElement('img')
+        img.setAttribute('id', 'photo');
+        img.src = data.image;
+        $output.prepend(img);
+      });
+    }
+
     function readURL(input) {
 
       if (input.files && input.files[0]) {
@@ -219,11 +261,10 @@
         reader.onloadend = function(e) {
           // $('#loadingImage').show();
           // $('#loadingImage').attr('src', e.target.result);
-          $("#myImg").attr('src', e.target.result).show();
-
+          $("#myImg").attr('src', e.target.result);
+          $("#myImg").show();
           // Use EXIF library to handle the loaded image exif orientation
 		      EXIF.getData(input.files[0], function() {
-
   			    // Fetch image tag
             var img = $("#myImg").get(0);
             // Fetch canvas
@@ -232,37 +273,9 @@
             orientation(img, canvas);
 			    });
 
-          // Move photo to gallery
-          $('#output img:visible').each(function(i) {
-            // Create card for image
-            var img_src = $(this).attr('src');
-            $(this).remove();
+          moveToGallery();
+          sendFile(e.target.result);
 
-            var galleryLength = $(".card-img-top").length;
-
-            var myCard = $('<div class="col-md-4"><div class="card mb-4 box-shadow"><img id="img_' + galleryLength + '" class="card-img-top" src="' + img_src +
-              '" alt="Card image cap"><div class="card-body"><div class="d-flex justify-content-between align-items-center"><div class="btn-group"><button type="button" id="btn_' + i +
-              '" class="btn btn-sm btn-outline-secondary view-btn" onclick="saveMe('+img_src+','+galleryLength + ')"><i class="fas fa-download"></i></button></div><small class="text-muted"></small></div></div></div>');
-            myCard.prependTo('#galleryImages');
-          });
-
-          // send image to API
-          $.ajax({
-            type: "POST",
-            url: "{{ url_for('image') }}",
-            data: {
-              imageBase64: e.target.result,
-              emotion: currentEmotion
-            },
-            timeout: 10000
-          }).done(function(data) {
-            // Add photo to top
-            $output = $("#output");
-            var img = document.createElement('img')
-            img.setAttribute('id', 'photo');
-            img.src = data.image;
-            $output.prepend(img);
-          });
         };
         reader.readAsDataURL(input.files[0]);
       }
@@ -282,9 +295,7 @@
       console.error(message, typeof e == 'undefined' ? '' : e);
     }
 
-    var webcam;
     var debug = {{ debug }};
-
     var currentEmotion = 'happy';
 
     function getWebcam() {
@@ -358,21 +369,22 @@
               return;
           }
           console.log("HTML5 input not available, switching to file input.")
-          $('#imageInput').show();
-          $("#imageInput").filestyle({
-            input: false,
-            text: "Take photo",
-            size: 'lg',
-            btnClass: "btn btn-primary"
-          });
-          alert("Showing image input.")
-          $('#videoElement').hide();
-          $('#play').hide();
-
           errorMessage(message);
         });
       } else {
         console.log('HTTPS not found');
+      }
+
+      if (isMobile) {
+        $('#imageInput').show();
+        $("#imageInput").filestyle({
+          input: false,
+          text: "Take photo",
+          size: 'lg',
+          btnClass: "btn btn-primary"
+        });
+        $('#videoElement').hide();
+        $('#play').hide();
       }
     };
     // end startWebcam
@@ -389,21 +401,7 @@
         getWebcam();
         startWebcam();
         $("#play").click(function() {
-          // Move photos below
-          $("#output img:visible").each(function(i) {
-            // $(this).attr('class', 'gallery');
-            // $(this).prependTo("#galleryImages");
-            var img_src = $(this).attr('src');
-            $(this).remove();
-            var galleryLength = $(".card-img-top").length;
-
-            var myCard = $('<div class="col-md-4"><div class="card mb-4 box-shadow"><img id="img_' + galleryLength + '" class="card-img-top" src="' + img_src +
-              '" alt="Card image cap"><div class="card-body"><div class="d-flex justify-content-between align-items-center"><div class="btn-group"><button type="button" id="btn_' + i +
-              '" class="btn btn-sm btn-outline-secondary view-btn" onclick="saveMe(img_'+ galleryLength + ')"><i class="fas fa-download"></i></button></div><small class="text-muted"></small></div></div></div>');
-            // $(this).prependTo("#galleryImages");
-            myCard.prependTo('#galleryImages');
-          });
-
+          moveToGallery();
           // for (var i = 0; i < galleryLength; i++) {
           //   console.log(i, galleryLength)
           //   $('.card-img-top')[i].id = 'img_' + galleryLength - i - 1;
