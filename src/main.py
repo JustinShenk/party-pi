@@ -18,17 +18,17 @@ from utils.inference import get_class_to_arg, apply_offsets, get_labels
 from utils.misc import *
 from PIL import Image
 
-# logging for heroku
-if 'DYNO' in os.environ:
-    app.logger.addHandler(logging.StreamHandler(sys.stdout))
-    app.logger.setLevel(logging.INFO)
-
 # tf.keras.backend.clear_session()
 graph = tf.get_default_graph()
 
 emotion_classifier = load_model('../emotion_model.hdf5', compile=False)
 
 app = Flask(__name__)
+# logging for heroku
+if 'DYNO' in os.environ:
+    app.logger.addHandler(logging.StreamHandler(sys.stdout))
+    app.logger.setLevel(logging.INFO)
+
 debug = False
 if not debug:
     sslify = SSLify(app)
