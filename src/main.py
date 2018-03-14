@@ -159,6 +159,7 @@ def random_emotion():
 
 
 def predict_emotions(faces, gray_image, current_emotion='happy'):
+    global graph
     player_data = []
     # Hyperparameters for bounding box
     emotion_offsets = (20, 40)
