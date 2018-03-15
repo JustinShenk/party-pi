@@ -217,12 +217,13 @@ def get_face(frame):
 
 @app.route('/image', methods=['POST'])
 def image():
-    # Get image
-    image_b64 = request.values['imageBase64']
-    image_data = re.sub('^data:image/.+;base64,', '', image_b64)
-    # Get emotion
-    emotion = request.values['emotion']
     try:
+        print("image received")
+        image_b64 = request.values['imageBase64']
+        image_data = re.sub('^data:image/.+;base64,', '', image_b64)
+        print(image_b64[:100])
+        # Get emotion
+        emotion = request.values['emotion']
         img = readb64(image_data)
         app.logger.debug(img.shape)
         gray_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -246,7 +247,7 @@ def image():
         # response.status_code = 500
         return jsonify({
             'image': '',
-            'score': is_score
+            'score': False
         })
 
     is_score = len(player_data) > 0
@@ -345,5 +346,8 @@ if __name__ == '__main__':
     if os.path.exists('cert.pem'):  # local environment only
         app.run(host='0.0.0.0', ssl_context=(
             'cert.pem', 'key.pem'), debug=debug)
+    elif os.path.exists('/etc/letsencrypt/live/openhistoryproject.com/'):
+        app.run(host='0.0.0.0', ssl_context=(
+            '/etc/letsencrypt/live/openhistoryproject.com/cert.pem', '/etc/letsencrypt/live/openhistoryproject.com/privkey.pem'), debug=debug)
     else:
-        app.run(debug=debug)
+        app.run(host='0.0.0.0', debug=debug)

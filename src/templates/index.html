@@ -49,7 +49,7 @@
       <div class="container d-flex justify-content-between">
         <a href="#" class="navbar-brand d-flex align-items-center">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-          <strong>Emotion Detection Game (Development Stage)</strong>
+          <strong>Party Pi</strong>
         </a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarHeader" aria-controls="navbarHeader" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
@@ -60,45 +60,37 @@
 
   <main role="main">
 
-    <section id='jumbo' class="jumbotron text-center">
-      <h3> Currently tested on desktop Chrome, Firefox and Safari.</h3>
-      <div class='video-container'>
-        <div class='row justify-content-md-center'>
-          <div id='output'>
+    <section class="jumbotron text-center">
+      <p class='lead text-muted'> Currently tested on desktop Chrome, Firefox and Safari.</p>
+      <div id='output' class='container'>
+        <div class='row justify-content-center'>
+      <label class="btn btn-default">
+       <input id='imageInput' type="file" accept='image/*;' capture='camera' hidden>
+      </label>
+    </div>
+        <div class='img-overlay'>
+      <div class='row justify-content-center'>
+        <p id="text">Show happiness_</p>
+        <button id="play" syle='display: none;'>Play</button>
+      </div>
+      </div>
+        <!-- <input id='imageInput' type="file" accept="image/*;" capture="camera" style="display: none"> -->
+          <!-- <div id='output' class='container'> -->
             <video width='640' height='480' autoplay="true" id="videoElement" >Your browser does not support HTML5 video.</video>
+            <image id='placeholderImage' width='640' height='480' style='display: none; background-color: gray;'></image>
+            <div class='' id="myProgress" style='::after'>
+              <div id="countdownBar">
+              </div>
+            </div>
             <img id="myImg" class="img-responsive" crossorigin="anonymous" src="" hidden='true'/>
-            <canvas id="myCanvas"></canvas>
+            <canvas id="myCanvas" hidden='true'></canvas>
             <div id='spinner' class='loader'>
             </div>
-          </div>
-          <div id="uiContainer">
-            <div class='row'>
-              <h1 id="headline"></h1>
-            </div>
-            <div class='row'>
-              <p id="text">Show happiness_</p>
-            </div>
-            <div class='row'>
-              <button id="play">Play</button>
-            </div>
-          </div>
           <!-- <image id='placeholder' src="{{ url_for('static', filename='loading.jpg')}}" height="480px" width="640px"></image> -->
-        </div>
+          <div id='mobilePrompt' class='row justify-content-center lead'>
+          </div>
       </div>
     </section>
-
-    <div class='row'>
-      <div class='mx-auto col-md-2 col-md-offset-5'>
-        <form>
-          <input id='imageInput' type="file" accept="image/*;" capture="camera" style="display: none">
-        </form>
-      </div>
-    </div>
-    <div class='row' id="myProgress">
-      <div id="countdownBar">
-      </div>
-    </div>
-
     <div id='gallery' class="album py-5 bg-light" style="display: none;">
       <div class="container">
         <h1>Gallery</h1>
@@ -117,14 +109,15 @@
       <p class="float-right">
         <a href="#">Back to top</a>
       </p>
-      <p>Party Pi is &copy; Justin Shenk</p>
+      <p>Party Pi is &copy; 2018 Justin Shenk</p>
       <p>Want the code? <a href="https://github.com/justinshenk/partypi">Visit the GitHub repo</a>.</p>
     </div>
   </footer>
 
   <script type="text/javascript">
 
-  const isMobile;
+  var isMobile;
+  var showGallery = false;
 
   if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Silk|Opera Mini/i.test(navigator.userAgent)) {
       // Take the user to a different screen here.
@@ -156,6 +149,7 @@
 
     function moveToGallery() {
       // Move photo to gallery
+      $('#gallery').css("display", "block");
       $('#output img:visible').each(function(i) {
         // Create card for image
         var img_src = $(this).attr('src');
@@ -234,6 +228,7 @@
     var fileupload = $("#imageInput");
 
     function sendFile(imageData) {
+      $("#spinner").addClass('loader');
       // send image to API
       $.ajax({
         type: "POST",
@@ -250,6 +245,10 @@
         img.setAttribute('id', 'photo');
         img.src = data.image;
         $output.prepend(img);
+        $("#spinner").removeClass('loader');
+        var emotion = getRandomEmotion();
+        currentEmotion = emotion;
+        $("#mobilePrompt").text("Show " + currentEmotion + "_");
       });
     }
 
@@ -271,17 +270,15 @@
   			    var canvas = $("#myCanvas").get(0);
   				// run orientation on img in canvas
             orientation(img, canvas);
+            sendFile(img.src);
 			    });
-
-          moveToGallery();
-          sendFile(e.target.result);
-
         };
         reader.readAsDataURL(input.files[0]);
       }
     };
 
     fileupload.on('change', function() {
+      moveToGallery(); // move old images to gallery
       readURL(this);
     });
     // end image upload
@@ -329,12 +326,11 @@
         // navigator.getUserMedia = navigator.getUserMedia || navigator.mediaDevices.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.oGetUserMedia;
 
         // Prefer camera resolution nearest to 640x480.
-        var constraints = { audio: false, video: { width: 640, height: 480 } };
+        var constraints = { audio: false, video: {width: {exact: 640}, height: {exact: 480}} };
 
         navigator.mediaDevices.getUserMedia(constraints)
         .then(function(stream) {
           $("#videoElement").show();
-          $('#placeholder').hide();
           $('#imageInput').filestyle('destroy');
           $('#imageInput').hide();
 
@@ -374,18 +370,6 @@
       } else {
         console.log('HTTPS not found');
       }
-
-      if (isMobile) {
-        $('#imageInput').show();
-        $("#imageInput").filestyle({
-          input: false,
-          text: "Take photo",
-          size: 'lg',
-          btnClass: "btn btn-primary"
-        });
-        $('#videoElement').hide();
-        $('#play').hide();
-      }
     };
     // end startWebcam
 
@@ -399,37 +383,63 @@
 
       var initialize = function() {
         getWebcam();
-        startWebcam();
-        $("#play").click(function() {
-          moveToGallery();
-          // for (var i = 0; i < galleryLength; i++) {
-          //   console.log(i, galleryLength)
-          //   $('.card-img-top')[i].id = 'img_' + galleryLength - i - 1;
-          // }
-          // $(".view-btn").each(function(i) {
-          //   console.log('view btn each ' + i);
-          //   $(this).click(function() {
-          //     console.log('click of ' + i);
-          //     var img_src = $("#img_" + i).attr('src');
-          //     var a = document.createElement('a');
-          //     a.href = img_src;
-          //     a.download = "party_pi_" + i + ".jpg";
-          //     document.body.appendChild(a);
-          //     a.click();
-          //     document.body.removeChild(a);
-          //   })
-          // });
+        if (!isMobile) {
+          $('#play').show();
+          startWebcam();
+          $("#play").click(function() {
+            // startWebcam();
+            $("#placeholderImage").hide();
+            $("#videoElement").removeAttr('hidden');
+            $("#myProgress").show();
+            if (showGallery) {
+              // move photo from main display to gallery
+              moveToGallery();
+            } else {
+              showGallery = true;
+            }
+            // for (var i = 0; i < galleryLength; i++) {
+            //   console.log(i, galleryLength)
+            //   $('.card-img-top')[i].id = 'img_' + galleryLength - i - 1;
+            // }
+            // $(".view-btn").each(function(i) {
+            //   console.log('view btn each ' + i);
+            //   $(this).click(function() {
+            //     console.log('click of ' + i);
+            //     var img_src = $("#img_" + i).attr('src');
+            //     var a = document.createElement('a');
+            //     a.href = img_src;
+            //     a.download = "party_pi_" + i + ".jpg";
+            //     document.body.appendChild(a);
+            //     a.click();
+            //     document.body.removeChild(a);
+            //   })
+            // });
 
-          // Show and start webcam
-          $("#videoElement").show();
-          $("#text").text("Show " + currentEmotion + "_");
-          // Hide play button
-          $(this).hide();
-          // Start timer
-          move();
-          // Capture image and load image
-          setTimeout(captureImage, 3000);
-        });
+            // Show and start webcam
+            $("#text").text("Show " + currentEmotion + "_");
+            // Hide play button
+            $(this).hide();
+            // Start timer
+            move();
+            // Capture image and load image
+            setTimeout(captureImage, 3000);
+          });
+        } else { // is mobile
+          $("#imageInput").show();
+          $("#imageInput").filestyle({
+            input: false,
+            text: "Take photo",
+            size: 'lg',
+            btnClass: "btn btn-primary"
+          });
+          $('#videoElement').hide();
+          $('#play').hide();
+          $('#myProgress').hide();
+          // $('#text span').css('color','black');
+          $('#text').hide();
+          $("#mobilePrompt").text("Show " + currentEmotion + "_");
+          $('#mobilePrompt').show();
+        }
       };
 
       var captureImage = function() {
@@ -446,11 +456,14 @@
 
         // var image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");  // here is the most important part because if you dont replace you will get a DOM 18 exception.
         // window.location.href=image;
-        $("#videoElement").hide();
+        // video.setAttribute('src','');
+        // video.setAttribute('width',canvas.width);
+        // video.setAttribute('height',canvas.height);
+        video.setAttribute('hidden','true');
+        $("#placeholderImage").show();
         // video.style.visibility = 'hidden';
         $output = $("#output");
         $("#spinner").addClass("loader");
-
         var dataURL = canvas.toDataURL();
         document.querySelector('#play').href = dataURL;
         $.ajax({
@@ -462,15 +475,15 @@
           },
           timeout: 10000
         }).done(function(data) {
+          $("#placeholderImage").hide();
           $("#spinner").removeClass("loader");
           var img_data = data.image;
           // Add photo to top
           var img = document.createElement('img')
           img.src = img_data;
           $output.prepend(img);
+          $("#myProgress").hide();
           $("#play").show();
-          // Show gallery first time
-          $('#gallery').css("display", "block");
         });
       }; // end captureImage
 
