@@ -1,8 +1,8 @@
 import base64
 import cv2
 import io
-import logging
 import numpy as np
+import os
 import random
 import re
 import sys
@@ -25,15 +25,16 @@ graph = tf.get_default_graph()
 emotion_classifier = load_model('../emotion_model.hdf5', compile=False)
 
 app = Flask(__name__)
-# logging for heroku
-if 'DYNO' in os.environ:
-    app.logger.addHandler(logging.StreamHandler(sys.stdout))
-    app.logger.setLevel(logging.INFO)
+app.config.update(dict(
+    PREFERRED_URL_SCHEME='https'
+))
 
-debug = False
+debug = True
 if not debug:
     sslify = SSLify(app)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+
+
 # party_pi = PartyPi(web=True)
 print("Game loaded")
 face_detector = load_detection_model()
@@ -192,13 +193,32 @@ def predict_emotions(faces, gray_image, current_emotion='happy'):
     return player_data
 
 
-def readb64(base64_string):
+def data_uri_to_cv2_img(uri):
+    uri = uri.split(",")
+    uri = uri[1]
+    image_bytes = BytesIO()
+    encoded = str.encode(uri)
+    decoded = base64.decodestring(encoded)
+    image_bytes.write(decoded)
+    image_bytes.seek(0)
+    image = Image.open(image_bytes)
+    image = image.convert('RGB')
+    np_img = np.array(image, dtype=np.uint8)
+    img = cv2.cvtColor(np_img, cv2.COLOR_RGB2BGR)
+    return img
+
+
+def readb64(uri):
+    uri = uri.split(",")
+    base64_string = uri[1]
     sbuf = BytesIO()
     sbuf.write(base64.b64decode(base64_string))
     sbuf.seek(0)
     pil_img = Image.open(sbuf).convert('RGB')
-    np_img = np.array(pil_img)
-    return cv2.cvtColor(np_img, cv2.COLOR_RGB2BGR)
+    np_img = np.array(pil_img, dtype=np.uint8)
+    color_image_flag = 1
+    img = cv2.imdecode(np_img, color_image_flag)
+    return img
 
 
 def get_face(frame):
@@ -215,58 +235,56 @@ def get_face(frame):
     return frame
 
 
-@app.route('/image', methods=['POST'])
+@app.route('/image', methods=['POST', 'GET'])
 def image():
-    try:
-        print("image received")
-        image_b64 = request.values['imageBase64']
-        image_data = re.sub('^data:image/.+;base64,', '', image_b64)
-        print(image_b64[:100])
-        # Get emotion
-        emotion = request.values['emotion']
-        img = readb64(image_data)
-        app.logger.debug(img.shape)
-        gray_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        faces = detect_faces(face_detector, gray_image)
-        player_data = predict_emotions(
-            faces, gray_image, emotion)
-        photo = rank_players(player_data, img, emotion)
-        # photo = party_pi.photo
-        photo_path = 'static/images/{}.jpg'.format(str(uuid.uuid4()))
-        cv2.imwrite(photo_path, photo)
-        print("Saved image to {}".format(photo_path))
-        #
-        # _, img_encoded = cv2.imencode('.jpg', photo)
-        # print("OUTPUT:", img_encoded.tostring())
-        # with open(photo_path, 'rb') as image_file:
-        #     encoded_string = base64.b64encode(image_file.read())
-    except Exception as e:
-        print("ERROR:", e)
-        # response = jsonify({'image': photo_path,
-        #                     'score': False})
-        # response.status_code = 500
-        return jsonify({
-            'image': '',
-            'score': False
-        })
-
-    is_score = len(player_data) > 0
-    # base64_string = base64.urlsafe_b64decode(encoded_string.as_string())
-    # data = {
-    #     'image': base64_string,
-    #     'score': is_score
-    # }
-    # response = jsonify(data)
-    # response.status_code = 200
-    # return response
-    # response = make_response(send_file(photo_path,
-    #                                    attachment_filename='player.jpg',
-    #                                    mimetype='image/jpg'))
-    # response.headers['Score'] = 'Yes'
-    return jsonify({
-        'image': photo_path,
-        'score': is_score
-    })
+    if request.method == 'POST':
+        print("POST request")
+        f = request.form
+        for key in f.keys():
+            for value in f.getlist(key):
+                print(key, ":", value[:50])
+        try:
+            print("request received")
+            # json_data = request.get_json(silent=True)
+            # print(json_data[:20])
+            # image_b64 = json_data['imageBase64']
+            image_b64 = request.form.get('imageBase64')
+            if image_b64 is None:
+                print("No image in request.")
+                return jsonify(success=False, photoPath='')
+            print("image_b64 request received.", image_b64[:10])
+            # Get emotion
+            # emotion = json_data['emotion']
+            emotion = request.form.get('emotion')
+            if emotion is None:
+                print("No emotion in request.")
+                return jsonify(success=False, photoPath='')
+            img = data_uri_to_cv2_img(image_b64)
+            # img = readb64(image_b64)
+            app.logger.debug(img.shape)
+            gray_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            faces = detect_faces(face_detector, gray_image)
+            player_data = predict_emotions(
+                faces, gray_image, emotion)
+            photo = rank_players(player_data, img, emotion)
+            # photo = party_pi.photo
+            photo_path = 'static/images/{}.jpg'.format(str(uuid.uuid4()))
+            cv2.imwrite(photo_path, photo)
+            print("Saved image to {}".format(photo_path))
+            return jsonify(success=True,
+                           photoPath=photo_path
+                           )
+        except Exception as e:
+            print("ERROR:", e)
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            print(exc_type, fname, exc_tb.tb_lineno)
+            # response = jsonify({'image': photo_path,
+            #                     'score': False})
+            # response.status_code = 500
+            return jsonify(success=False, photoPath='')
+        print("What happened here?")
+        return jsonify(success=False, photoPath='')
 
 
 def get_image(empty=False, face=False):
@@ -293,6 +311,19 @@ def video_feed():
     return Response(get_image(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
+# @app.after_request
+# def add_header(r):
+#     """
+#     Add headers to both force latest IE rendering engine or Chrome Frame,
+#     and also to cache the rendered page for 10 minutes.
+#     """
+#     r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+#     r.headers["Pragma"] = "no-cache"
+#     r.headers["Expires"] = "0"
+#     r.headers['Cache-Control'] = 'public, max-age=0'
+#     return r
+
+
 @app.route('/face')
 def face():
     return Response(get_image(face=True), mimetype='multipart/x-mixed-replace; boundary=frame')
@@ -311,9 +342,14 @@ def index():
     # send http request with image and receive response
     # response = requests.post(
     #     test_url, data=img_encoded.tostring(), headers=headers)
-    debug_js = 'true' if debug else 'false'
-    return render_template('index.html', debug=debug_js)
-
+    try:
+        debug_js = 'true' if debug else 'false'
+        print("Debug mode:", debug_js)
+        return render_template('index.html', debug=debug_js)
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fname, exc_tb.tb_lineno)
     # response = {'message': '<h1>Hello world</h1>' + img, ''}
     # response_pickled = jsonpickle.encode(response)
     # return Response(response=response_pickled, status=200, mimetype="application/json", headers=)
@@ -343,11 +379,12 @@ def server_error(e):
 
 
 if __name__ == '__main__':
+    threaded = False
     if os.path.exists('cert.pem'):  # local environment only
         app.run(host='0.0.0.0', ssl_context=(
-            'cert.pem', 'key.pem'), debug=debug)
+            'cert.pem', 'key.pem'), debug=debug, threaded=threaded)
     elif os.path.exists('/etc/letsencrypt/live/openhistoryproject.com/'):
         app.run(host='0.0.0.0', ssl_context=(
-            '/etc/letsencrypt/live/openhistoryproject.com/cert.pem', '/etc/letsencrypt/live/openhistoryproject.com/privkey.pem'), debug=debug)
+            '/etc/letsencrypt/live/openhistoryproject.com/cert.pem', '/etc/letsencrypt/live/openhistoryproject.com/privkey.pem'), debug=debug, threaded=threaded)
     else:
-        app.run(host='0.0.0.0', debug=debug)
+        app.run(host='0.0.0.0', debug=debug, threaded=threaded)
