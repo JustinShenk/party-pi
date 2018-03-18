@@ -66,7 +66,7 @@
         Please note, this demo works about 50% of the time.</br>
         Sign up below to be notified of the official release in May or get the <a href="https://github.com/JustinShenk/party-pi">Python app</a>.</p>
       <!-- <input type="file" class="filestyle" accept='image/*;' capture='camera' data-input="false" data-badge="false" id="file-btn"> -->
-      <input id='imageInput' type="file" accept='image/*;' capture='camera' data-input="false" data-badge="false" class='filestyle' data-btnClass="btn-primary text-center" data-text="Upload selfie">
+      <input id='imageInput' type="file" accept='image/*;' capture='camera' data-input="false" data-badge="false" class='filestyle' data-btnClass="btn-primary text-center" data-text="Take selfie">
       <div id='output' class='container'>
         <div class='img-overlay'>
           <div class='row justify-content-center'>
@@ -130,7 +130,7 @@
 
   if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Silk|Opera Mini/i.test(navigator.userAgent)) {
       // Take the user to a different screen here.
-      alert("Support for mobile devices is still in developmental stage. For the best experience try desktop Chrome.");
+      //alert("Support for mobile devices is still in developmental stage. For the best experience try desktop Chrome.");
       isMobile = true;
   } else {
     isMobile = false;
