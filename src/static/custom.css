@@ -104,12 +104,12 @@
   background-color: tomato;
 }
 
-#imageInput {
-  visibility: false;
+.input-group {
+  margin-left: 35%;
 }
 
 .view-btn{
-  display: none;
+  /* display: none; */
 }
 
 #jumbo{
@@ -117,16 +117,18 @@
 }
 
 .loader {
-  position: fixed;
+  position: absolute;
   z-index: 999;
-  height: 120px;
-  width: 120px;
-  overflow: show;
-  margin: 250px auto;
-  top: 0;
+  height: 60px;
+  width: 60px;
+  /* overflow: show; */
+  margin: 0px auto;
+  left: 50%;
+top: 50%;
+  /* top: 0;
   left: 0;
   bottom: 0;
-  right: 0;
+  right: 0; */
 
   /* padding-top: 50%; */
   /* margin-top: 50px; */
@@ -193,10 +195,6 @@
   /* bottom: -210px; */
   text-align: center;
   z-index: 100;
-}
-
-input {
-  z-index: 200
 }
 
 #output {

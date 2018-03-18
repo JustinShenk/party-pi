@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="{{ url_for('static',filename='custom.css') }}" />
   <!-- jQuery library -->
   <script type="text/javascript" src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.3.1.min.js"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='jquery-3.3.1.min.js') }}"></script>
   <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='adapter-latest.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='bootstrap-filestyle.js') }}"></script>
@@ -61,31 +62,31 @@
   <main role="main">
 
     <section class="jumbotron text-center">
-      <p class='lead text-muted'> Currently tested on desktop Chrome, Firefox and Safari.</p>
+      <p class='lead text-muted'> Thanks for checking out the testing site! </br>
+        Please note, this demo works about 50% of the time.</br>
+        Sign up below to be notified of the official release in May or get the <a href="https://github.com/JustinShenk/party-pi">Python app</a>.</p>
+      <!-- <input type="file" class="filestyle" accept='image/*;' capture='camera' data-input="false" data-badge="false" id="file-btn"> -->
+      <input id='imageInput' type="file" accept='image/*;' capture='camera' data-input="false" data-badge="false" class='filestyle' data-btnClass="btn-primary text-center" data-text="Upload selfie">
       <div id='output' class='container'>
-        <div class='row justify-content-center'>
-      <label class="btn btn-default">
-       <input id='imageInput' type="file" accept='image/*;' capture='camera' hidden>
-      </label>
-    </div>
         <div class='img-overlay'>
-      <div class='row justify-content-center'>
-        <p id="text">Show happiness_</p>
-        <button id="play" syle='display: none;'>Play</button>
-      </div>
+          <div class='row justify-content-center'>
+            <p id="text">Show happiness_</p>
+            <button id="play" syle='display: none;'>Play</button>
+          </div>
       </div>
         <!-- <input id='imageInput' type="file" accept="image/*;" capture="camera" style="display: none"> -->
           <!-- <div id='output' class='container'> -->
-            <video width='640' height='480' autoplay="true" id="videoElement" >Your browser does not support HTML5 video.</video>
-            <image id='placeholderImage' width='640' height='480' style='display: none; background-color: gray;'></image>
-            <div class='' id="myProgress" style='::after'>
-              <div id="countdownBar">
-              </div>
-            </div>
-            <img id="myImg" class="img-responsive" crossorigin="anonymous" src="" hidden='true'/>
-            <canvas id="myCanvas" hidden='true'></canvas>
-            <div id='spinner' class='loader'>
-            </div>
+      <div id='spinner' >
+      </div>
+        <video width='640' height='480' autoplay="true" id="videoElement" >Your browser does not support HTML5 video.</video>
+        <image id='placeholderImage' width='640' height='480' style='display: none; background-color: gray;'></image>
+        <div class='' id="myProgress" style='::after'>
+          <div id="countdownBar">
+          </div>
+        </div>
+        <img id="myImg" class="img-responsive" crossorigin="anonymous" src="" hidden='true'/>
+        <canvas id="myCanvas" hidden='true'></canvas>
+
           <!-- <image id='placeholder' src="{{ url_for('static', filename='loading.jpg')}}" height="480px" width="640px"></image> -->
           <div id='mobilePrompt' class='row justify-content-center lead'>
           </div>
@@ -102,6 +103,7 @@
         </div>
       </div>
     </div>
+<script type="text/javascript" src="//downloads.mailchimp.com/js/signup-forms/popup/embed.js" data-dojo-config="usePlainJson: true, isDebug: false"></script><script type="text/javascript">require(["mojo/signup-forms/Loader"], function(L) { L.start({"baseUrl":"mc.us12.list-manage.com","uuid":"37227b4f5e1bbd80f404cfef6","lid":"0229295406"}) })</script>
   </main>
 
   <footer class="text-muted">
@@ -118,6 +120,13 @@
 
   var isMobile;
   var showGallery = false;
+  //
+  // $("#imageInput").filestyle({
+  //   text: "Take photo",
+  //   size: 'lg',
+  //   btnClass: "btn btn-primary"
+  // });
+
 
   if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Silk|Opera Mini/i.test(navigator.userAgent)) {
       // Take the user to a different screen here.
@@ -137,11 +146,16 @@
       'neutral'
     ]
 
-    function saveMe(img, i) {
-      var img_src = img.src;
+    function saveMe(img_id) {
+      if (!typeof img_id === 'string') {
+        img_id = img_id.id;
+      }
+      var img_src = $("#" + img_id).attr("src");
       var a = document.createElement('a');
       a.href = img_src;
-      a.download = "party_pi_" +  + ".jpg";
+      var filename = "party_pi_" + String(img_id) + ".jpg";
+      console.log(filename);
+      a.download = filename;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -156,10 +170,10 @@
         $(this).remove();
 
         var galleryLength = $(".card-img-top").length;
-
-        var myCard = $('<div class="col-md-4"><div class="card mb-4 box-shadow"><img id="img_' + galleryLength + '" class="card-img-top" src="' + img_src +
+        var img_filename = "img_" + galleryLength;
+        var myCard = $('<div class="col-md-4"><div class="card mb-4 box-shadow"><img id="' + img_filename + '" class="card-img-top" src="' + img_src +
           '" alt="Card image cap"><div class="card-body"><div class="d-flex justify-content-between align-items-center"><div class="btn-group"><button type="button" id="btn_' + galleryLength +
-          '" class="btn btn-sm btn-outline-secondary view-btn" onclick="saveMe(img_'+ galleryLength + ')"><i class="fas fa-download"></i></button></div><small class="text-muted"></small></div></div></div>');
+          '" class="btn btn-sm btn-outline-secondary view-btn" onclick="saveMe(&apos;img_' + galleryLength + '&apos;)"><i class="fas fa-download"></i></button></div><small class="text-muted"></small></div></div></div>');
         myCard.prependTo('#galleryImages');
       });
     }
@@ -224,11 +238,11 @@
 
     }
 
-    // Image upload for mobile device
-    var fileupload = $("#imageInput");
+    var fileUpload = $("#imageInput");
 
     function sendFile(imageData) {
       $("#spinner").addClass('loader');
+      $("#placeholder").show();
       // send image to API
       $.ajax({
         type: "POST",
@@ -237,6 +251,9 @@
           imageBase64: imageData,
           emotion: currentEmotion
         },
+        cache: false,
+        processData: false,
+        contentType: false,
         timeout: 10000
       }).done(function(data) {
         // Add photo to top
@@ -244,6 +261,7 @@
         var img = document.createElement('img')
         img.setAttribute('id', 'photo');
         img.src = data.image;
+        $("#placeholderImage").hide();
         $output.prepend(img);
         $("#spinner").removeClass('loader');
         var emotion = getRandomEmotion();
@@ -277,7 +295,7 @@
       }
     };
 
-    fileupload.on('change', function() {
+    fileUpload.on('change', function() {
       moveToGallery(); // move old images to gallery
       readURL(this);
     });
@@ -331,8 +349,10 @@
         navigator.mediaDevices.getUserMedia(constraints)
         .then(function(stream) {
           $("#videoElement").show();
+          console.log("Hide webcam");
           $('#imageInput').filestyle('destroy');
           $('#imageInput').hide();
+          console.log("Destroy #imageInput");
 
           var video = $("#videoElement").get(0);
           // Older browsers may not have srcObject
@@ -373,12 +393,30 @@
     };
     // end startWebcam
 
+    function dataURItoBlob(dataURI) {
+        // convert base64/URLEncoded data component to raw binary data held in a string
+        var byteString;
+        if (dataURI.split(',')[0].indexOf('base64') >= 0)
+            byteString = atob(dataURI.split(',')[1]);
+        else
+            byteString = unescape(dataURI.split(',')[1]);
+
+        // separate out the mime component
+        var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+
+        // write the bytes of the string to a typed array
+        var ia = new Uint8Array(byteString.length);
+        for (var i = 0; i < byteString.length; i++) {
+            ia[i] = byteString.charCodeAt(i);
+        }
+
+        return new Blob([ia], {type:mimeString});
+    }
+
     $(document).ready(function() {
       "use strict";
 
-      $("#spinner").removeClass('loader');
-
-      var video, $output;
+      var $output;
       var scale = 1;
 
       var initialize = function() {
@@ -426,12 +464,7 @@
           });
         } else { // is mobile
           $("#imageInput").show();
-          $("#imageInput").filestyle({
-            input: false,
-            text: "Take photo",
-            size: 'lg',
-            btnClass: "btn btn-primary"
-          });
+          console.log("Show #imageInput");
           $('#videoElement').hide();
           $('#play').hide();
           $('#myProgress').hide();
@@ -443,9 +476,7 @@
       };
 
       var captureImage = function() {
-
-        video = $("#videoElement").get(0);
-
+        var video = $("#videoElement").get(0);
         var canvas = document.createElement("canvas");
         canvas.width = video.videoWidth * scale;
         canvas.height = video.videoHeight * scale;
@@ -453,34 +484,34 @@
         canvasContext.translate(video.videoWidth, 0);
         canvasContext.scale(-1, 1);
         canvasContext.drawImage(video, 0, 0, canvas.width, canvas.height);
-
         // var image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");  // here is the most important part because if you dont replace you will get a DOM 18 exception.
-        // window.location.href=image;
-        // video.setAttribute('src','');
-        // video.setAttribute('width',canvas.width);
-        // video.setAttribute('height',canvas.height);
-        video.setAttribute('hidden','true');
+        var dataURL = canvas.toDataURL('image/jpeg', 1.0);
+        var blob = dataURItoBlob(dataURL);
+        var fd = new FormData(document.forms[0]);
+        fd.append("imageBase64", dataURL);
+        fd.append("emotion", currentEmotion);
         $("#placeholderImage").show();
         // video.style.visibility = 'hidden';
         $output = $("#output");
         $("#spinner").addClass("loader");
-        var dataURL = canvas.toDataURL();
-        document.querySelector('#play').href = dataURL;
+        // document.querySelector('#play').href = dataURL;
+        video.setAttribute('hidden','true');
+        console.log('submitting');
+
         $.ajax({
           type: "POST",
           url: "{{ url_for('image') }}",
-          data: {
-            imageBase64: dataURL,
-            emotion: currentEmotion
-          },
+          data: fd,
+          processData: false,
+          contentType: false,
           timeout: 10000
         }).done(function(data) {
+          console.log(data.photoPath);
           $("#placeholderImage").hide();
           $("#spinner").removeClass("loader");
-          var img_data = data.image;
           // Add photo to top
-          var img = document.createElement('img')
-          img.src = img_data;
+          var img = document.createElement('img');
+          img.src = data.photoPath;
           $output.prepend(img);
           $("#myProgress").hide();
           $("#play").show();
