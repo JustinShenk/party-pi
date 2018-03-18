@@ -484,8 +484,8 @@
       var captureImage = function() {
         var video = $("#videoElement").get(0);
         var canvas = document.createElement("canvas");
-        canvas.width = 480 * video.videoWidth / video.videoHeight;
-        canvas.height = 480;
+        canvas.width = video.videoWidth * scale;
+        canvas.height = video.videoHeight * scale;
         var canvasContext = canvas.getContext('2d');
         canvasContext.translate(video.videoWidth, 0);
         canvasContext.scale(-1, 1);
