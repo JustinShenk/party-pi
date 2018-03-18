@@ -187,9 +187,6 @@
         var width = img.width,
             height = img.height;
 
-            console.log(width);
-            console.log(height);
-
         // Check orientation in EXIF metadatas
         EXIF.getData(img, function() {
             var allMetaData = EXIF.getAllTags(this);
@@ -235,34 +232,44 @@
 
         // Draw img into canvas
         ctx.drawImage(img, 0, 0, width, height);
-
     }
 
     var fileUpload = $("#imageInput");
 
-    function sendFile(imageData) {
+    function sendFile(canvas) {
+      var resizedCanvas = document.createElement("canvas");
+      var resizedContext = resizedCanvas.getContext("2d");
+
+      resizedCanvas.height = String(480 * canvas.width / canvas.height);
+      resizedCanvas.width = "480";
+
+      resizedContext.drawImage(canvas, 0, 0, resizedCanvas.width, resizedCanvas.height);
+      var dataURL = resizedCanvas.toDataURL('image/jpeg', 0.7);
+
+      var fd = new FormData(document.forms[0]);
+      fd.append("imageBase64", dataURL);
+      fd.append("emotion", currentEmotion);
+
       $("#spinner").addClass('loader');
       $("#placeholder").show();
       // send image to API
       $.ajax({
         type: "POST",
         url: "{{ url_for('image') }}",
-        data: {
-          imageBase64: imageData,
-          emotion: currentEmotion
-        },
+        data: fd,
+        async: true,
         cache: false,
+        headers: { "cache-control": "no-cache" },
         processData: false,
         contentType: false,
         timeout: 10000
       }).done(function(data) {
         // Add photo to top
-        $output = $("#output");
         var img = document.createElement('img')
         img.setAttribute('id', 'photo');
-        img.src = data.image;
+        img.src = data.photoPath;
+        $("#output").prepend(img);
         $("#placeholderImage").hide();
-        $output.prepend(img);
         $("#spinner").removeClass('loader');
         var emotion = getRandomEmotion();
         currentEmotion = emotion;
@@ -276,19 +283,18 @@
         var reader = new FileReader();
 
         reader.onloadend = function(e) {
-          // $('#loadingImage').show();
-          // $('#loadingImage').attr('src', e.target.result);
-          $("#myImg").attr('src', e.target.result);
-          $("#myImg").show();
+          var $myImg = $("#myImg");
+          $myImg.attr('src', e.target.result);
+          $myImg.show();
           // Use EXIF library to handle the loaded image exif orientation
 		      EXIF.getData(input.files[0], function() {
   			    // Fetch image tag
-            var img = $("#myImg").get(0);
+            var img = $myImg.get(0);
             // Fetch canvas
   			    var canvas = $("#myCanvas").get(0);
   				// run orientation on img in canvas
             orientation(img, canvas);
-            sendFile(img.src);
+            sendFile(canvas);
 			    });
         };
         reader.readAsDataURL(input.files[0]);
@@ -478,15 +484,14 @@
       var captureImage = function() {
         var video = $("#videoElement").get(0);
         var canvas = document.createElement("canvas");
-        canvas.width = video.videoWidth * scale;
-        canvas.height = video.videoHeight * scale;
+        canvas.width = 480 * video.videoWidth / video.videoHeight;
+        canvas.height = 480;
         var canvasContext = canvas.getContext('2d');
         canvasContext.translate(video.videoWidth, 0);
         canvasContext.scale(-1, 1);
         canvasContext.drawImage(video, 0, 0, canvas.width, canvas.height);
-        // var image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");  // here is the most important part because if you dont replace you will get a DOM 18 exception.
+
         var dataURL = canvas.toDataURL('image/jpeg', 1.0);
-        var blob = dataURItoBlob(dataURL);
         var fd = new FormData(document.forms[0]);
         fd.append("imageBase64", dataURL);
         fd.append("emotion", currentEmotion);
@@ -506,7 +511,6 @@
           contentType: false,
           timeout: 10000
         }).done(function(data) {
-          console.log(data.photoPath);
           $("#placeholderImage").hide();
           $("#spinner").removeClass("loader");
           // Add photo to top
