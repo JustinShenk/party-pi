@@ -256,9 +256,9 @@ def image():
             img = data_uri_to_cv2_img(image_b64)
             print(img.shape)
             w, h, c = img.shape
-            if h > 480:
+            if w > 480:
                 print("Check yo' image size.")
-                img = cv2.resize(img, (480, int(480 * w / h)))
+                img = cv2.resize(img, (int(480 * w / h), 480))
                 print("New size {}.".format(img.shape))
             gray_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             faces = detect_faces(face_detector, gray_image)
