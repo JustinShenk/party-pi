@@ -29,7 +29,7 @@ app.config.update(dict(
     PREFERRED_URL_SCHEME='https'
 ))
 
-debug = True
+debug = False
 if not debug:
     sslify = SSLify(app)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
@@ -56,9 +56,9 @@ def rank_players(player_data, photo, current_emotion='happy'):
         photo : numpy nd array
     """
 
-    text_size = 0.8
+    text_size = 0.5
     if len(player_data) < 1:
-        draw_text((145, 180), photo, "No faces found - try again!",
+        draw_text((0.2 * photo.shape[0], 0.2 * photo.shape[1]), photo, "No faces found - try again!",
                   font_scale=text_size, color=YELLOW)
         return photo
     scores = []
@@ -181,11 +181,8 @@ def predict_emotions(faces, gray_image, current_emotion='happy'):
         with graph.as_default():
             emotion_prediction = emotion_classifier.predict(gray_face)
         emotion_index = emotion_idx_lookup[current_emotion]
-        print("EMOTION_INDEX", emotion_index)
         # app.logger.debug("EMOTION INDEX: ", emotion_index)
         emotion_score = emotion_prediction[0][emotion_index]
-        print("EMOTION_SCORE:", emotion_score)
-        print("EMOTION_PREDICTION[0]:", emotion_prediction[0])
         x, y, w, h = face_coordinates
         face_dict = {'left': x, 'top': y, 'right': x + w, 'bottom': y + h}
         player_data.append(
@@ -239,15 +236,12 @@ def get_face(frame):
 def image():
     if request.method == 'POST':
         print("POST request")
-        f = request.form
-        for key in f.keys():
-            for value in f.getlist(key):
-                print(key, ":", value[:50])
         try:
-            print("request received")
-            # json_data = request.get_json(silent=True)
-            # print(json_data[:20])
-            # image_b64 = json_data['imageBase64']
+            f = request.form
+            for key in f.keys():
+                for value in f.getlist(key):
+                    print(key, ":", value[:50])
+
             image_b64 = request.form.get('imageBase64')
             if image_b64 is None:
                 print("No image in request.")
@@ -260,8 +254,12 @@ def image():
                 print("No emotion in request.")
                 return jsonify(success=False, photoPath='')
             img = data_uri_to_cv2_img(image_b64)
-            # img = readb64(image_b64)
-            app.logger.debug(img.shape)
+            print(img.shape)
+            w, h, c = img.shape
+            if h > 480:
+                print("Check yo' image size.")
+                img = cv2.resize(img, (480, int(480 * w / h)))
+                print("New size {}.".format(img.shape))
             gray_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             faces = detect_faces(face_detector, gray_image)
             player_data = predict_emotions(
@@ -301,16 +299,6 @@ def get_image(empty=False, face=False):
                b'\r\n')
 
 
-@app.route('/select_mode', methods=['POST'])
-def select_mode(click_x):
-    print("CLICKX: ", click_x)
-
-
-@app.route('/video_feed')
-def video_feed():
-    return Response(get_image(), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-
 # @app.after_request
 # def add_header(r):
 #     """
@@ -344,7 +332,7 @@ def index():
     #     test_url, data=img_encoded.tostring(), headers=headers)
     try:
         debug_js = 'true' if debug else 'false'
-        print("Debug mode:", debug_js)
+        print("Page accessed, debug mode:", debug_js)
         return render_template('index.html', debug=debug_js)
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()
