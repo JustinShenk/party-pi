@@ -20,6 +20,7 @@
   <script type="text/javascript" src="{{ url_for('static', filename='exif.js') }}"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
   <script src="{{ url_for('static', filename='holder.min.js') }}"></script>
+  <script id="mcjs">!function(c,h,i,m,p){m=c.createElement(h),p=c.getElementsByTagName(h)[0],m.async=1,m.src=i,p.parentNode.insertBefore(m,p)}(document,"script","https://chimpstatic.com/mcjs-connected/js/users/37227b4f5e1bbd80f404cfef6/ae35f9ecc36904532f0c06bb7.js");</script>
   <link href="{{ url_for('static', filename='album.css') }}" rel="stylesheet"/>
 
   <title>Computer Vision Emotion Detection Game</title>
@@ -245,7 +246,7 @@
 
       resizedContext.drawImage(canvas, 0, 0, resizedCanvas.width, resizedCanvas.height);
       var dataURL = resizedCanvas.toDataURL('image/jpeg', 0.7);
-
+      alert(resizedCanvas.width + resizedCanvas.height);
       var fd = new FormData(document.forms[0]);
       fd.append("imageBase64", dataURL);
       fd.append("emotion", currentEmotion);
