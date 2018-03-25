@@ -7,21 +7,21 @@
   <meta name="description" content="">
   <meta name="author" content="">
   <!-- <script defer src="https://use.fontawesome.com/releases/v5.0.8/js/all.js"></script> -->
-  <script type="text/javascript" src="{{ url_for('static',filename='fontawesome-all.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static',filename='js/fontawesome-all.js') }}"></script>
   <!-- Latest compiled and minified CSS -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous" />
-  <link rel="stylesheet" href="{{ url_for('static',filename='custom.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static',filename='css/custom.css') }}" />
   <!-- jQuery library -->
   <script type="text/javascript" src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.3.1.min.js"></script>
-  <script type="text/javascript" src="{{ url_for('static', filename='jquery-3.3.1.min.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}"></script>
   <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-  <script type="text/javascript" src="{{ url_for('static', filename='adapter-latest.js') }}"></script>
-  <script type="text/javascript" src="{{ url_for('static', filename='bootstrap-filestyle.js') }}"></script>
-  <script type="text/javascript" src="{{ url_for('static', filename='exif.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/adapter-latest.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap-filestyle.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/exif.js') }}"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-  <script src="{{ url_for('static', filename='holder.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/holder.min.js') }}"></script>
   <script id="mcjs">!function(c,h,i,m,p){m=c.createElement(h),p=c.getElementsByTagName(h)[0],m.async=1,m.src=i,p.parentNode.insertBefore(m,p)}(document,"script","https://chimpstatic.com/mcjs-connected/js/users/37227b4f5e1bbd80f404cfef6/ae35f9ecc36904532f0c06bb7.js");</script>
-  <link href="{{ url_for('static', filename='album.css') }}" rel="stylesheet"/>
+  <link href="{{ url_for('static', filename='css/album.css') }}" rel="stylesheet"/>
 
   <title>Computer Vision Emotion Detection Game</title>
 
@@ -442,23 +442,6 @@
             } else {
               showGallery = true;
             }
-            // for (var i = 0; i < galleryLength; i++) {
-            //   console.log(i, galleryLength)
-            //   $('.card-img-top')[i].id = 'img_' + galleryLength - i - 1;
-            // }
-            // $(".view-btn").each(function(i) {
-            //   console.log('view btn each ' + i);
-            //   $(this).click(function() {
-            //     console.log('click of ' + i);
-            //     var img_src = $("#img_" + i).attr('src');
-            //     var a = document.createElement('a');
-            //     a.href = img_src;
-            //     a.download = "party_pi_" + i + ".jpg";
-            //     document.body.appendChild(a);
-            //     a.click();
-            //     document.body.removeChild(a);
-            //   })
-            // });
 
             // Show and start webcam
             $("#text").text("Show " + currentEmotion + "_");
@@ -542,7 +525,7 @@
       }
     }
   </script>
-  <script type="text/javascript" src="{{ url_for('static', filename='shuffler1.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/shuffler.js') }}"></script>
 
 </body>
 
