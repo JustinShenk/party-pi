@@ -14,4 +14,4 @@ pyqt5
 secret.py
 README-pypi.rst
 register.py
-src/static/images/*
+*/static/images/*

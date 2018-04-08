@@ -1,0 +1,268 @@
+
+/* :not(:required) hides these rules from IE9 and below */
+/* .loading:not(:required) {
+  /* hide "loading..." text */
+  font: 0/0 a;
+  color: transparent;
+  text-shadow: none;
+  background-color: transparent;
+  border: 0;
+} */
+
+.loading:not(:required):after {
+  content: '';
+  display: block;
+  font-size: 10px;
+  width: 1em;
+  height: 1em;
+  margin-top: -0.5em;
+  -webkit-animation: spinner 1500ms infinite linear;
+  -moz-animation: spinner 1500ms infinite linear;
+  -ms-animation: spinner 1500ms infinite linear;
+  -o-animation: spinner 1500ms infinite linear;
+  animation: spinner 1500ms infinite linear;
+  border-radius: 0.5em;
+  -webkit-box-shadow: rgba(0, 0, 0, 0.75) 1.5em 0 0 0, rgba(0, 0, 0, 0.75) 1.1em 1.1em 0 0, rgba(0, 0, 0, 0.75) 0 1.5em 0 0, rgba(0, 0, 0, 0.75) -1.1em 1.1em 0 0, rgba(0, 0, 0, 0.5) -1.5em 0 0 0, rgba(0, 0, 0, 0.5) -1.1em -1.1em 0 0, rgba(0, 0, 0, 0.75) 0 -1.5em 0 0, rgba(0, 0, 0, 0.75) 1.1em -1.1em 0 0;
+  box-shadow: rgba(0, 0, 0, 0.75) 1.5em 0 0 0, rgba(0, 0, 0, 0.75) 1.1em 1.1em 0 0, rgba(0, 0, 0, 0.75) 0 1.5em 0 0, rgba(0, 0, 0, 0.75) -1.1em 1.1em 0 0, rgba(0, 0, 0, 0.75) -1.5em 0 0 0, rgba(0, 0, 0, 0.75) -1.1em -1.1em 0 0, rgba(0, 0, 0, 0.75) 0 -1.5em 0 0, rgba(0, 0, 0, 0.75) 1.1em -1.1em 0 0;
+}
+
+/* Animation */
+
+@-webkit-keyframes spinner {
+  0% {
+    -webkit-transform: rotate(0deg);
+    -moz-transform: rotate(0deg);
+    -ms-transform: rotate(0deg);
+    -o-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+    -moz-transform: rotate(360deg);
+    -ms-transform: rotate(360deg);
+    -o-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+@-moz-keyframes spinner {
+  0% {
+    -webkit-transform: rotate(0deg);
+    -moz-transform: rotate(0deg);
+    -ms-transform: rotate(0deg);
+    -o-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+    -moz-transform: rotate(360deg);
+    -ms-transform: rotate(360deg);
+    -o-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+@-o-keyframes spinner {
+  0% {
+    -webkit-transform: rotate(0deg);
+    -moz-transform: rotate(0deg);
+    -ms-transform: rotate(0deg);
+    -o-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+    -moz-transform: rotate(360deg);
+    -ms-transform: rotate(360deg);
+    -o-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+@keyframes spinner {
+  0% {
+    -webkit-transform: rotate(0deg);
+    -moz-transform: rotate(0deg);
+    -ms-transform: rotate(0deg);
+    -o-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+    -moz-transform: rotate(360deg);
+    -ms-transform: rotate(360deg);
+    -o-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+#myProgress {
+  width: 100%;
+  background-color: grey;
+}
+
+#countdownBar {
+  width: 1%;
+  height: 30px;
+  background-color: tomato;
+}
+
+.input-group {
+  margin-left: 35%;
+}
+
+.view-btn{
+  /* display: none; */
+}
+
+#jumbo{
+  padding: 0px;
+}
+
+.loader {
+  position: absolute;
+  z-index: 999;
+  height: 60px;
+  width: 60px;
+  /* overflow: show; */
+  margin: 0px auto;
+  left: 50%;
+top: 50%;
+  /* top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0; */
+
+  /* padding-top: 50%; */
+  /* margin-top: 50px; */
+  border: 16px solid #f3f3f3; /* Light grey */
+  border-top: 16px solid #3498db; /* Blue */
+  border-radius: 50%;
+  /* width: 60px;
+  height: 60px; */
+  animation: spin 2s linear infinite;
+  z-index: 1000;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";       /* IE 8 */
+  filter: alpha(opacity=50);  /* IE 5-7 */
+  -moz-opacity: 0.5;          /* Netscape */
+  -khtml-opacity: 0.5;        /* Safari 1.x */
+  opacity: 0.5;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+#videoElement {
+  z-index: 0;
+  /* max-width: 100%;
+  height: auto; */
+  /* transform: rotateY(180deg);
+  -webkit-transform: rotateY(180deg);
+  /* Safari and Chrome */
+  /* -moz-transform: rotateY(180deg); */ */
+  /* Firefox */
+  -moz-transform: scale(-1, 1);
+  -webkit-transform: scale(-1, 1);
+  -o-transform: scale(-1, 1);
+  transform: scale(-1, 1);
+  filter: FlipH;
+  width: 100%    !important;
+  height: auto   !important;
+}
+
+#text {
+  top: 72%;
+  left: 30%;
+  position: absolute;
+  margin: 0px 0 20px 0;
+  font-size: 2em;
+  text-align: center;
+  z-index: 100;
+}
+
+#play {
+  font-family: monospace;
+  border: 2px solid tomato;
+  background: transparent;
+  width: 250px;
+  font-size: 2em;
+  /* font-size: 1.2em; */
+  padding: 10px 0;
+  border-radius: 5px;
+  /* display: block; */
+  cursor: pointer;
+  /* margin: auto; */
+  position: relative;
+  /* bottom: -210px; */
+  text-align: center;
+  z-index: 100;
+}
+
+#output {
+  max-width: 640px !important;
+  max-height: 480px !important;
+  position: relative;
+}
+
+#output img {
+  width: 640px;
+  height: 480px;
+}
+
+.img-overlay {
+position: absolute;
+top: 0;
+bottom: 0;
+left: 0;
+right: 0;
+text-align: center;
+}
+
+.img-overlay:before {
+  content: ' ';
+  display: block;
+  /* adjust 'height' to position overlay content vertically */
+  height: 50%;
+}
+
+*, ::before, ::after {
+  box-sizing: inherit;
+}
+#gallery div {
+  /* margin: 20px;
+  padding-left: 30px; */
+}
+
+#gallery img {
+  /* margin: 20px;
+  height: 200px;
+  width: 260px; */
+}
+
+#gallery h1 {
+  /* color: white; */
+  margin: auto;
+}
+
+#secretImages {
+  visibility: hidden;
+  height: 0px;
+  width: 0px;
+}
+
+#photo {
+  padding: 10 auto;
+}
+
+#uiContainer{
+  position:absolute;
+  z-index: 100;
+}
+
+#spinner{
+  /* margin: 0 auto; */
+  /* margin-top: 180px; */
+}
+
+#mobilePrompt{
+  padding-bottom: 40px;
+}

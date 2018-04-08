@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <!-- <script defer src="https://use.fontawesome.com/releases/v5.0.8/js/all.js"></script> -->
+  <script type="text/javascript" src="{{ url_for('static',filename='js/fontawesome-all.js') }}"></script>
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous" />
+  <link rel="stylesheet" href="{{ url_for('static',filename='css/custom.css') }}" />
+  <!-- jQuery library -->
+  <script type="text/javascript" src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.3.1.min.js"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}"></script>
+  <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/adapter-latest.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap-filestyle.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/exif.js') }}"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+  <script src="{{ url_for('static', filename='js/holder.min.js') }}"></script>
+  <script id="mcjs">!function(c,h,i,m,p){m=c.createElement(h),p=c.getElementsByTagName(h)[0],m.async=1,m.src=i,p.parentNode.insertBefore(m,p)}(document,"script","https://chimpstatic.com/mcjs-connected/js/users/37227b4f5e1bbd80f404cfef6/ae35f9ecc36904532f0c06bb7.js");</script>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-30504176-4"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-30504176-4');
+</script>
+
+  <link href="{{ url_for('static', filename='css/album.css') }}" rel="stylesheet"/>
+
+  <title>Computer Vision Emotion Detection Game</title>
+
+</head>
+
+<body>
+  <header>
+    <div class="collapse bg-dark" id="navbarHeader">
+      <div class="container">
+        <div class="row">
+          <div class="col-sm-8 col-md-7 py-4">
+            <h4 class="text-white">About</h4>
+            <p class="text-muted">Computer vision game build with OpenCV and TensorFlow.</p>
+          </div>
+          <div class="col-sm-4 offset-md-1 py-4">
+            <h4 class="text-white">Contact</h4>
+            <ul class="list-unstyled">
+              <li><a href="https://github.com/justinshenk/party-pi" class="text-white">Get the code</a></li>
+              <li><a href="https://linkedin.com/in/justinshenk" class="text-white">Connect on LinkedIn</a></li>
+              <li><a href="mailto:shenk.justin@gmail.com?subject=Party-Pi" class="text-white">Email me</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="navbar navbar-dark bg-dark box-shadow">
+      <div class="container d-flex justify-content-between">
+        <a href="#" class="navbar-brand d-flex align-items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+          <strong>Party Pi</strong>
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarHeader" aria-controls="navbarHeader" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main role="main">
+
+    <section class="jumbotron text-center">
+      <p class='lead text-muted'> Thanks for checking out the testing site! </br>
+        Please note, mobile devices are not yet fully supported. Use desktop Chrome for best results.</br>
+        Sign up below to be notified of the official release in May or get the <a href="https://github.com/JustinShenk/party-pi">Python app</a>.</p>
+      <!-- <input type="file" class="filestyle" accept='image/*;' capture='camera' data-input="false" data-badge="false" id="file-btn"> -->
+      <input id='imageInput' type="file" accept='image/*;' capture='camera' data-input="false" data-badge="false" class='filestyle' data-btnClass="btn-primary text-center" data-text="Take selfie">
+      <div id='output' class='container'>
+        <div class='img-overlay'>
+          <div class='row justify-content-center'>
+            <p id="text">Show happiness_</p>
+            <button id="play" syle='display: none;'>Play</button>
+          </div>
+      </div>
+        <!-- <input id='imageInput' type="file" accept="image/*;" capture="camera" style="display: none"> -->
+          <!-- <div id='output' class='container'> -->
+      <div id='spinner' >
+      </div>
+        <video width='640' height='480' autoplay="true" id="videoElement" >Your browser does not support HTML5 video.</video>
+        <image id='placeholderImage' width='640' height='480' style='display: none; background-color: gray;'></image>
+        <div class='' id="myProgress" style='::after'>
+          <div id="countdownBar">
+          </div>
+        </div>
+        <img id="myImg" class="img-responsive" crossorigin="anonymous" src="" hidden='true'/>
+        <canvas id="myCanvas" hidden='true'></canvas>
+
+          <!-- <image id='placeholder' src="{{ url_for('static', filename='loading.jpg')}}" height="480px" width="640px"></image> -->
+          <div id='mobilePrompt' class='row justify-content-center lead'>
+          </div>
+      </div>
+    </section>
+    <div id='gallery' class="album py-5 bg-light" style="display: none;">
+      <div class="container">
+        <h1>Gallery</h1>
+        <br>
+        <div class='row' id='galleryImages'>
+          <canvas id="c" style="display:none"/>
+          <!-- <p id='purchaseNote'></p>
+        <div id='secretImages'></div> -->
+        </div>
+      </div>
+    </div>
+<script type="text/javascript" src="//downloads.mailchimp.com/js/signup-forms/popup/embed.js" data-dojo-config="usePlainJson: true, isDebug: false"></script><script type="text/javascript">require(["mojo/signup-forms/Loader"], function(L) { L.start({"baseUrl":"mc.us12.list-manage.com","uuid":"37227b4f5e1bbd80f404cfef6","lid":"0229295406"}) })</script>
+  </main>
+
+  <footer class="text-muted">
+    <div class="container">
+      <p class="float-right">
+        <a href="#">Back to top</a>
+      </p>
+      <p>Party Pi is &copy; 2018 Justin Shenk</p>
+      <p>Want the code? <a href="https://github.com/justinshenk/partypi">Visit the GitHub repo</a>.</p>
+    </div>
+  </footer>
+
+  <script type="text/javascript">
+
+  var isMobile;
+  var showGallery = false;
+  //
+  // $("#imageInput").filestyle({
+  //   text: "Take photo",
+  //   size: 'lg',
+  //   btnClass: "btn btn-primary"
+  // });
+
+
+  if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Silk|Opera Mini/i.test(navigator.userAgent)) {
+      // Take the user to a different screen here.
+      //alert("Support for mobile devices is still in developmental stage. For the best experience try desktop Chrome.");
+      isMobile = true;
+  } else {
+    isMobile = false;
+  }
+
+    var emotionArray = [
+      'happy',
+      'angry',
+      'sad',
+      'disgust',
+      'fear',
+      'surprise',
+      'neutral'
+    ]
+
+    function saveMe(img_id) {
+      if (!typeof img_id === 'string') {
+        img_id = img_id.id;
+      }
+      var img_src = $("#" + img_id).attr("src");
+      var a = document.createElement('a');
+      a.href = img_src;
+      var filename = "party_pi_" + String(img_id) + ".jpg";
+      console.log(filename);
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    function moveToGallery() {
+      // Move photo to gallery
+      $('#gallery').css("display", "block");
+      $('#output img:visible').each(function(i) {
+        // Create card for image
+        var img_src = $(this).attr('src');
+        $(this).remove();
+
+        var galleryLength = $(".card-img-top").length;
+        var img_filename = "img_" + galleryLength;
+        var myCard = $('<div class="col-md-4"><div class="card mb-4 box-shadow"><img id="' + img_filename + '" class="card-img-top" src="' + img_src +
+          '" alt="Card image cap"><div class="card-body"><div class="d-flex justify-content-between align-items-center"><div class="btn-group"><button type="button" id="btn_' + galleryLength +
+          '" class="btn btn-sm btn-outline-secondary view-btn" onclick="saveMe(&apos;img_' + galleryLength + '&apos;)"><i class="fas fa-download"></i></button></div><small class="text-muted"></small></div></div></div>');
+        myCard.prependTo('#galleryImages');
+      });
+    }
+
+		// Function to check orientation of image from EXIF metadatas and draw canvas
+    function orientation(img, canvas) {
+
+        // Set variables
+        var ctx = canvas.getContext("2d");
+        var exifOrientation = '';
+        var width = img.width,
+            height = img.height;
+
+        // Check orientation in EXIF metadatas
+        EXIF.getData(img, function() {
+            var allMetaData = EXIF.getAllTags(this);
+            exifOrientation = allMetaData.Orientation;
+            console.log('Exif orientation: ' + exifOrientation);
+        });
+
+        // set proper canvas dimensions before transform & export
+        if (jQuery.inArray(exifOrientation, [5, 6, 7, 8]) > -1) {
+            canvas.width = height;
+            canvas.height = width;
+        } else {
+            canvas.width = width;
+            canvas.height = height;
+        }
+
+        // transform context before drawing image
+        switch (exifOrientation) {
+            case 2:
+                ctx.transform(-1, 0, 0, 1, width, 0);
+                break;
+            case 3:
+                ctx.transform(-1, 0, 0, -1, width, height);
+                break;
+            case 4:
+                ctx.transform(1, 0, 0, -1, 0, height);
+                break;
+            case 5:
+                ctx.transform(0, 1, 1, 0, 0, 0);
+                break;
+            case 6:
+                ctx.transform(0, 1, -1, 0, height, 0);
+                break;
+            case 7:
+                ctx.transform(0, -1, -1, 0, height, width);
+                break;
+            case 8:
+                ctx.transform(0, -1, 1, 0, 0, width);
+                break;
+            default:
+                ctx.transform(1, 0, 0, 1, 0, 0);
+        }
+
+        // Draw img into canvas
+        ctx.drawImage(img, 0, 0, width, height);
+    }
+
+    var fileUpload = $("#imageInput");
+
+    function sendFile(canvas) {
+      var resizedCanvas = document.createElement("canvas");
+      var resizedContext = resizedCanvas.getContext("2d");
+
+      resizedCanvas.height = String(480 * canvas.width / canvas.height);
+      resizedCanvas.width = "480";
+
+      resizedContext.drawImage(canvas, 0, 0, resizedCanvas.width, resizedCanvas.height);
+      var dataURL = resizedCanvas.toDataURL('image/jpeg', 0.7);
+      alert(resizedCanvas.width + resizedCanvas.height);
+      var fd = new FormData(document.forms[0]);
+      fd.append("imageBase64", dataURL);
+      fd.append("emotion", currentEmotion);
+
+      $("#spinner").addClass('loader');
+      $("#placeholder").show();
+      // send image to API
+      $.ajax({
+        type: "POST",
+        url: "{{ url_for('image') }}",
+        data: fd,
+        async: true,
+        cache: false,
+        headers: { "cache-control": "no-cache" },
+        processData: false,
+        contentType: false,
+        timeout: 10000
+      }).done(function(data) {
+        // Add photo to top
+        var img = document.createElement('img')
+        img.setAttribute('id', 'photo');
+        img.src = data.photoPath;
+        $("#output").prepend(img);
+        $("#placeholderImage").hide();
+        $("#spinner").removeClass('loader');
+        var emotion = getRandomEmotion();
+        currentEmotion = emotion;
+        $("#mobilePrompt").text("Show " + currentEmotion + "_");
+      });
+    }
+
+    function readURL(input) {
+
+      if (input.files && input.files[0]) {
+        var reader = new FileReader();
+
+        reader.onloadend = function(e) {
+          var $myImg = $("#myImg");
+          $myImg.attr('src', e.target.result);
+          $myImg.show();
+          // Use EXIF library to handle the loaded image exif orientation
+		      EXIF.getData(input.files[0], function() {
+  			    // Fetch image tag
+            var img = $myImg.get(0);
+            // Fetch canvas
+  			    var canvas = $("#myCanvas").get(0);
+  				// run orientation on img in canvas
+            orientation(img, canvas);
+            sendFile(canvas);
+			    });
+        };
+        reader.readAsDataURL(input.files[0]);
+      }
+    };
+
+    fileUpload.on('change', function() {
+      moveToGallery(); // move old images to gallery
+      readURL(this);
+    });
+    // end image upload
+
+    function getRandomEmotion() {
+      var randomNumber = Math.floor(Math.random() * emotionArray.length);
+      return emotionArray[randomNumber];
+    }
+
+    function errorMessage(message, e) {
+      console.error(message, typeof e == 'undefined' ? '' : e);
+    }
+
+    var debug = {{ debug }};
+    var currentEmotion = 'happy';
+
+    function getWebcam() {
+      if (navigator.mediaDevices === undefined) {
+        navigator.mediaDevices = {};
+      }
+
+      // Here, we will just add the getUserMedia property if it's missing.
+      if (navigator.mediaDevices.getUserMedia === undefined) {
+        navigator.mediaDevices.getUserMedia = function(constraints) {
+
+          // First get ahold of the legacy getUserMedia, if present
+          var getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+
+          // Some browsers just don't implement it - return a rejected promise with an error
+          // to keep a consistent interface
+          if (!getUserMedia) {
+            return Promise.reject(new Error('getUserMedia is not implemented in this browser'));
+          }
+
+          // Otherwise, wrap the call to the old navigator.getUserMedia with a Promise
+          return new Promise(function(resolve, reject) {
+            getUserMedia.call(navigator, constraints, resolve, reject);
+          });
+        }
+      }
+    }
+
+    function startWebcam() {
+      if (debug | location.protocol === 'https:') {
+        // navigator.getUserMedia = navigator.getUserMedia || navigator.mediaDevices.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.oGetUserMedia;
+
+        // Prefer camera resolution nearest to 640x480.
+        var constraints = { audio: false, video: {width: {exact: 640}, height: {exact: 480}} };
+
+        navigator.mediaDevices.getUserMedia(constraints)
+        .then(function(stream) {
+          $("#videoElement").show();
+          console.log("Hide webcam");
+          $('#imageInput').filestyle('destroy');
+          $('#imageInput').hide();
+          console.log("Destroy #imageInput");
+
+          var video = $("#videoElement").get(0);
+          // Older browsers may not have srcObject
+          if ("srcObject" in video) {
+            video.srcObject = stream;
+          } else {
+            // Avoid using this in new browsers, as it is going away.
+            video.src = window.URL.createObjectURL(stream);
+          }
+          video.onloadedmetadata = function(e) {
+            video.play();
+          };
+        })
+        .catch(function(e) {
+          var message;
+          switch (e.name) {
+            case 'NotFoundError':
+            case 'DevicesNotFoundError':
+              message = 'Please setup your webcam first.';
+              break;
+            case 'SourceUnavailableError':
+              message = 'Your webcam is busy';
+              break;
+            case 'PermissionDeniedError':
+            case 'SecurityError':
+              message = 'Permission denied!';
+              break;
+            default:
+              errorMessage('Reeeejected!', e);
+              return;
+          }
+          console.log("HTML5 input not available, switching to file input.")
+          errorMessage(message);
+        });
+      } else {
+        console.log('HTTPS not found');
+      }
+    };
+    // end startWebcam
+
+    function dataURItoBlob(dataURI) {
+        // convert base64/URLEncoded data component to raw binary data held in a string
+        var byteString;
+        if (dataURI.split(',')[0].indexOf('base64') >= 0)
+            byteString = atob(dataURI.split(',')[1]);
+        else
+            byteString = unescape(dataURI.split(',')[1]);
+
+        // separate out the mime component
+        var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+
+        // write the bytes of the string to a typed array
+        var ia = new Uint8Array(byteString.length);
+        for (var i = 0; i < byteString.length; i++) {
+            ia[i] = byteString.charCodeAt(i);
+        }
+
+        return new Blob([ia], {type:mimeString});
+    }
+
+    $(document).ready(function() {
+      "use strict";
+
+      var $output;
+      var scale = 1;
+
+      var initialize = function() {
+        getWebcam();
+        if (!isMobile) {
+          $('#play').show();
+          startWebcam();
+          $("#play").click(function() {
+            // startWebcam();
+            $("#placeholderImage").hide();
+            $("#videoElement").removeAttr('hidden');
+            $("#myProgress").show();
+            if (showGallery) {
+              // move photo from main display to gallery
+              moveToGallery();
+            } else {
+              showGallery = true;
+            }
+
+            // Show and start webcam
+            $("#text").text("Show " + currentEmotion + "_");
+            // Hide play button
+            $(this).hide();
+            // Start timer
+            move();
+            // Capture image and load image
+            setTimeout(captureImage, 3000);
+          });
+        } else { // is mobile
+          $("#imageInput").show();
+          console.log("Show #imageInput");
+          $('#videoElement').hide();
+          $('#play').hide();
+          $('#myProgress').hide();
+          // $('#text span').css('color','black');
+          $('#text').hide();
+          $("#mobilePrompt").text("Show " + currentEmotion + "_");
+          $('#mobilePrompt').show();
+        }
+      };
+
+      var captureImage = function() {
+        var video = $("#videoElement").get(0);
+        var canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth * scale;
+        canvas.height = video.videoHeight * scale;
+        var canvasContext = canvas.getContext('2d');
+        canvasContext.translate(video.videoWidth, 0);
+        canvasContext.scale(-1, 1);
+        canvasContext.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        var dataURL = canvas.toDataURL('image/jpeg', 1.0);
+        var fd = new FormData(document.forms[0]);
+        fd.append("imageBase64", dataURL);
+        fd.append("emotion", currentEmotion);
+        $("#placeholderImage").show();
+        // video.style.visibility = 'hidden';
+        $output = $("#output");
+        $("#spinner").addClass("loader");
+        // document.querySelector('#play').href = dataURL;
+        video.setAttribute('hidden','true');
+        console.log('submitting');
+
+        $.ajax({
+          type: "POST",
+          url: "{{ url_for('image') }}",
+          data: fd,
+          processData: false,
+          contentType: false,
+          timeout: 10000
+        }).done(function(data) {
+          $("#placeholderImage").hide();
+          $("#spinner").removeClass("loader");
+          // Add photo to top
+          var img = document.createElement('img');
+          img.src = data.photoPath;
+          $output.prepend(img);
+          $("#myProgress").hide();
+          $("#play").show();
+        });
+      }; // end captureImage
+
+      $(initialize);
+    });
+
+    <!-- PROGRESS BAR -->
+    function move() {
+      var elem = document.getElementById("countdownBar");
+      var width = 1;
+      var id = setInterval(frame, 30);
+
+      function frame() {
+        if (width >= 100) {
+          clearInterval(id);
+        } else {
+          width++;
+          elem.style.width = width + '%';
+        }
+      }
+    }
+  </script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/shuffler.js') }}"></script>
+
+</body>
+
+
+<!-- <script src="https://code.jquery.com/jquery-3.2.1.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script> -->
+<!-- <script src="{{url_for('static',filename='index.js')}}"></script>
+	<script  type="text/javascript">
+		document.getElementById("image").src = "data:image/png;base64," + {{ image }};
+	</script> -->
+
+</html>
