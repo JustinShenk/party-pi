@@ -22,7 +22,7 @@ from PIL import Image
 # tf.keras.backend.clear_session()
 graph = tf.get_default_graph()
 
-emotion_classifier = load_model('../emotion_model.hdf5', compile=False)
+emotion_classifier = load_model('emotion_model.hdf5', compile=False)
 
 app = Flask(__name__)
 app.config.update(dict(
