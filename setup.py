@@ -34,7 +34,7 @@ setup(
     long_description=README,
     author='Justin Shenk',
     author_email='shenk.justin@gmail.com',
-    packages=['partypi']
+    packages=['partypi'],
     package_data={'': extra_files},
     install_requires=[
         'opencv-contrib-python==3.3.0.9',
