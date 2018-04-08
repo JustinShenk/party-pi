@@ -40,7 +40,7 @@ setup(
     install_requires=[
         'opencv-contrib-python==3.3.0.9',
         'pillow',
-        'Flask',
+        'flask >= 0.10',
         'Flask-SSLify',
         'gunicorn',
         'itsdangerous',
