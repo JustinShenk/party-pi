@@ -30,7 +30,7 @@ print("Extra_files: ", extra_files)
 setup(
     name='partypi',
     version=VERSION,
-    description='Party Pi is a computer vision emotion detection game with OpenCV and Microsoft Oxford Emotion API.',
+    description='Party Pi is a computer vision emotion detection game with OpenCV and a neural network',
     long_description=README,
     author='Justin Shenk',
     author_email='shenk.justin@gmail.com',
@@ -51,7 +51,7 @@ setup(
         'tensorflow',
         'h5py',
         'gevent'
-    ]
+    ],
     url=REPOSITORY,
     download_url='{}/tarball/{}'.format(REPOSITORY, VERSION),
     classifiers=[
@@ -67,6 +67,6 @@ setup(
     ],
     license='MIT',
     keywords=[
-        'OpenCV', 'cv2', 'emotion', 'detection', 'game'
-    ],
+        'OpenCV', 'cv2', 'emotion', 'detection', 'game', 'computer', 'vision'
+    ]
 )
