@@ -1,7 +1,10 @@
 import os
 import cv2
+import partypi
 import numpy as np
 from keras.preprocessing import image
+
+base_dir = os.path.dirname(partypi.__file__)
 
 
 def load_image(image_path, grayscale=False, target_size=None):
@@ -9,13 +12,11 @@ def load_image(image_path, grayscale=False, target_size=None):
     return image.img_to_array(pil_image)
 
 
-def load_detection_model(model_path='/usr/local/opt/opencv3/share/OpenCV/haarcascades/haarcascade_frontalface_default.xml'):
-    if not os.path.exists(model_path):
-        # Try alternative file path
-        local_cascade_path = 'face.xml'
-        if not os.path.exists(local_cascade_path):
-            raise NameError('File not found:', local_cascade_path)
-        model_path = local_cascade_path
+def load_detection_model(model_path=None):
+    local_cascade_path = os.path.join(base_dir, 'face.xml')
+    if not os.path.exists(local_cascade_path):
+        raise NameError('File not found:', local_cascade_path)
+    model_path = local_cascade_path
     detection_model = cv2.CascadeClassifier(model_path)
     return detection_model
 
@@ -48,4 +49,5 @@ def get_labels():
 
 def get_class_to_arg():
     return {'angry': 0, 'disgust': 1, 'fear': 2, 'happy': 3, 'sad': 4,
-            'surprise': 5, 'neutral': 6}
+            'surprise': 5, 'neutral': 6, 'crazy': 5, 'euphoria': 3, 'wonder': 2,
+            'delighted': 3, 'pro-wrestler': 0}

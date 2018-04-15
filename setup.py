@@ -1,14 +1,12 @@
-from setuptools import setup, find_packages
-
+#!/usr/bin/env python
 import os
 import re
 import sys
 
+from setuptools import setup, find_packages
 
 VERSION = '0.1.6'  # x.y.z[-dev#]
 REPOSITORY = 'https://github.com/JustinShenk/party-pi'
-
-PACKAGES = find_packages(where='partypi')
 
 README = ''
 with open('README.rst', 'r') as f:
@@ -25,7 +23,7 @@ def package_files(directory):
     return paths
 
 
-extra_files = package_files('match_scientist')
+extra_files = package_files('partypi')
 print("Extra_files: ", extra_files)
 
 setup(
@@ -53,6 +51,11 @@ setup(
         'h5py',
         'gevent'
     ],
+    entry_points={
+        'console_scripts': [
+            'partypi=partypi.main:serve'
+        ],
+    },
     url=REPOSITORY,
     download_url='{}/tarball/{}'.format(REPOSITORY, VERSION),
     classifiers=[
@@ -69,5 +72,6 @@ setup(
     license='MIT',
     keywords=[
         'OpenCV', 'cv2', 'emotion', 'detection', 'game', 'computer', 'vision'
-    ]
+    ],
+    zip_safe=False
 )

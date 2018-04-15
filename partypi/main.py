@@ -1,7 +1,10 @@
+#!/usr/bin/env python
+
 import base64
 import cv2
 import io
 import numpy as np
+import partypi
 import os
 import random
 import re
@@ -9,22 +12,25 @@ import sys
 import tensorflow as tf
 import uuid
 
-from flask import Flask, Response, request, render_template, jsonify
+from flask import Flask, Response, request, render_template, jsonify, send_from_directory
 from flask_sslify import SSLify
 from io import BytesIO
 from keras.models import load_model
 from keras import backend as K
-from utils.inference import load_detection_model, detect_faces, draw_bounding_box
-from utils.inference import get_class_to_arg, apply_offsets, get_labels
-from utils.misc import *
+from partypi.utils.inference import load_detection_model, detect_faces, draw_bounding_box, get_class_to_arg, apply_offsets, get_labels
+from partypi.utils.misc import preprocess_input, draw_text, new_image_path
 from PIL import Image
+
+base_dir = os.path.dirname(partypi.__file__)
+static_file_dir = os.path.join(base_dir, 'static')
 
 # tf.keras.backend.clear_session()
 graph = tf.get_default_graph()
 
-emotion_classifier = load_model('emotion_model.hdf5', compile=False)
+emotion_classifier = load_model(os.path.join(
+    base_dir, 'emotion_model.hdf5'), compile=False)
 
-app = Flask(__name__)
+app = Flask(__name__, root_path=base_dir)
 app.config.update(dict(
     PREFERRED_URL_SCHEME='https'
 ))
@@ -34,12 +40,16 @@ if not debug:
     sslify = SSLify(app)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
+BLUE = (232, 167, 35)
+GREEN = (62, 184, 144)
+YELLOW = (0, 255, 255)
+PURPLE = (68, 54, 66)
 
-# party_pi = PartyPi(web=True)
 print("Game loaded")
 face_detector = load_detection_model()
-if not os.path.exists('static/images'):
-    os.mkdir('static/images')
+images_path = os.path.join(static_file_dir, 'images')
+if not os.path.exists(images_path):
+    os.mkdir(images_path)
 
 # Get input model shapes for inference
 emotion_target_size = emotion_classifier.input_shape[1:3]
@@ -48,11 +58,25 @@ emotion_target_size = emotion_classifier.input_shape[1:3]
 EMOTIONS = list(get_labels().values())
 
 
+def score_players(player_data):
+    emotion_idx_lookup = get_class_to_arg()
+    # Get lists of player points.
+    first_emotion_idx = emotion_idx_lookup[current_emotion]
+    # second_emotion_idx = emotion_idx_lookup[second_current_emotion]
+    scores_list = [
+        (round(x['scores'][first_emotion_idx] * 100)) for x in player_data]
+    return scores_list
+
+
 def rank_players(player_data, photo, current_emotion='happy'):
     """ Rank players and display.
 
     Args:
         player_data : list of dicts
+        photo : numpy nd array
+        current_emotion: str
+
+    Returns:
         photo : numpy nd array
     """
 
@@ -64,17 +88,9 @@ def rank_players(player_data, photo, current_emotion='happy'):
     scores = []
     first_emotion = None
     easy_mode = True
-    emotion_idx_lookup = get_class_to_arg()
-    # Get lists of player points.
-    first_emotion_idx = emotion_idx_lookup[current_emotion]
-    # second_emotion_idx = emotion_idx_lookup[second_current_emotion]
-    first_emotion_scores = [
-        (round(x['scores'][first_emotion_idx] * 100)) for x in player_data]
 
     # Collect scores into `scores_list`.
-    scores_list = []
-    # if easy_mode:  # rank players by one emotion
-    scores_list = first_emotion_scores
+    scores_list = score_players(player_data)
 
     # Draw the scores for the faces.
     for i, currFace in enumerate(player_data):
@@ -135,7 +151,6 @@ def rank_players(player_data, photo, current_emotion='happy'):
                               first_rect_top - tied_text_height_offset)
                 draw_text(tied_coord, photo, "Tied: ",
                           color=YELLOW, font_scale=text_size)
-            # crown_over_faces
     return photo
 
 
@@ -143,21 +158,10 @@ def random_emotion():
     """ Pick a random emotion from list of emotions.
 
     """
-    # if tickcount < 30:  # generate random emotion
-    current_emotion = random.choice(EMOTIONS)
-    # Select another emotion for second emotion
     current_emotion_idx = EMOTIONS.index(current_emotion)
     new_emotion_idx = (current_emotion_idx +
                        random.choice(list(range(1, 7)))) % 7
-    second_current_emotion = EMOTIONS[new_emotion_idx]
-    # if easy_mode:
-    return current_emotion
-    # else:
-    #     return current_emotion + '+' + second_current_emotion
-    # else:  # hold emotion for prompt
-    #     emotionString = str(
-    #         current_emotion) if easy_mode else current_emotion + '+' + second_current_emotion
-    #     return emotionString
+    return new_emotion_idx
 
 
 def predict_emotions(faces, gray_image, current_emotion='happy'):
@@ -219,7 +223,7 @@ def readb64(uri):
 
 
 def get_face(frame):
-    detection_model_path = './face.xml'
+    detection_model_path = os.path.join(base_dir, 'face.xml')
     face_detection = load_detection_model(detection_model_path)
     try:
         gray_image = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -244,34 +248,31 @@ def image():
 
             image_b64 = request.form.get('imageBase64')
             if image_b64 is None:
-                print("No image in request.")
+                print("WARNING:No image in request.")
                 return jsonify(success=False, photoPath='')
-            print("image_b64 request received.", image_b64[:10])
+            print("INFO:image_b64 request received.", image_b64[:10])
             # Get emotion
             # emotion = json_data['emotion']
             emotion = request.form.get('emotion')
             if emotion is None:
-                print("No emotion in request.")
+                print("WARNING:No emotion in request.")
                 return jsonify(success=False, photoPath='')
             img = data_uri_to_cv2_img(image_b64)
             print(img.shape)
             w, h, c = img.shape
-            if w > 480:
-                print("Check yo' image size.")
-                img = cv2.resize(img, (int(480 * w / h), 480))
-                print("New size {}.".format(img.shape))
+            # if w > 480:
+            #     print("Check yo' image size.")
+            #     img = cv2.resize(img, (480, int(480 * h / w)))
+            #     print("New size {}.".format(img.shape))
             gray_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             faces = detect_faces(face_detector, gray_image)
             player_data = predict_emotions(
                 faces, gray_image, emotion)
             photo = rank_players(player_data, img, emotion)
-            # photo = party_pi.photo
-            photo_path = 'static/images/{}.jpg'.format(str(uuid.uuid4()))
-            cv2.imwrite(photo_path, photo)
-            print("Saved image to {}".format(photo_path))
-            return jsonify(success=True,
-                           photoPath=photo_path
-                           )
+            photo_path = 'images/{}.jpg'.format(str(uuid.uuid4()))
+            cv2.imwrite(os.path.join(static_file_dir, photo_path), photo)
+            print("INFO:Saved image to {}".format(photo_path))
+            return jsonify(success=True, photoPath=photo_path)
         except Exception as e:
             print("ERROR:", e)
             exc_type, exc_obj, exc_tb = sys.exc_info()
@@ -281,7 +282,7 @@ def image():
             #                     'score': False})
             # response.status_code = 500
             return jsonify(success=False, photoPath='')
-        print("What happened here?")
+        print("WARNING:Should not be reached.")
         return jsonify(success=False, photoPath='')
 
 
@@ -366,15 +367,24 @@ def server_error(e):
     """.format(e), 500
 
 
-if __name__ == '__main__':
+def serve():
     threaded = False
+    host = 'localhost'
     if 'TRAVIS' in os.environ:
+        print("INFO:Exiting.")
         sys.exit()
     if os.path.exists('cert.pem'):  # local environment only
-        app.run(host='0.0.0.0', ssl_context=(
+        app.run(host=host, ssl_context=(
             'cert.pem', 'key.pem'), debug=debug, threaded=threaded)
     elif os.path.exists('/etc/letsencrypt/live/openhistoryproject.com/'):
-        app.run(host='0.0.0.0', ssl_context=(
+        app.run(host=host, ssl_context=(
             '/etc/letsencrypt/live/openhistoryproject.com/cert.pem', '/etc/letsencrypt/live/openhistoryproject.com/privkey.pem'), debug=debug, threaded=threaded)
     else:
-        app.run(host='0.0.0.0', debug=debug, threaded=threaded)
+        print("INFO:Running partypi.")
+        print(app._static_folder)
+        print(app._static_url_path)
+        app.run(host=host, debug=debug, threaded=threaded)
+
+
+if __name__ == '__main__':
+    serve()
