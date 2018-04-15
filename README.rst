@@ -21,7 +21,7 @@ Demo
 Play
 ====
 
-Visit http://partytest2.herokuapp.com with Desktop Chrome or Firefox.
+Visit https://partytest2.herokuapp.com with Desktop Chrome or Firefox.
 
 Run locally
 ===========
