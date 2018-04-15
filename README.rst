@@ -8,18 +8,23 @@ Emotion detection game using computer vision.
 Description
 ===========
 
-Interactive game that ranks players by their ability to show an emotion (eg, "Show surprise"). Can be used on Raspberry Pi with piCamera module or with laptop.
+Interactive game that ranks players by their ability to show an emotion (eg, "Show surprise").
 
-Emotion detection is accomplished using an Inception-based neural network trained in TensorFlow. Face detection is accomplished using OpenCV's Haar cascade.
+Emotion detection is accomplished using an Inception-based neural network trained in TensorFlow on the FER2013 dataset. Face detection is accomplished using OpenCV's Haar cascade.
 
 Demo
 ====
 
-`Pics from a demo at the Institute of Cognitive Science 2016 Christmas Party <https://imgur.com/a/zzf6O>`_
+`Pics from the first demo at the Institute of Cognitive Science 2016 Christmas Party <https://imgur.com/a/zzf6O>`_
 
 
-Getting Started
-===============
+Play
+====
+
+Visit http://partytest2.herokuapp.com with Desktop Chrome or Firefox.
+
+Run locally
+===========
 
 Clone repository:
 
@@ -38,8 +43,11 @@ If using Ubuntu, install tkinter with ``sudo apt-get install python3-tk``
 
 .. code-block:: python
 
-    cd src/
+    cd partypi/
     python3 main.py
+
+Raspberry Pi
+============
 
 Additional (optional)  arguments: ``--picam`` for piCamera module and ``--slow`` to slow down the countdown.
 
@@ -56,11 +64,10 @@ Awards, Press, Demos
 
 TODO
 ====
-- Fix alignment of analyzing text
-- Redesign mode selection boxes
-- Add PyQT for font and sizing support
-- Add Python 2 compatibility
-- Add camera detection feature to recognize if piCamera
+- Fix alignment of user interface elements
+- Fix display of elements
+- Fix mobile image processing
+- Test latest version on Raspberry Pi (support is deprecated)
 
 Author
 ======
