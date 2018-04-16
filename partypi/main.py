@@ -381,8 +381,6 @@ def serve():
             '/etc/letsencrypt/live/openhistoryproject.com/cert.pem', '/etc/letsencrypt/live/openhistoryproject.com/privkey.pem'), debug=debug, threaded=threaded)
     else:
         print("INFO:Running partypi.")
-        print(app._static_folder)
-        print(app._static_url_path)
         app.run(host=host, debug=debug, threaded=threaded)
 
 def main():

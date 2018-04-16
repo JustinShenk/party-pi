@@ -1,6 +1,17 @@
 language: python
-addons:
-  apt:
+
+os:
+  - linux
+  - osx
+
+git:
+  depth: 1
+
+before_install:
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update          ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install graphviz; fiaddons:
+
+apt:
     sources:
       - ubuntu-toolchain-r-test
     packages:

@@ -253,7 +253,6 @@ function errorMessage(message, e) {
   console.error(message, typeof e == 'undefined' ? '' : e);
 }
 
-var debug = {{ debug }};
 var currentEmotion = 'happy';
 
 function getWebcam() {
@@ -283,7 +282,7 @@ function getWebcam() {
 }
 
 function startWebcam() {
-  if (debug | location.protocol === 'https:') {
+  if (location.protocol === 'https:') {
     // navigator.getUserMedia = navigator.getUserMedia || navigator.mediaDevices.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.oGetUserMedia;
 
     // Prefer camera resolution nearest to 640x480.
