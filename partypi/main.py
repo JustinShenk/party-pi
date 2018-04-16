@@ -385,6 +385,8 @@ def serve():
         print(app._static_url_path)
         app.run(host=host, debug=debug, threaded=threaded)
 
+def main():
+    serve()
 
 if __name__ == '__main__':
     serve()

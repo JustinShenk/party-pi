@@ -33,6 +33,8 @@ Easy installation:
     pip3 install git+https://github.com/justinshenk/party-pi
     partypi
 
+Visit localhost:5000 to play.
+
 To install manually, clone repository:
 
 .. code-block:: bash
