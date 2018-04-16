@@ -10,7 +10,7 @@ Description
 
 Interactive game that ranks players by their ability to show an emotion (eg, "Show surprise").
 
-Emotion detection is accomplished using an Inception-based neural network trained in TensorFlow on the FER2013 dataset. Face detection is accomplished using OpenCV's Haar cascade.
+Emotion detection is accomplished using a neural network trained with TensorFlow on the FER2013 dataset. Face detection is accomplished using OpenCV's Haar cascade.
 
 Demo
 ====
@@ -26,22 +26,24 @@ Visit https://partytest2.herokuapp.com with Desktop Chrome or Firefox.
 Run locally
 ===========
 
-Clone repository:
+Easy installation:
 
-.. code-block:: python
+.. code-block:: bash
+
+    pip3 install git+https://github.com/justinshenk/party-pi
+    partypi
+
+To install manually, clone repository:
+
+.. code-block:: bash
 
     git clone https://github.com/JustinShenk/party-pi.git
     cd party-pi
-
-Install dependencies:
-
-.. code-block:: python
-
-    pip3 install -r requirements.txt
+    python setup.py install
 
 If using Ubuntu, install tkinter with ``sudo apt-get install python3-tk``
 
-.. code-block:: python
+.. code-block:: bash
 
     cd partypi/
     python3 main.py
