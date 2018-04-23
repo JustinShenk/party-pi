@@ -46,6 +46,8 @@ If using Ubuntu, install tkinter with ``sudo apt-get install python3-tk``
     cd partypi/
     python3 main.py
 
+Open a browser to `https://localhost:5000`.
+
 Raspberry Pi
 ============
 
