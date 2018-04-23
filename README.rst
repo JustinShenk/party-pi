@@ -23,10 +23,11 @@ Play
 
 Visit https://partytest2.herokuapp.com with Desktop Chrome or Firefox.
 
+
 Run locally
 ===========
 
-Easy installation:
+WIP - Easy installation:
 
 .. code-block:: bash
 
