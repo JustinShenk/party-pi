@@ -1,1 +1,1 @@
-web: gunicorn --chdir=src main:app -w 2 --log-file=- -k gevent
+web: gunicorn --chdir=partypi main:app -w 2 --log-file=- -k gevent
