@@ -9,16 +9,15 @@ BLUE = (232, 167, 35)
 GREEN = (62, 184, 144)
 YELLOW = (0, 255, 255)
 PURPLE = (68, 54, 66)
-BRAND = "partypi.net"
 VERSION = "0.1.6"
 hat_path = 'images/hat.png'
 
 
 def print_traceback():
-    print ("Exception:")
-    print ('-' * 60)
+    print("Exception:")
+    print('-' * 60)
     traceback.print_exc()
-    print ('-' * 60)
+    print('-' * 60)
     pass
 
 

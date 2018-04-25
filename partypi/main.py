@@ -25,15 +25,12 @@ graph = tf.get_default_graph()
 emotion_classifier = load_model('emotion_model.hdf5', compile=False)
 
 app = Flask(__name__)
-app.config.update(dict(
-    PREFERRED_URL_SCHEME='https'
-))
+app.config.update(dict(PREFERRED_URL_SCHEME='https'))
 
 debug = False
 if not debug:
     sslify = SSLify(app)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
-
 
 # party_pi = PartyPi(web=True)
 print("Game loaded")
@@ -58,8 +55,12 @@ def rank_players(player_data, photo, current_emotion='happy'):
 
     text_size = 0.5
     if len(player_data) < 1:
-        draw_text((0.2 * photo.shape[0], 0.2 * photo.shape[1]), photo, "No faces found - try again!",
-                  font_scale=text_size, color=YELLOW)
+        draw_text(
+            (0.2 * photo.shape[0], 0.2 * photo.shape[1]),
+            photo,
+            "No faces found - try again!",
+            font_scale=text_size,
+            color=YELLOW)
         return photo
     scores = []
     first_emotion = None
@@ -68,8 +69,8 @@ def rank_players(player_data, photo, current_emotion='happy'):
     # Get lists of player points.
     first_emotion_idx = emotion_idx_lookup[current_emotion]
     # second_emotion_idx = emotion_idx_lookup[second_current_emotion]
-    first_emotion_scores = [
-        (round(x['scores'][first_emotion_idx] * 100)) for x in player_data]
+    first_emotion_scores = [(round(x['scores'][first_emotion_idx] * 100))
+                            for x in player_data]
 
     # Collect scores into `scores_list`.
     scores_list = []
@@ -86,18 +87,22 @@ def rank_players(player_data, photo, current_emotion='happy'):
 
         # Format points.
         if first_emotion == 1:  # singular 'point'
-            first_emotion_caption = "%i point: %s" % (
-                first_emotion, current_emotion)
+            first_emotion_caption = "%i point: %s" % (first_emotion,
+                                                      current_emotion)
         else:
-            first_emotion_caption = "%i points: %s" % (
-                first_emotion, current_emotion)
+            first_emotion_caption = "%i points: %s" % (first_emotion,
+                                                       current_emotion)
         #
         # Display points.
         score_height_offset = 10
-        first_emotion_coord = (faceRectangle['left'], faceRectangle['top'] -
-                               score_height_offset)
-        draw_text(first_emotion_coord, photo, first_emotion_caption,
-                  font_scale=text_size, color=YELLOW)
+        first_emotion_coord = (faceRectangle['left'],
+                               faceRectangle['top'] - score_height_offset)
+        draw_text(
+            first_emotion_coord,
+            photo,
+            first_emotion_caption,
+            font_scale=text_size,
+            color=YELLOW)
 
         # Display 'Winner: ' above player with highest score.
         one_winner = True
@@ -120,21 +125,28 @@ def rank_players(player_data, photo, current_emotion='happy'):
         crown_over_faces = []
         if one_winner:
             tied_text_height_offset = 40 if easy_mode else 70
-            draw_text((first_rect_left, first_rect_top -
-                       tied_text_height_offset), photo, "Winner: ", color=YELLOW, font_scale=text_size)
+            draw_text(
+                (first_rect_left, first_rect_top - tied_text_height_offset),
+                photo,
+                "Winner: ",
+                color=YELLOW,
+                font_scale=text_size)
             crown_over_faces = [winner]
         else:
             tied_text_height_offset = 40 if easy_mode else 70
             print("tied_winners:", tied_winners)
             for winner in tied_winners:
                 # FIXME: show both
-                first_rect_left = player_data[
-                    winner]['faceRectangle']['left']
+                first_rect_left = player_data[winner]['faceRectangle']['left']
                 first_rect_top = player_data[winner]['faceRectangle']['top']
                 tied_coord = (first_rect_left,
                               first_rect_top - tied_text_height_offset)
-                draw_text(tied_coord, photo, "Tied: ",
-                          color=YELLOW, font_scale=text_size)
+                draw_text(
+                    tied_coord,
+                    photo,
+                    "Tied: ",
+                    color=YELLOW,
+                    font_scale=text_size)
             # crown_over_faces
     return photo
 
@@ -147,8 +159,8 @@ def random_emotion():
     current_emotion = random.choice(EMOTIONS)
     # Select another emotion for second emotion
     current_emotion_idx = EMOTIONS.index(current_emotion)
-    new_emotion_idx = (current_emotion_idx +
-                       random.choice(list(range(1, 7)))) % 7
+    new_emotion_idx = (
+        current_emotion_idx + random.choice(list(range(1, 7)))) % 7
     second_current_emotion = EMOTIONS[new_emotion_idx]
     # if easy_mode:
     return current_emotion
@@ -167,8 +179,7 @@ def predict_emotions(faces, gray_image, current_emotion='happy'):
     emotion_offsets = (20, 40)
     emotion_idx_lookup = get_class_to_arg()
     for face_coordinates in faces:
-        x1, x2, y1, y2 = apply_offsets(
-            face_coordinates, emotion_offsets)
+        x1, x2, y1, y2 = apply_offsets(face_coordinates, emotion_offsets)
         gray_face = gray_image[y1:y2, x1:x2]
         try:
             gray_face = cv2.resize(gray_face, emotion_target_size)
@@ -185,8 +196,10 @@ def predict_emotions(faces, gray_image, current_emotion='happy'):
         emotion_score = emotion_prediction[0][emotion_index]
         x, y, w, h = face_coordinates
         face_dict = {'left': x, 'top': y, 'right': x + w, 'bottom': y + h}
-        player_data.append(
-            {'faceRectangle': face_dict, 'scores': emotion_prediction[0]})
+        player_data.append({
+            'faceRectangle': face_dict,
+            'scores': emotion_prediction[0]
+        })
     return player_data
 
 
@@ -262,16 +275,13 @@ def image():
                 print("New size {}.".format(img.shape))
             gray_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             faces = detect_faces(face_detector, gray_image)
-            player_data = predict_emotions(
-                faces, gray_image, emotion)
+            player_data = predict_emotions(faces, gray_image, emotion)
             photo = rank_players(player_data, img, emotion)
             # photo = party_pi.photo
             photo_path = 'static/images/{}.jpg'.format(str(uuid.uuid4()))
             cv2.imwrite(photo_path, photo)
             print("Saved image to {}".format(photo_path))
-            return jsonify(success=True,
-                           photoPath=photo_path
-                           )
+            return jsonify(success=True, photoPath=photo_path)
         except Exception as e:
             print("ERROR:", e)
             exc_type, exc_obj, exc_tb = sys.exc_info()
@@ -288,15 +298,15 @@ def image():
 def get_image(empty=False, face=False):
     while True:
         if empty:
-            yield (b'--frame\r\n' + b'Content-Type: image/jpeg\r\n\r\n' + b'\r\n')
+            yield (
+                b'--frame\r\n' + b'Content-Type: image/jpeg\r\n\r\n' + b'\r\n')
         # _, frame = cam.read()
         # if face:
         #     frame = get_face(frame)
         # cv2.imwrite('t.jpg', frame)
         # yield (b'--frame\r\n' + b'Content-Type: image/jpeg\r\n\r\n' +
         #        open('t.jpg', 'rb').read() + b'\r\n')
-        yield (b'--frame\r\n' + b'Content-Type: image/jpeg\r\n\r\n' +
-               b'\r\n')
+        yield (b'--frame\r\n' + b'Content-Type: image/jpeg\r\n\r\n' + b'\r\n')
 
 
 # @app.after_request
@@ -314,7 +324,9 @@ def get_image(empty=False, face=False):
 
 @app.route('/face')
 def face():
-    return Response(get_image(face=True), mimetype='multipart/x-mixed-replace; boundary=frame')
+    return Response(
+        get_image(face=True),
+        mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
 @app.route('/')
@@ -345,8 +357,10 @@ def index():
 
 @app.route('/none')
 def none():
-    Response(get_image(empty=True),
-             mimetype='multipart/x-mixed-replace; boundary=frame')
+    Response(
+        get_image(empty=True),
+        mimetype='multipart/x-mixed-replace; boundary=frame')
+
 
 # HTTP Errors handlers
 
@@ -371,10 +385,18 @@ if __name__ == '__main__':
     if 'TRAVIS' in os.environ:
         sys.exit()
     if os.path.exists('cert.pem'):  # local environment only
-        app.run(host='0.0.0.0', ssl_context=(
-            'cert.pem', 'key.pem'), debug=debug, threaded=threaded)
+        app.run(
+            host='localhost',
+            ssl_context=('cert.pem', 'key.pem'),
+            debug=debug,
+            threaded=threaded)
     elif os.path.exists('/etc/letsencrypt/live/openhistoryproject.com/'):
-        app.run(host='0.0.0.0', ssl_context=(
-            '/etc/letsencrypt/live/openhistoryproject.com/cert.pem', '/etc/letsencrypt/live/openhistoryproject.com/privkey.pem'), debug=debug, threaded=threaded)
+        app.run(
+            host='localhost',
+            ssl_context=(
+                '/etc/letsencrypt/live/openhistoryproject.com/cert.pem',
+                '/etc/letsencrypt/live/openhistoryproject.com/privkey.pem'),
+            debug=debug,
+            threaded=threaded)
     else:
-        app.run(host='0.0.0.0', debug=debug, threaded=threaded)
+        app.run(host='localhost', debug=debug, threaded=threaded)
