@@ -109,8 +109,6 @@
         <br>
         <div class='row' id='galleryImages'>
           <canvas id="c" style="display:none"/>
-          <!-- <p id='purchaseNote'></p>
-        <div id='secretImages'></div> -->
         </div>
       </div>
     </div>
@@ -361,7 +359,9 @@
         // navigator.getUserMedia = navigator.getUserMedia || navigator.mediaDevices.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.oGetUserMedia;
 
         // Prefer camera resolution nearest to 640x480.
-        var constraints = { audio: false, video: {width: {exact: 640}, height: {exact: 480}} };
+        var constraints = { audio: false, video: {
+          width: { min: 640, ideal: 640}, height: { min:480, ideal: 480}}
+        };
 
         navigator.mediaDevices.getUserMedia(constraints)
         .then(function(stream) {
@@ -536,14 +536,5 @@
     }
   </script>
   <script type="text/javascript" src="{{ url_for('static', filename='js/shuffler.js') }}"></script>
-
 </body>
-
-
-<!-- <script src="https://code.jquery.com/jquery-3.2.1.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script> -->
-<!-- <script src="{{url_for('static',filename='index.js')}}"></script>
-	<script  type="text/javascript">
-		document.getElementById("image").src = "data:image/png;base64," + {{ image }};
-	</script> -->
-
 </html>
