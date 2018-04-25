@@ -1,7 +1,7 @@
 Party Pi
 ========
 
-|license| |nbsp| |PyPi|
+|license| |nbsp|
 
 Emotion detection game using computer vision.
 
@@ -28,20 +28,20 @@ Run locally
 
 Clone repository:
 
-.. code-block:: python
+.. code-block:: bash
 
     git clone https://github.com/JustinShenk/party-pi.git
     cd party-pi
 
 Install dependencies:
 
-.. code-block:: python
+.. code-block:: bash
 
     pip3 install -r requirements.txt
 
 If using Ubuntu, install tkinter with ``sudo apt-get install python3-tk``
 
-.. code-block:: python
+.. code-block:: bash
 
     cd partypi/
     python3 main.py
