@@ -1,7 +1,7 @@
 Party Pi
 ========
 
-|license| |nbsp| |PyPi|
+|license| |nbsp|
 
 Emotion detection game using computer vision.
 
@@ -11,6 +11,7 @@ Description
 Interactive game that ranks players by their ability to show an emotion (eg, "Show surprise").
 
 Emotion detection is accomplished using a neural network trained with TensorFlow on the FER2013 dataset. Face detection is accomplished using OpenCV's Haar cascade.
+=======
 
 Demo
 ====
