@@ -110,6 +110,8 @@
         <br>
         <div class='row' id='galleryImages'>
           <canvas id="c" style="display:none"/>
+          <!-- <p id='purchaseNote'></p>
+        <div id='secretImages'></div> -->
         </div>
       </div>
     </div>
@@ -360,9 +362,7 @@
         // navigator.getUserMedia = navigator.getUserMedia || navigator.mediaDevices.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.oGetUserMedia;
 
         // Prefer camera resolution nearest to 640x480.
-        var constraints = { audio: false, video: {
-          width: { min: 640, ideal: 640}, height: { min:480, ideal: 480}}
-        };
+        var constraints = { audio: false, video: {width: {exact: 640}, height: {exact: 480}} };
 
         navigator.mediaDevices.getUserMedia(constraints)
         .then(function(stream) {

@@ -32,7 +32,6 @@ if not debug:
     sslify = SSLify(app)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
-# party_pi = PartyPi(web=True)
 print("Game loaded")
 face_detector = load_detection_model()
 if not os.path.exists('static/images'):
