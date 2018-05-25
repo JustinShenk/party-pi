@@ -51,7 +51,7 @@ setup(
         'tensorflow',
         'h5py',
         'gevent'
-    ]
+    ],
     url=REPOSITORY,
     download_url='{}/tarball/{}'.format(REPOSITORY, VERSION),
     classifiers=[
