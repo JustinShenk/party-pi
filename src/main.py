@@ -10,7 +10,6 @@ import tensorflow as tf
 import uuid
 
 from flask import Flask, Response, request, render_template, jsonify
-from flask_sslify import SSLify
 from io import BytesIO
 from keras.models import load_model
 from keras import backend as K
@@ -30,8 +29,8 @@ app.config.update(dict(
 ))
 
 debug = False
-if not debug:
-    sslify = SSLify(app)
+# if not debug:
+#     sslify = SSLify(app)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
 
@@ -368,11 +367,4 @@ def server_error(e):
 
 if __name__ == '__main__':
     threaded = False
-    if os.path.exists('cert.pem'):  # local environment only
-        app.run(host='0.0.0.0', ssl_context=(
-            'cert.pem', 'key.pem'), debug=debug, threaded=threaded)
-    elif os.path.exists('/etc/letsencrypt/live/openhistoryproject.com/'):
-        app.run(host='0.0.0.0', ssl_context=(
-            '/etc/letsencrypt/live/openhistoryproject.com/cert.pem', '/etc/letsencrypt/live/openhistoryproject.com/privkey.pem'), debug=debug, threaded=threaded)
-    else:
-        app.run(host='0.0.0.0', debug=debug, threaded=threaded)
+    app.run(host='0.0.0.0', debug=debug, threaded=threaded)

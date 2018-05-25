@@ -1,5 +1,6 @@
 from setuptools import setup, find_packages
 
+import os
 import re
 import sys
 
@@ -40,7 +41,6 @@ setup(
         'opencv-contrib-python==3.3.0.9',
         'pillow',
         'Flask',
-        'Flask-SSLify',
         'gunicorn',
         'itsdangerous',
         'Jinja2',
@@ -69,4 +69,5 @@ setup(
     keywords=[
         'OpenCV', 'cv2', 'emotion', 'detection', 'game'
     ],
+    zip_safe = False
 )
