@@ -8,15 +8,15 @@ req_extensions = v3_req
 [ req ]
 distinguished_name     = req_distinguished_name
 [ req_distinguished_name ]
- countryName                    = Country Name (2 letter code)
+ countryName                    = United States
  countryName_default            = US
  countryName_min                = 2
  countryName_max                = 2
  localityName                   = Locality Name (eg, city)
  localityName_default           = Palo Alto
  organizationalUnitName         = Organizational Unit Name (eg, section)
- organizationalUnitName_default = ACME Inc.
- commonName                     = Common Name (eg, YOUR name)
+ organizationalUnitName_default = Self publish
+ commonName                     = Justin Shenk
  commonName_max                 = 64
  commonName_default             = *
  emailAddress                   = Email Address
@@ -29,7 +29,7 @@ subjectAltName=critical,email:no-reply.self-signed@localhost,DNS:localhost
 C=US
 O=My Example Organization
 OU=My Example Unit
-CN=My Example Name
+CN=Name
 CNF
 
 openssl req -new -x509 -days 365 -batch -subject -key ca-key.pem -config ca.cnf -out ca.pem
