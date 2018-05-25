@@ -10,7 +10,6 @@ import tensorflow as tf
 import uuid
 
 from flask import Flask, Response, request, render_template, jsonify
-from flask_sslify import SSLify
 from io import BytesIO
 from keras.models import load_model
 from keras import backend as K
@@ -28,8 +27,6 @@ app = Flask(__name__)
 app.config.update(dict(PREFERRED_URL_SCHEME='https'))
 
 debug = False
-if not debug:
-    sslify = SSLify(app)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
 print("Game loaded")
@@ -383,19 +380,6 @@ if __name__ == '__main__':
     threaded = False
     if 'TRAVIS' in os.environ:
         sys.exit()
-    if os.path.exists('cert.pem'):  # local environment only
-        app.run(
-            host='localhost',
-            ssl_context=('cert.pem', 'key.pem'),
+    app.run(host='localhost',
             debug=debug,
             threaded=threaded)
-    elif os.path.exists('/etc/letsencrypt/live/openhistoryproject.com/'):
-        app.run(
-            host='localhost',
-            ssl_context=(
-                '/etc/letsencrypt/live/openhistoryproject.com/cert.pem',
-                '/etc/letsencrypt/live/openhistoryproject.com/privkey.pem'),
-            debug=debug,
-            threaded=threaded)
-    else:
-        app.run(host='localhost', debug=debug, threaded=threaded)
