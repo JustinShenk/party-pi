@@ -1,0 +1,6 @@
+Dockerfile
+docker-compose.yml
+.git/
+.gitignore
+.dockerignore
+.travis.yml
