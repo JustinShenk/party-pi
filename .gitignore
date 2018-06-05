@@ -1,4 +1,5 @@
 /extras
+*__pycache__*
 update.py
 /build
 /dist
