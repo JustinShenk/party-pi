@@ -1,0 +1,13 @@
+opencv-contrib-python==3.3.0.9
+pillow
+Flask
+gunicorn
+itsdangerous
+Jinja2
+scipy
+six
+Werkzeug
+keras
+tensorflow
+h5py
+gevent
