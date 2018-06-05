@@ -1,5 +1,6 @@
 from setuptools import setup, find_packages
 
+import os
 import re
 import sys
 
@@ -34,13 +35,12 @@ setup(
     long_description=README,
     author='Justin Shenk',
     author_email='shenk.justin@gmail.com',
-    packages=['partypi']
+    packages=['partypi'],
     package_data={'': extra_files},
     install_requires=[
         'opencv-contrib-python==3.3.0.9',
         'pillow',
         'Flask',
-        'Flask-SSLify',
         'gunicorn',
         'itsdangerous',
         'Jinja2',
@@ -51,7 +51,7 @@ setup(
         'tensorflow',
         'h5py',
         'gevent'
-    ]
+    ],
     url=REPOSITORY,
     download_url='{}/tarball/{}'.format(REPOSITORY, VERSION),
     classifiers=[
@@ -69,4 +69,5 @@ setup(
     keywords=[
         'OpenCV', 'cv2', 'emotion', 'detection', 'game'
     ],
+    zip_safe = False
 )
