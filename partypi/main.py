@@ -1,6 +1,7 @@
 import base64
 import cv2
 import io
+import json
 import numpy as np
 import os
 import random
@@ -8,7 +9,6 @@ import re
 import sys
 import tensorflow as tf
 import uuid
-
 from flask import Flask, Response, request, render_template, jsonify
 from flask_sslify import SSLify
 from io import BytesIO
@@ -96,6 +96,8 @@ def rank_players(player_data, photo, current_emotion='happy'):
         score_height_offset = 10
         first_emotion_coord = (faceRectangle['left'],
                                faceRectangle['top'] - score_height_offset)
+        #added for CodeUp
+        first_emotion_caption = EMOTIONS[np.argmax(currFace['scores'])]
         draw_text(
             first_emotion_coord,
             photo,
@@ -124,12 +126,12 @@ def rank_players(player_data, photo, current_emotion='happy'):
         crown_over_faces = []
         if one_winner:
             tied_text_height_offset = 40 if easy_mode else 70
-            draw_text(
-                (first_rect_left, first_rect_top - tied_text_height_offset),
-                photo,
-                "Winner: ",
-                color=YELLOW,
-                font_scale=text_size)
+            # draw_text(
+            #     (first_rect_left, first_rect_top - tied_text_height_offset),
+            #     photo,
+            #     "Winner: ",
+            #     color=YELLOW,
+            #     font_scale=text_size)
             crown_over_faces = [winner]
         else:
             tied_text_height_offset = 40 if easy_mode else 70
@@ -140,15 +142,16 @@ def rank_players(player_data, photo, current_emotion='happy'):
                 first_rect_top = player_data[winner]['faceRectangle']['top']
                 tied_coord = (first_rect_left,
                               first_rect_top - tied_text_height_offset)
-                draw_text(
-                    tied_coord,
-                    photo,
-                    "Tied: ",
-                    color=YELLOW,
-                    font_scale=text_size)
+                # draw_text(
+                #     tied_coord,
+                #     photo,
+                #     "Tied: ",
+                #     color=YELLOW,
+                #     font_scale=text_size)
             # crown_over_faces
-    return photo
-
+    # return photo
+    print(photo.shape, len(scores_list))
+    return photo, scores_list
 
 def random_emotion():
     """ Pick a random emotion from list of emotions.
@@ -199,7 +202,7 @@ def predict_emotions(faces, gray_image, current_emotion='happy'):
             'faceRectangle': face_dict,
             'scores': emotion_prediction[0]
         })
-    return player_data
+    return player_data, emotion_prediction[0]
 
 
 def data_uri_to_cv2_img(uri):
@@ -268,19 +271,30 @@ def image():
             img = data_uri_to_cv2_img(image_b64)
             print(img.shape)
             w, h, c = img.shape
-            if w > 480:
-                print("Check yo' image size.")
-                img = cv2.resize(img, (int(480 * w / h), 480))
-                print("New size {}.".format(img.shape))
+            # if w > 480:
+            #     print("Check yo' image size.")
+            #     img = cv2.resize(img, (int(480 * w / h), 480))
+            #     print("New size {}.".format(img.shape))
             gray_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             faces = detect_faces(face_detector, gray_image)
-            player_data = predict_emotions(faces, gray_image, emotion)
-            photo = rank_players(player_data, img, emotion)
-            # photo = party_pi.photo
+            print("faces, gray image", len(faces), gray_image.shape)
+            if len(faces) is 0:
+                photo_path = 'static/images/{}.jpg'.format(str(uuid.uuid4()))
+                cv2.imwrite(photo_path, img)
+                print("Saved image to {}".format(photo_path))
+                return jsonify(success=False, photoPath=photo_path, scoresList = [])
+            player_data, emotion_prediction = predict_emotions(faces, gray_image, emotion)
+            print(player_data, img.shape, emotion_prediction)
+            photo, scores_list = rank_players(player_data, img, emotion)
             photo_path = 'static/images/{}.jpg'.format(str(uuid.uuid4()))
             cv2.imwrite(photo_path, photo)
             print("Saved image to {}".format(photo_path))
-            return jsonify(success=True, photoPath=photo_path)
+            # return jsonify(success=True, photoPath=photo_path)
+            top_emotion = EMOTIONS[np.argmax(emotion_prediction)]
+            happy_score = str(emotion_prediction[3]) # happy
+            negative_score = str(emotion_prediction[0] + emotion_prediction[4]) # sad angrz
+            neutral_score = str(emotion_prediction[6])
+            return jsonify(success=True, photoPath=photo_path, scoresList=scores_list, emotionPrediction=json.dumps(emotion_prediction.tolist()), emotions=EMOTIONS, topEmotion=top_emotion, happyScore = happy_score, negativeScore=negative_score, neutralScore=neutral_score)
         except Exception as e:
             print("ERROR:", e)
             exc_type, exc_obj, exc_tb = sys.exc_info()
