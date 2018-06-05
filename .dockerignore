@@ -1,6 +1,10 @@
-Dockerfile
-docker-compose.yml
 .git/
 .gitignore
+*.pyc
+__pycache__
+README.md
+Dockerfile
+docker-compose.yml
 .dockerignore
 .travis.yml
+*/static/images/*
