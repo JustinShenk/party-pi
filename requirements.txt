@@ -11,4 +11,3 @@ keras
 tensorflow
 h5py
 gevent
-greenlet
