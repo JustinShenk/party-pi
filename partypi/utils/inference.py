@@ -43,7 +43,7 @@ def get_colors(num_classes):
 
 
 def get_labels():
-    return {0: 'angry', 1: 'disgust', 2: 'fear', 3: 'happy',
+    return {0: 'angry', 2: 'fear', 3: 'happy',
             4: 'sad', 5: 'surprise', 6: 'neutral'}
 
 
