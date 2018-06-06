@@ -7,11 +7,15 @@ RUN apt-get update -y && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /partypi
-RUN pip3 install --no-cache-dir pipenv
+#RUN pip3 install --no-cache-dir pipenv
 
-ADD Pipfile /partypi/Pipfile
-ADD Pipfile.lock /partypi/Pipfile.lock
-RUN pipenv install --system
+# Disabled until fix for https://github.com/pypa/pipenv/issues/2113
+#ADD Pipfile /partypi/Pipfile
+#ADD Pipfile.lock /partypi/Pipfile.lock
+#RUN pipenv install --system
+
+ADD requirements.txt /partypi/requirements.txt
+RUN pip3 install -r requirements.txt
 
 ADD . /partypi
 
@@ -28,4 +32,5 @@ RUN openssl req \
 # Expose the web port
 EXPOSE 5000
 
+RUN ls -la
 CMD ["gunicorn",  "-c", "gunicorn.conf", "main:app"]
