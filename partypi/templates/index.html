@@ -152,7 +152,6 @@
       'happy',
       'angry',
       'sad',
-      'disgust',
       'fear',
       'surprise',
       'neutral'
@@ -386,7 +385,7 @@
         })
         .catch(function(e) {
           var message;
-          switch (e.name) {
+          switch (e.name) {gi
             case 'NotFoundError':
             case 'DevicesNotFoundError':
               message = 'Please setup your webcam first.';
