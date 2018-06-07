@@ -43,17 +43,20 @@ If using Ubuntu, install tkinter with ``sudo apt-get install python3-tk``
 
 .. code-block:: python
 
-    cd partypi/
-    python3 main.py
+    gunicorn -c gunicorn.conf main:app
 
 Open a browser to `https://localhost:5000`.
 
 Docker
 ======
 
-Clone the repo, enter folder and `docker build -t partypi .`
+Pull the docker image with `docker pull justinshenk/partypi:latest`.
+
 Run the server interactively with `docker run -it -p 5000:5000 partypi` and open `https://localhost:5000`.
-In Chrome, click Advanced and proceed past the warning.
+
+In Chrome (or Firefox), click Advanced and proceed past the warning.
+
+
 
 Raspberry Pi
 ============
