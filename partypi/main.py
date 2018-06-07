@@ -57,7 +57,7 @@ def rank_players(player_data, photo, current_emotion='happy'):
             "No faces found - try again!",
             font_scale=text_size,
             color=YELLOW)
-        return photo
+        return photo, []
     scores = []
     first_emotion = None
     easy_mode = True
@@ -73,12 +73,24 @@ def rank_players(player_data, photo, current_emotion='happy'):
     # if easy_mode:  # rank players by one emotion
     scores_list = first_emotion_scores
 
+    emotion_offsets = (20, 40)
+    faces_with_scores = []
+
     # Draw the scores for the faces.
     for i, currFace in enumerate(player_data):
         faceRectangle = currFace['faceRectangle']
-
+        x1, x2 = faceRectangle['left'], faceRectangle['right']
+        y1, y2 = faceRectangle['top'], faceRectangle['bottom']
+        # Convert back to coordinates to get offset
+        face_coordinates = (x1, y1, x2-x1, y2-y1)
         # Get points for first emotion.
         first_emotion = first_emotion_scores[i]
+        face_photo_path = 'static/images/face_{}.jpg'.format(str(uuid.uuid4()))
+        x1, x2, y1, y2 = apply_offsets(face_coordinates, emotion_offsets)
+        face_image = photo[y1:y2, x1:x2]
+        cv2.imwrite(face_photo_path, face_image)
+        print("saved to {}".format(face_photo_path))
+        faces_with_scores.append((face_photo_path, first_emotion))
         # second_emotion = second_emotion_scores[i]
 
         # Format points.
@@ -144,7 +156,7 @@ def rank_players(player_data, photo, current_emotion='happy'):
                     color=YELLOW,
                     font_scale=text_size)
             # crown_over_faces
-    return photo
+    return photo, faces_with_scores
 
 
 def random_emotion():
@@ -272,12 +284,13 @@ def image():
             gray_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             faces = detect_faces(face_detector, gray_image)
             player_data = predict_emotions(faces, gray_image, emotion)
-            photo = rank_players(player_data, img, emotion)
+            photo, faces_with_scores = rank_players(player_data, img, emotion)
+            print("Faces with scores", faces_with_scores)
             # photo = party_pi.photo
             photo_path = 'static/images/{}.jpg'.format(str(uuid.uuid4()))
             cv2.imwrite(photo_path, photo)
             print("Saved image to {}".format(photo_path))
-            return jsonify(success=True, photoPath=photo_path)
+            return jsonify(success=True,photoPath=photo_path, emotion=emotion, facesWithScores=faces_with_scores)
         except Exception as e:
             print("ERROR:", e)
             exc_type, exc_obj, exc_tb = sys.exc_info()
@@ -296,26 +309,7 @@ def get_image(empty=False, face=False):
         if empty:
             yield (
                 b'--frame\r\n' + b'Content-Type: image/jpeg\r\n\r\n' + b'\r\n')
-        # _, frame = cam.read()
-        # if face:
-        #     frame = get_face(frame)
-        # cv2.imwrite('t.jpg', frame)
-        # yield (b'--frame\r\n' + b'Content-Type: image/jpeg\r\n\r\n' +
-        #        open('t.jpg', 'rb').read() + b'\r\n')
         yield (b'--frame\r\n' + b'Content-Type: image/jpeg\r\n\r\n' + b'\r\n')
-
-
-# @app.after_request
-# def add_header(r):
-#     """
-#     Add headers to both force latest IE rendering engine or Chrome Frame,
-#     and also to cache the rendered page for 10 minutes.
-#     """
-#     r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-#     r.headers["Pragma"] = "no-cache"
-#     r.headers["Expires"] = "0"
-#     r.headers['Cache-Control'] = 'public, max-age=0'
-#     return r
 
 
 @app.route('/face')
@@ -327,17 +321,6 @@ def face():
 
 @app.route('/')
 def index():
-    # ret, jpeg = cv2.imencode('.jpg', frame)
-    # img = jpeg.tobytes()
-    # # prepare headers for http request
-    # content_type = 'image/jpeg'
-    # headers = {'content-type': content_type}
-
-    # img = cv2.imread('src/images/christmas.png')
-
-    # send http request with image and receive response
-    # response = requests.post(
-    #     test_url, data=img_encoded.tostring(), headers=headers)
     try:
         debug_js = 'true' if debug else 'false'
         print("Page accessed, debug mode:", debug_js)
@@ -346,9 +329,6 @@ def index():
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         print(exc_type, fname, exc_tb.tb_lineno)
-    # response = {'message': '<h1>Hello world</h1>' + img, ''}
-    # response_pickled = jsonpickle.encode(response)
-    # return Response(response=response_pickled, status=200, mimetype="application/json", headers=)
 
 
 @app.route('/none')

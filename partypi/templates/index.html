@@ -72,6 +72,9 @@
   </header>
 
   <main role="main">
+    <div class='row'>
+      <!-- begin left column -->
+      <div class="col-sm-8" style="background-color:#aaa;">
     <!-- Modal -->
     <div id="gameInfoModal" class="modal fade" role="dialog">
       <div class="modal-dialog">
@@ -92,6 +95,8 @@
 
       </div>
     </div>
+
+
     <section class="jumbotron text-center">
       <p class='lead text-muted'> Thanks for checking out Party Pi, a computer vision emotion detection <a href="#gameInfoModal" data-toggle="modal" data-target="#gameInfoModal">game.</a></br>
         Use desktop Chrome for best results (mobile devices are not fully supported).</br>
@@ -123,6 +128,7 @@
           </div>
       </div>
     </section>
+
     <div id='gallery' class="album py-5 bg-light" style="display: none;">
       <div class="container">
         <h1>Gallery</h1>
@@ -134,7 +140,64 @@
         </div>
       </div>
     </div>
+  </div>
+  <!-- end left column -->
+    <div class="col-sm-3" id="leaderboard" style="background-color:#aaa;">
+      <h1>Leaderboard</h1>
+      <div id="leaderboardContent">
+        <div id='leaderboardHappy' style="display:none">
+          <h3>Happy</h3>
+          <div class="row">
+          <div id="happyPlace1" class="leaderCol"></div>
+          <div id="happyPlace2" class="leaderCol"></div>
+          <div id="happyPlace3" class="leaderCol"></div>
+        </div>
+        </div>
+        <div id='leaderboardSurprise' style="display:none">
+          <h3>Surprise</h3>
+          <div class="row">
+          <div id="surprisePlace1" class="leaderCol"></div>
+          <div id="surprisePlace2" class="leaderCol"></div>
+          <div id="surprisePlace3" class="leaderCol"></div>
+        </div>
+        </div>
+        <div id='leaderboardAngry' style="display:none">
+          <h3>Angry</h3>
+          <div class="row">
+          <div id="angryPlace1" class="leaderCol"></div>
+          <div id="angryPlace2" class="leaderCol"></div>
+          <div id="angryPlace3" class="leaderCol"></div>
+        </div>
+        </div>
+        <div id='leaderboardSad' style="display:none">
+          <h3>Sad</h3>
+          <div class="row">
+          <div id="sadPlace1" class="leaderCol"></div>
+          <div id="sadPlace2" class="leaderCol"></div>
+          <div id="sadPlace3" class="leaderCol"></div>
+        </div>
+        </div>
+        <div id='leaderboardNeutral' style="display:none">
+          <h3>Neutral</h3>
+          <div class="row">
+          <div id="neutralPlace1" class="leaderCol"></div>
+          <div id="neutralPlace2" class="leaderCol"></div>
+          <div id="neutralPlace3" class="leaderCol"></div>
+        </div>
+        </div>
+        <div id='leaderboardFear' style="display:none">
+          <h3>Fear</h3>
+          <div class="row">
+          <div id="fearPlace1" class="leaderCol"></div>
+          <div id="fearPlace2" class="leaderCol"></div>
+          <div id="fearPlace3" class="leaderCol"></div>
+        </div>
+        </div>
+      </div>
+
+    </div>
 <script type="text/javascript" src="//downloads.mailchimp.com/js/signup-forms/popup/embed.js" data-dojo-config="usePlainJson: true, isDebug: false"></script><script type="text/javascript">require(["mojo/signup-forms/Loader"], function(L) { L.start({"baseUrl":"mc.us12.list-manage.com","uuid":"37227b4f5e1bbd80f404cfef6","lid":"0229295406"}) })</script>
+</div>
   </main>
 
   <footer class="text-muted">
@@ -201,7 +264,7 @@
 
         var galleryLength = $(".card-img-top").length;
         var img_filename = "img_" + galleryLength;
-        var myCard = $('<div class="col-md-4"><div class="card mb-4 box-shadow"><img id="' + img_filename + '" class="card-img-top" src="' + img_src +
+        var myCard = $('<div class="col-md-4" style=""><div class="card mb-4 box-shadow"><img id="' + img_filename + '" class="card-img-top" src="' + img_src +
           '" alt="Card image cap"><div class="card-body"><div class="d-flex justify-content-between align-items-center"><div class="btn-group"><button type="button" id="btn_' + galleryLength +
           '" class="btn btn-sm btn-outline-secondary view-btn" onclick="saveMe(&apos;img_' + galleryLength + '&apos;)"><i class="fas fa-download"></i></button></div><small class="text-muted"></small></div></div></div>');
         myCard.prependTo('#galleryImages');
@@ -449,6 +512,76 @@
         return new Blob([ia], {type:mimeString});
     }
 
+    function capitalizeFirstLetter(string) {
+      return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+
+    function bumpLeaderboardCards(faceRank, rankedPlayers) {
+      $leaderboardPlace = $("#" + currentEmotion + "Place" + faceRank);
+      $firstPlace = $("#" + currentEmotion + "Place" + 1);
+      $secondPlace = $("#" + currentEmotion + "Place" + 2);
+      $thirdPlace = $("#" + currentEmotion + "Place" + 3);
+      if (faceRank === 3) { // third place
+          $leaderboardPlace.find('.leaderboardCard').remove();
+      } else if (faceRank === 2){ // second place
+          $leaderboardPlace.find('.leaderboardCard').remove();
+          $secondPlace.find('.leaderboardCard').prependTo($thirdPlace);
+      } else if (faceRank === 1){ // first place
+          $thirdPlace.find('.leaderboardCard').remove();
+          $secondPlace.find('.leaderboardCard').prependTo($thirdPlace);
+          $firstPlace.find('.leaderboardCard').prependTo($secondPlace);
+      }
+    }
+
+    function updateLeaderboard(facesWithScores) {
+      $leaderboard = $("#leaderboardContent");
+      for (var i = 0; i < facesWithScores.length; i++) {
+        var faceURL = facesWithScores[i][0];
+        var score = parseInt(facesWithScores[i][1]);
+        var imgID = currentEmotion + score;
+        var capEmotion = capitalizeFirstLetter(currentEmotion)
+        var sectionID = "leaderboard" + capEmotion;
+        $leaderboardSection = $('#' + sectionID);
+        var sectionLength = $("#" + sectionID + " img").length;
+        if (sectionLength == 0) {
+          // Show if first image in section
+          $leaderboardSection.show();
+        }
+        // Sort faces in leaderboard section by score
+        var faceRank = 1; // initialize
+        var sameScores = 0;
+        $('#' + sectionID + ' img:visible').each(function(index, value) {
+          var leaderImgID = value.id;
+          // var leaderEmotion = leaderImgID.match(/[a-zA-Z]+/g)[0];
+          var leaderScore = parseInt(leaderImgID.match(/\d+/g)[0]);
+          if (leaderScore > score) {
+              faceRank += 1;
+          } else if (leaderScore === score) {
+              sameScores += 1;
+            }
+        });
+        faceRank += sameScores;
+        if (faceRank <= 3) {
+          $leaderboardPlace = $("#" + currentEmotion + "Place" + faceRank );
+
+          var rankedPlayers = $leaderboardPlace.find('img').length;
+          if (faceRank === 1 && rankedPlayers === 0) { // only when empty
+            var trophy = '<i class="fa fa-trophy" style="font-size: 20px; color: gold"></i>'
+            $leaderboardSection.prepend(trophy);
+          }
+
+          // Bump players down if rank <= number of rankedPlayers
+          bumpLeaderboardCards(faceRank, rankedPlayers);
+
+          var leaderboardCard = $('<div class="leaderboardCard col-md-4"><div class="card mb-4 box-shadow"><img id="' + imgID + '" class="card-img-top" src="' + faceURL +
+            '" alt="Card image cap"><div class="card-body" style="padding: 0.25rem"><div class="d-flex justify-content-between align-items-center"><div class="btn-group"></div><small class="text-muted">' + score + " points" + '</small></div></div></div>');
+          $leaderboardPlace.append(leaderboardCard);
+        } else {
+          console.log("Try again! Score:" + score + ", Emotion: " + capEmotion);
+        }
+      }
+    }
+
     $(document).ready(function() {
       "use strict";
 
@@ -461,7 +594,6 @@
           $('#play').show();
           startWebcam();
           $("#play").click(function() {
-            // startWebcam();
             $("#placeholderImage").hide();
             $("#videoElement").removeAttr('hidden');
             $("#myProgress").show();
@@ -487,7 +619,6 @@
           $('#videoElement').hide();
           $('#play').hide();
           $('#myProgress').hide();
-          // $('#text span').css('color','black');
           $('#text').hide();
           $("#mobilePrompt").text("Show " + currentEmotion + "_");
           $('#mobilePrompt').show();
@@ -529,12 +660,13 @@
           // Add photo to top
           var img = document.createElement('img');
           img.src = data.photoPath;
+          console.log(data.facesWithScores);
+          updateLeaderboard(data.facesWithScores);
           $output.prepend(img);
           $("#myProgress").hide();
           $("#play").show();
         });
       }; // end captureImage
-
       $(initialize);
     });
 

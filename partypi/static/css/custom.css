@@ -266,3 +266,11 @@ text-align: center;
 #mobilePrompt{
   padding-bottom: 40px;
 }
+
+.leaderCol {
+  float: left; width: 100px;
+}
+
+.leaderboardCard {
+  max-width: 100% !important;
+}
