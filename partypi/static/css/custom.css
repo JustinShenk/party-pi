@@ -269,8 +269,13 @@ text-align: center;
 
 .leaderCol {
   float: left; width: 100px;
+  text
 }
 
 .leaderboardCard {
   max-width: 100% !important;
+}
+
+.leaderboardCard .card-img-top {
+  height: 120px;
 }
