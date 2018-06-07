@@ -82,7 +82,7 @@ def rank_players(player_data, photo, current_emotion='happy'):
         x1, x2 = faceRectangle['left'], faceRectangle['right']
         y1, y2 = faceRectangle['top'], faceRectangle['bottom']
         # Convert back to coordinates to get offset
-        face_coordinates = (x1, y1, x2-x1, y2-y1)
+        face_coordinates = (x1, y1, x2 - x1, y2 - y1)
         # Get points for first emotion.
         first_emotion = first_emotion_scores[i]
         face_photo_path = 'static/images/face_{}.jpg'.format(str(uuid.uuid4()))
@@ -290,7 +290,7 @@ def image():
             photo_path = 'static/images/{}.jpg'.format(str(uuid.uuid4()))
             cv2.imwrite(photo_path, photo)
             print("Saved image to {}".format(photo_path))
-            return jsonify(success=True,photoPath=photo_path, emotion=emotion, facesWithScores=faces_with_scores)
+            return jsonify(success=True, photoPath=photo_path, emotion=emotion, facesWithScores=faces_with_scores)
         except Exception as e:
             print("ERROR:", e)
             exc_type, exc_obj, exc_tb = sys.exc_info()
