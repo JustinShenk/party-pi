@@ -1,3 +1,5 @@
+.DS_Store
+*.ipynb
 .git/
 .gitignore
 *.pyc
@@ -8,3 +10,5 @@ docker-compose.yml
 .dockerignore
 .travis.yml
 */static/images/*
+*.cert
+*.key

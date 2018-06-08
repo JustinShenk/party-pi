@@ -279,3 +279,7 @@ text-align: center;
 .leaderboardCard .card-img-top {
   height: 120px;
 }
+
+.top-section {
+  background-color: #aaa;
+}

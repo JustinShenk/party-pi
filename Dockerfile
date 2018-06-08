@@ -32,5 +32,4 @@ RUN openssl req \
 # Expose the web port
 EXPOSE 5000
 
-RUN ls -la
 CMD ["gunicorn",  "-c", "gunicorn.conf", "main:app"]
