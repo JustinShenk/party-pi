@@ -179,9 +179,6 @@ function WordShuffler(holder, opt) {
   }
 
   this.restart = function() {
-    //   if (this.holder.id === 'text') {
-    //   this.holder = document.getElementById('text');
-    // }
     this.currentCharacter = 0;
     this.needUpdate = true;
   }
@@ -199,16 +196,8 @@ function WordShuffler(holder, opt) {
   update(time);
 }
 
-// var headline = document.getElementById('headline');
-var text = document.getElementById('text');
+var text = document.getElementById('prompt');
 var shuffler = document.getElementById('play');
-
-// var headText = new WordShuffler(headline, {
-//   textColor: '#fff',
-//   timeOffset: 1, // was 18
-//   mixCapital: true,
-//   mixSpecialCharacters: true
-// });
 
 var pText = new WordShuffler(text, {
   textColor: '#fff',
