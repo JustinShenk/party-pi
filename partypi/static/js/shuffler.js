@@ -209,8 +209,7 @@ var buttonText = new WordShuffler(shuffler, {
   timeOffset: 10
 });
 
-shuffler.addEventListener('click', function() {
-  // headText.restart();
+shuffler.addEventListener('click', function() {;
   // Get random emotion
   var emotion = getRandomEmotion();
   currentEmotion = emotion;
