@@ -11,7 +11,7 @@
   <script type="text/javascript" src="{{ url_for('static',filename='js/fontawesome-all.js') }}"></script>
   <!-- Latest compiled and minified CSS -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous" />
-  <link rel="stylesheet" href="{{ url_for('static',filename='css/custom.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static',filename='css/main.css') }}" />
   <!-- jQuery library -->
   <script type="text/javascript" src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.3.1.min.js"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}"></script>
@@ -49,7 +49,7 @@
   <header>
     <div class="collapse bg-dark" id="navbarHeader">
       <div class="container">
-        <div class="top-section row">
+        <div class="row">
           <div class="col-sm-8 col-md-7 py-4">
             <h4 class="text-white">About</h4>
             <p class="text-muted">Computer vision game build with OpenCV and TensorFlow.</p>
@@ -79,9 +79,9 @@
   </header>
 
   <main role="main">
-    <div class='row'>
+    <div class='top-section row'>
       <!-- begin left column -->
-      <div class="col-sm-8" style="background-color:#aaa;">
+      <div class="col-sm-8">
         <!-- Modal -->
         <div id="gameInfoModal" class="modal fade" role="dialog">
           <div class="modal-dialog">
@@ -109,7 +109,7 @@
             Use desktop Chrome for best results (mobile devices are not fully supported).</br>
             Sign up below to receive updates to this <a href="https://github.com/JustinShenk/party-pi">Python web app</a>.</p>
           <!-- <input type="file" class="filestyle" accept='image/*;' capture='camera' data-input="false" data-badge="false" id="file-btn"> -->
-          <input id='imageInput' type="file" accept='image/*;' capture='camera' data-input="false" data-badge="false" class='filestyle' data-btnClass="btn-primary text-center" data-text="Take selfie">
+          <input id='imageInput' type="file" accept='image/*;' capture='camera' data-input="false" data-badge="false" class='filestyle' data-btnClass="btn-primary text-center" data-text="Take selfie" style="display:none">
           <div id='output' class='container'>
             <div class='img-overlay'>
               <div class='row justify-content-center'>
@@ -241,6 +241,8 @@
       // Take the user to a different screen here.
       //alert("Support for mobile devices is still in developmental stage. For the best experience try desktop Chrome.");
       isMobile = true;
+      $("#imageInput").show();
+      fileUpload.show();
     } else {
       isMobile = false;
     }
@@ -357,7 +359,7 @@
       var fd = new FormData(document.forms[0]);
       fd.append("imageBase64", dataURL);
       fd.append("emotion", currentEmotion);
-
+      console.log("Current emotion" + currentEmotion);
       $("#spinner").addClass('loader');
       $("#placeholder").show();
       // send image to API
@@ -375,15 +377,19 @@
         timeout: 10000
       }).done(function(data) {
         // Add photo to top
-        var img = document.createElement('img')
+        var img = document.createElement('img');
+        console.log("Create img");
         img.setAttribute('id', 'photo');
         img.src = data.photoPath;
+        console.log("Add photo path:" + data.photoPath);
         $("#output").prepend(img);
         $("#placeholderImage").hide();
         $("#spinner").removeClass('loader');
         var emotion = getRandomEmotion();
         currentEmotion = emotion;
         $("#mobilePrompt").text("Show " + currentEmotion + "_");
+      }).fail(function(data) {
+        console.log(data.responseCode);
       });
     }
 
@@ -690,13 +696,15 @@
           // Add photo to top
           var img = document.createElement('img');
           img.src = data.photoPath;
-          console.log(data.facesWithScores);
           updateLeaderboard(data.facesWithScores);
           $output.prepend(img);
           $("#myProgress").hide();
           $("#play").show();
+        }).fail(function(data) {
+            console.log(data.responseCode);
         });
       }; // end captureImage
+
       $(initialize);
     });
 

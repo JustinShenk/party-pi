@@ -93,12 +93,15 @@
   }
 }
 
-#myProgress {
+#photoCountdown {
+  /* div that holds moving bar */
   width: 100%;
   background-color: grey;
+  display: none;
 }
 
 #countdownBar {
+  /* gray bar that moves */
   width: 1%;
   height: 30px;
   background-color: tomato;
@@ -169,7 +172,7 @@ top: 50%;
   height: auto   !important;
 }
 
-#text {
+#prompt {
   top: 72%;
   left: 30%;
   position: absolute;
@@ -177,6 +180,7 @@ top: 50%;
   font-size: 2em;
   text-align: center;
   z-index: 100;
+  display: none;
 }
 
 #play {
@@ -195,6 +199,7 @@ top: 50%;
   /* bottom: -210px; */
   text-align: center;
   z-index: 100;
+  display: none;
 }
 
 #output {
@@ -282,4 +287,45 @@ text-align: center;
 
 .top-section {
   background-color: #aaa;
+}
+
+.inputFile {
+  position: relative;
+  color: #7f7f7f;
+}
+
+.inputFile input[type="file"] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  width: 100%;
+  opacity: 1;
+  transition: .3s ease;
+  z-index: 100;
+}
+
+.icon {
+  color: gold;
+  font-size: 30px;
+  position: absolute;
+  top: 0px;
+  left: 20px;
+  transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.leaderCol {
+  display: inline-block;
+  position: relative;
 }

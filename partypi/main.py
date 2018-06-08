@@ -9,7 +9,7 @@ import sys
 import tensorflow as tf
 import uuid
 
-from flask import Flask, Response, request, render_template, jsonify
+from flask import Flask, Response, request, render_template, jsonify, make_response
 from io import BytesIO
 from keras.models import load_model
 from keras import backend as K
@@ -267,7 +267,6 @@ def image():
             if image_b64 is None:
                 print("No image in request.")
                 return jsonify(success=False, photoPath='')
-            print("image_b64 request received.", image_b64[:10])
             # Get emotion
             # emotion = json_data['emotion']
             emotion = request.form.get('emotion')
@@ -275,7 +274,6 @@ def image():
                 print("No emotion in request.")
                 return jsonify(success=False, photoPath='')
             img = data_uri_to_cv2_img(image_b64)
-            print(img.shape)
             w, h, c = img.shape
             if w > 480:
                 print("Check yo' image size.")
@@ -290,33 +288,16 @@ def image():
             photo_path = 'static/images/{}.jpg'.format(str(uuid.uuid4()))
             cv2.imwrite(photo_path, photo)
             print("Saved image to {}".format(photo_path))
-            return jsonify(success=True, photoPath=photo_path, emotion=emotion, facesWithScores=faces_with_scores)
+            response = jsonify(success=True, photoPath=photo_path, emotion=emotion, facesWithScores=faces_with_scores)
+            status_code = 200
         except Exception as e:
             print("ERROR:", e)
             exc_type, exc_obj, exc_tb = sys.exc_info()
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
             print(exc_type, fname, exc_tb.tb_lineno)
-            # response = jsonify({'image': photo_path,
-            #                     'score': False})
-            # response.status_code = 500
-            return jsonify(success=False, photoPath='')
-        print("What happened here?")
-        return jsonify(success=False, photoPath='')
-
-
-def get_image(empty=False, face=False):
-    while True:
-        if empty:
-            yield (
-                b'--frame\r\n' + b'Content-Type: image/jpeg\r\n\r\n' + b'\r\n')
-        yield (b'--frame\r\n' + b'Content-Type: image/jpeg\r\n\r\n' + b'\r\n')
-
-
-@app.route('/face')
-def face():
-    return Response(
-        get_image(face=True),
-        mimetype='multipart/x-mixed-replace; boundary=frame')
+            response = jsonify(success=False, photoPath='')
+            status_code = 500
+        return make_response(response, status_code)
 
 
 @app.route('/')
@@ -329,14 +310,6 @@ def index():
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         print(exc_type, fname, exc_tb.tb_lineno)
-
-
-@app.route('/none')
-def none():
-    Response(
-        get_image(empty=True),
-        mimetype='multipart/x-mixed-replace; boundary=frame')
-
 
 # HTTP Errors handlers
 

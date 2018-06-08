@@ -31,20 +31,20 @@ Run locally
 
 Clone repository:
 
-.. code-block:: python
+.. code-block:: bash
 
     git clone https://github.com/JustinShenk/party-pi.git
     cd party-pi
 
 Install dependencies:
 
-.. code-block:: python
+.. code-block:: bash
 
     pip3 install -r requirements.txt
 
 If using Ubuntu, install tkinter with ``sudo apt-get install python3-tk``
 
-.. code-block:: python
+.. code-block:: bash
 
     gunicorn -c gunicorn.conf main:app
 
@@ -55,7 +55,7 @@ Docker
 
 Pull the docker image with `docker pull justinshenk/partypi:latest`.
 
-Run the server interactively with `docker run -it -p 5000:5000 partypi` and open `https://localhost:5000`.
+Run the server interactively with ``docker run -it -p 5000:5000 partypi`` and open a browser to https://localhost:5000.
 
 In Chrome (or Firefox), click Advanced and proceed past the warning.
 
