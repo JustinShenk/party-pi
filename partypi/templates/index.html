@@ -296,6 +296,7 @@
     var currentEmotion = 'happy';
     var playButtonInitialized = false;
     var countdownTimerID;
+    var isCaptureInProgress = false;
 
     function saveMe(img_id) {
       // Download image with `img_id`
@@ -707,6 +708,11 @@
      * Capture image from `#videoElement` and POST to ``/image` endpoint.
      */
     function captureImage() {
+      if (isCaptureInProgress) {
+        console.log("Capture in progress, skipping");
+        return;
+      }
+      isCaptureInProgress = true;
       var video = $("#videoElement").get(0);
       var canvas = document.createElement("canvas");
       canvas.width = video.videoWidth;
@@ -746,8 +752,10 @@
         $output.prepend(img);
         $("#photoCountdown").hide();
         $("#play").show();
+        isCaptureInProgress = false;
       }).fail(function(data) {
         console.log(data.responseCode);
+        isCaptureInProgress = false;
       });
     };
 
