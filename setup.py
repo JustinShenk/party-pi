@@ -5,7 +5,7 @@ import re
 import sys
 
 
-VERSION = '0.1.6'  # x.y.z[-dev#]
+VERSION = '0.2.0'  # x.y.z[-dev#]
 REPOSITORY = 'https://github.com/JustinShenk/party-pi'
 
 PACKAGES = find_packages(where='partypi')
@@ -25,13 +25,13 @@ def package_files(directory):
     return paths
 
 
-extra_files = package_files('match_scientist')
+extra_files = package_files('partypi')
 print("Extra_files: ", extra_files)
 
 setup(
     name='partypi',
     version=VERSION,
-    description='Party Pi is a computer vision emotion detection game with OpenCV and Microsoft Oxford Emotion API.',
+    description='Party Pi is a computer vision emotion detection game with OpenCV and Keras.',
     long_description=README,
     author='Justin Shenk',
     author_email='shenk.justin@gmail.com',
@@ -67,7 +67,7 @@ setup(
     ],
     license='MIT',
     keywords=[
-        'OpenCV', 'cv2', 'emotion', 'detection', 'game'
+        'OpenCV', 'computer', 'vision', 'emotion', 'detection', 'game'
     ],
     zip_safe = False
 )
