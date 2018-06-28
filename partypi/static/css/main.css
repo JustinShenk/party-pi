@@ -165,7 +165,7 @@
 }
 
 #prompt {
-  top: 72%;
+  top: 80%;
   left: 30%;
   position: absolute;
   margin: 0px 0 20px 0;
@@ -188,7 +188,7 @@
   cursor: pointer;
   /* margin: auto; */
   position: relative;
-  /* bottom: -210px; */
+  bottom: -50px;
   text-align: center;
   z-index: 100;
   display: none;
