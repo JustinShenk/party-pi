@@ -40,6 +40,49 @@ emotion_target_size = emotion_classifier.input_shape[1:3]
 # Get emotions
 EMOTIONS = list(get_labels().values())
 
+# def _remove_background(frame, image, frame_loc, img_loc):
+#     """Remove black background from `image` and place on `frame`.
+#
+#     Args:
+#
+#     Returns:
+#
+#     """
+#     y0, y1, x0, x1 = frame_loc
+#     img_y0, img_y1, img_x0, img_x1 = img_loc
+#     import ipdb;ipdb.set_trace()
+#     # Iterate over all channels
+#     for c in range(0, 3):
+#         img_slice = image[img_y0:img_y1, img_x0:img_x1, c] * \
+#             (image[img_y0:img_y1, img_x0:img_x1, 3] / 255.0)
+#         bg_slice = frame[y0:y1, x0:x1, c] * \
+#             (1.0 - image[img_y0:img_y1, img_x0:img_x1, 3]
+#                 / 255.0)
+#         frame[y0:y1, x0:x1, c] = img_slice + bg_slice
+#     return frame
+
+def draw_logo(photo, logo="PartyPi.png"):
+    """Draws logo on `photo` in bottom right corner."""
+    logo = cv2.imread(logo, cv2.IMREAD_UNCHANGED)
+    photoRows, photoCols = photo.shape[:2]
+    rows,cols = logo.shape[:2]
+    # roi = photo[photoRows-rows:photoRows, 0:cols]
+    # logo_gray = cv2.cvtColor(logo,cv2.COLOR_BGR2GRAY)
+    # ret, mask = cv2.threshold(logo_gray, 10, 255, cv2.THRESH_BINARY)
+    # mask_inv = cv2.bitwise_not(mask)
+    # photo_bg = cv2.bitwise_and(roi,roi,mask = mask_inv)
+    # logo_fg = cv2.bitwise_and(logo[:,:,:3],logo[:,:,:3],mask = mask)
+    # dst = cv2.add(photo_bg,logo_fg)
+    # photo[photoRows-rows:photoRows, 0:cols] = dst
+    y0, y1, x0, x1 = photoRows-rows, photoRows, 0, cols
+    for c in range(0, 3):
+        logo_slice = logo[:rows, :cols, c] * \
+            (logo[:rows, :cols, 3] / 255.0)
+        bg_slice = photo[y0:y1, x0:x1, c] * \
+            (1.0 - logo[:rows, :cols, 3]
+                / 255.0)
+        photo[y0:y1, x0:x1, c] = logo_slice + bg_slice
+    return photo
 
 def rank_players(player_data, photo, current_emotion='happy'):
     """ Rank players and display.
@@ -284,7 +327,7 @@ def image():
             player_data = predict_emotions(faces, gray_image, emotion)
             photo, faces_with_scores = rank_players(player_data, img, emotion)
             print("Faces with scores", faces_with_scores)
-            # photo = party_pi.photo
+            photo = draw_logo(photo)
             photo_path = 'static/images/{}.jpg'.format(str(uuid.uuid4()))
             cv2.imwrite(photo_path, photo)
             print("Saved image to {}".format(photo_path))

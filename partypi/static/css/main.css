@@ -329,3 +329,25 @@ text-align: center;
   display: inline-block;
   position: relative;
 }
+
+/* .browser-warning{
+    position: fixed;
+    top: 5px;
+    left:2%;
+    width: 96%;
+}
+
+.browser-warning{
+    position: fixed;
+    bottom: 5px;
+    left:2%;
+    width: 96%;
+} */
+
+.alert{
+    display: none;
+}
+
+#jumbo {
+  padding-top: 50px;
+}

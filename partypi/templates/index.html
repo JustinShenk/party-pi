@@ -19,6 +19,7 @@
   <script type="text/javascript" src="{{ url_for('static', filename='js/adapter-latest.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap-filestyle.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='js/exif.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/main.js') }}"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
   <script src="{{ url_for('static', filename='js/holder.min.js') }}"></script>
   <script id="mcjs">
@@ -80,6 +81,10 @@
 
   <main role="main">
     <div class='top-section row'>
+      <div class="alert alert-warning browser-warning">
+        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+        <strong>Warning</strong> Browser not supported. Use Safari for iOS or desktop Chrome for best results.
+      </div>
       <!-- begin left column -->
       <div class="col-sm-8">
         <!-- Modal -->
@@ -93,7 +98,7 @@
                 <h4 class="modal-title">About Party Pi</h4>
               </div>
               <div class="modal-body">
-                <p>Emotion classification is performed with a neural network trained with Keras on the FER2013 dataset. The website runs with Flask on Heroku.</p>
+                <p>Emotion classification is performed with a neural network trained with Keras on the FER2013 dataset. The website runs with Flask on Heroku. Party Pi was developed by <a href="https://linkedin.com/in/justinshenk"><img alt="Justin Shenk" src="{{ url_for('static',filename='images/justin.png') }}" width=42 /></a>.</p>
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -104,9 +109,9 @@
         </div>
 
 
-        <section class="jumbotron text-center">
+        <section id="jumbo" class="jumbotron text-center">
+          <!-- <img src="{{ url_for('static', filename='images/PartyPi.jpg') }}" width=100/> -->
           <p class='lead text-muted'> Let's play Party Pi, a computer vision emotion detection <a href="#gameInfoModal" data-toggle="modal" data-target="#gameInfoModal">game.</a></br>
-            Use desktop Chrome or Firefox for best results.</br>
             <!-- <input type="file" class="filestyle" accept='image/*;' capture='camera' data-input="false" data-badge="false" id="file-btn"> -->
             <!-- <input id='imageInput' type="file" accept='image/*;' capture='camera' data-input="false" data-badge="false" class='filestyle' data-btnClass="btn-primary text-center" data-text="Take selfie" hidden style="display:none;"> -->
             <!-- <form id="inputForm">
@@ -140,7 +145,7 @@
               <!-- <div id='output' class='container'> -->
               <div id='spinner'>
               </div>
-              <video width='640' height='480' muted autoplay id="videoElement">Your browser does not support HTML5 video.</video>
+              <video width='640' height='480' playsinline muted autoplay id="videoElement">Your browser does not support HTML5 video.</video>
               <image id='placeholderImage' width='640' height='480' style='display: none; background-color: gray;'></image>
               <div class='' id="photoCountdown" style='::after'>
                 <div id="countdownBar">
@@ -169,7 +174,7 @@
       </div>
       <!-- end left column -->
       <div class="col-sm-3" id="leaderboard" style="background-color:#aaa;">
-        <h1>Leaderboard</h1>
+        <h2>Leaderboard</h2>
         <div id="leaderboardContent">
           <div id='leaderboardHappy' style="display:none">
             <h3>Happy</h3>
@@ -318,96 +323,6 @@
      * `videoMode` indicates if streaming should begin, otherwise video remains
      * hidden.
      */
-    function startWebcam(beginStreaming = true) {
-      if (location.protocol === 'https:') {
-        // Prefer camera resolution nearest to 640x480.
-        const constraints = {
-          audio: false,
-          video: {
-            width: {
-              exact: 640
-            },
-            height: {
-              exact: 480
-            },
-            facingMode: "user"
-          }
-        };
-
-        // Use polyfill for older browsers without `navigator.mediaDevices.getUserMedia()`
-        if (navigator.mediaDevices === undefined) {
-          navigator.mediaDevices = {};
-        }
-
-        // Here, we will just add the getUserMedia property if it's missing
-        if (navigator.mediaDevices.getUserMedia === undefined) {
-          navigator.mediaDevices.getUserMedia = function(constraints) {
-
-            // First get ahold of the legacy getUserMedia, if present
-            var getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-
-            // Some browsers just don't implement it - return a rejected promise with an error
-            // to keep a consistent interface
-            if (!getUserMedia) {
-              return Promise.reject(new Error('getUserMedia is not implemented in this browser'));
-            }
-
-            // Otherwise, wrap the call to the old navigator.getUserMedia with a Promise
-            return new Promise(function(resolve, reject) {
-              getUserMedia.call(navigator, constraints, resolve, reject);
-            });
-          }
-        }
-
-        navigator.mediaDevices.getUserMedia(constraints)
-          .then(function(stream) {
-            const video = document.querySelector('video');
-
-            // Older browsers may not have srcObject
-            if ("srcObject" in video) {
-              video.srcObject = stream;
-            } else {
-              // Avoid using this in new browsers, as it is going away.
-              video.src = window.URL.createObjectURL(stream);
-            }
-            video.onloadedmetadata = function(e) {
-              if (beginStreaming) {
-                video.style.display = "block";
-              }
-              video.play();
-              $('#play').show();
-              if (!playButtonInitialized) {
-                initPlayButton();
-              }
-            };
-          })
-          .catch(function(e) {
-            var message;
-            switch (e.name) {
-              case 'NotFoundError':
-              case 'DevicesNotFoundError':
-                message = 'Please setup your webcam first.';
-                break;
-              case 'SourceUnavailableError':
-                message = 'Your webcam is busy';
-                break;
-              case 'PermissionDeniedError':
-              case 'SecurityError':
-                message = 'Permission denied!';
-                break;
-              default:
-                message = 'Try desktop Chrome for best experience.';
-            }
-            console.log("HTML5 input not available, switching to file input.")
-            errorMessage(message);
-            showManualUpload();
-          });
-      } else {
-        console.log('HTTPS not found');
-        // reload with HTTPS
-        location.href = 'https:' + window.location.href.substring(window.location.protocol.length);
-      }
-    }
 
     function initPlayButton() {
       // let the game begin!
@@ -779,12 +694,13 @@
 
     function startCamera() {
       try {
+        $("#videoElement").get(0).srcObject.getVideoTracks().forEach(track => track.enabled = true);
         clearTimeout(captureImageTimerID);
         clearTimeout(countdownTimerID);
         $("#photoCountdown").hide();
         // If showing results, continue showing results, else stream video
-        const beginStreaming = $("#output .scoredImage").length === 0;
-        startWebcam(beginStreaming);
+        var beginStreaming = $("#output .scoredImage").length === 0;
+        // startWebcam(beginStreaming);
       } catch (err) {
         console.log("Caught an exception: " + err);
       }
@@ -792,7 +708,7 @@
 
     function pauseCamera() {
       try {
-        $("#videoElement").get(0).srcObject.getVideoTracks().forEach(track => track.stop());
+        $("#videoElement").get(0).srcObject.getVideoTracks().forEach(track => track.enabled = false);
         // var vid = document.getElementById("videoElement");
         // vid.pause();
       } catch {}
@@ -802,12 +718,20 @@
      * Start webcam and prepare app.
      */
     function initialize() {
+      if (location.protocol !== "https:") location.protocol = "https:";
+
+      // only Safari is supported on iOS
+      var ua = window.navigator.userAgent;
+      var iOS = !!ua.match(/iPad/i) || !!ua.match(/iPhone/i);
+      var webkit = !!ua.match(/WebKit/i);
+      var iOSNotSafari = iOS && webkit && ua.match(/CriOS/i);
+      if (iOSNotSafari) browserWarning();
+
       // Active
       window.addEventListener('focus', startCamera);
 
       // Inactive
       window.addEventListener('blur', pauseCamera);
-      startWebcam();
     };
 
     $(document).ready(function() {
@@ -816,6 +740,7 @@
     });
   </script>
   <script type="text/javascript" src="{{ url_for('static', filename='js/shuffler.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/video.js') }}"></script>
 </body>
 
 </html>
