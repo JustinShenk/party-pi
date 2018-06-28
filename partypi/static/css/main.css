@@ -121,20 +121,12 @@
 
 .loader {
   position: absolute;
-  z-index: 999;
   height: 60px;
   width: 60px;
-  /* overflow: show; */
-  margin: 0px auto;
   left: 50%;
-top: 50%;
-  /* top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0; */
-
-  /* padding-top: 50%; */
-  /* margin-top: 50px; */
+  top: 50%;
+  margin-top: -50px;
+  margin-left: -40px;
   border: 16px solid #f3f3f3; /* Light grey */
   border-top: 16px solid #3498db; /* Blue */
   border-radius: 50%;
