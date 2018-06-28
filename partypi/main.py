@@ -327,7 +327,7 @@ def image():
             player_data = predict_emotions(faces, gray_image, emotion)
             photo, faces_with_scores = rank_players(player_data, img, emotion)
             print("Faces with scores", faces_with_scores)
-            photo = draw_logo(photo)
+            # photo = draw_logo(photo)
             photo_path = 'static/images/{}.jpg'.format(str(uuid.uuid4()))
             cv2.imwrite(photo_path, photo)
             print("Saved image to {}".format(photo_path))
