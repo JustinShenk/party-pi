@@ -1,3 +1,4 @@
+import os
 import tweepy
 
 def twitter_api():
