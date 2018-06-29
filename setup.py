@@ -50,6 +50,7 @@ setup(
         'keras',
         'tensorflow',
         'h5py',
+        'tweepy',
         'gevent'
     ],
     url=REPOSITORY,
