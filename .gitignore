@@ -4,7 +4,6 @@ update.py
 /build
 /dist
 *.egg-info
-config.json
 img/
 lkface*
 *.pyc
@@ -16,3 +15,4 @@ secret.py
 README-pypi.rst
 register.py
 */static/images/*
+credentials.py

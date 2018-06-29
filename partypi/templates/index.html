@@ -21,6 +21,8 @@
   <script type="text/javascript" src="{{ url_for('static', filename='js/exif.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='js/main.js') }}"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+  <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
   <script src="{{ url_for('static', filename='js/holder.min.js') }}"></script>
   <script id="mcjs">
     ! function(c, h, i, m, p) {
@@ -67,11 +69,15 @@
       </div>
     </div>
     <div class="navbar navbar-dark bg-dark box-shadow">
-      <div class="container d-flex justify-content-between">
+      <div class="container d-flex">
         <a href="#" class="navbar-brand d-flex align-items-center">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
           <strong>Party Pi</strong>
         </a>
+        <label id='tweet-warning' class='checkbox-inline text-muted'>
+          <input id="mode-toggle" type="checkbox" data-toggle="toggle" data-on="<i class='fab fa-twitter'></i>" data-off="IP" data-onstyle="warning" data-style="ios">
+            Tweeting <span id="tweet-mode">your IP address</span> to #PlayPartyPi
+        </label>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarHeader" aria-controls="navbarHeader" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
@@ -81,10 +87,6 @@
 
   <main role="main">
     <div class='top-section row'>
-      <div class="alert alert-warning browser-warning">
-        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-        <strong>Warning</strong> Browser not supported. Use Safari for iOS or desktop Chrome for best results.
-      </div>
       <!-- begin left column -->
       <div class="col-sm-8">
         <!-- Modal -->
@@ -104,13 +106,20 @@
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
               </div>
             </div>
-
           </div>
         </div>
-
-
+        <div class="alert alert-warning browser-warning">
+          <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+          <strong>Warning</strong> Browser not supported. Use Safari for iOS or desktop Chrome for best results.
+        </div>
+        <div class="alert alert-danger privacy-warning">
+          <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+          <strong>Warning</strong> Your photo will be instantly shared via <a href="https://twitter.com/playpartypi">Twitter</a>.
+        </div>
         <section id="jumbo" class="jumbotron text-center">
+
           <!-- <img src="{{ url_for('static', filename='images/PartyPi.jpg') }}" width=100/> -->
+
           <p class='lead text-muted'> Let's play Party Pi, a computer vision emotion detection <a href="#gameInfoModal" data-toggle="modal" data-target="#gameInfoModal">game.</a></br>
             <!-- <input type="file" class="filestyle" accept='image/*;' capture='camera' data-input="false" data-badge="false" id="file-btn"> -->
             <!-- <input id='imageInput' type="file" accept='image/*;' capture='camera' data-input="false" data-badge="false" class='filestyle' data-btnClass="btn-primary text-center" data-text="Take selfie" hidden style="display:none;"> -->
@@ -365,7 +374,7 @@
         const img_filename = "img_" + galleryLength;
         const myCard = $('<div class="col-md-4" style=""><div class="card mb-4 box-shadow"><img id="' + img_filename + '" class="card-img-top" src="' + img_src +
           '" alt="Card image cap"><div class="card-body"><div class="d-flex justify-content-between align-items-center"><div class="btn-group"><button type="button" id="btn_' + galleryLength +
-          '" class="btn btn-sm btn-outline-secondary view-btn" onclick="saveMe(&apos;img_' + galleryLength + '&apos;)"><i class="fas fa-download"></i></button></div><small class="text-muted"></small></div></div></div>');
+          '" class="btn btn-sm btn-outline-secondary view-btn" onclick="saveMe(&apos;img_' + galleryLength + '&apos;)"><i class="fa fa-download"></i></button></div><small class="text-muted"></small></div></div></div>');
         myCard.prependTo('#galleryImages');
       });
     }
@@ -439,7 +448,6 @@
 
       resizedContext.drawImage(canvas, 0, 0, resizedCanvas.width, resizedCanvas.height);
       var dataURL = resizedCanvas.toDataURL('image/jpeg', 0.7);
-      alert(resizedCanvas.width + resizedCanvas.height);
       var fd = new FormData(document.forms[0]);
       fd.append("imageBase64", dataURL);
       fd.append("emotion", currentEmotion);
@@ -514,10 +522,11 @@
       console.error(message, typeof e == 'undefined' ? '' : e);
     }
 
-
     /*
      * Show manual upload button and related stuff.
+     * NOTE: Not implemented
      */
+
     function showManualUpload() {
       $("#inputFile").show();
       var fileUpload = $("#imageInput");
@@ -641,11 +650,10 @@
       var fd = new FormData(document.forms[0]);
       fd.append("imageBase64", dataURL);
       fd.append("emotion", currentEmotion);
+      fd.append("canTweetPhoto", $("#mode-toggle").get(0).checked);
       $("#placeholderImage").show();
-      // video.style.visibility = 'hidden';
       $output = $("#output");
       $("#spinner").addClass("loader");
-      // document.querySelector('#play').href = dataURL;
       video.style.display = 'none';
       console.log('submitting');
 
@@ -665,6 +673,9 @@
         img.classList.add("scoredImage");
         updateLeaderboard(data.facesWithScores);
         $output.prepend(img);
+        if ($("#tweet-mode").text() === "your IP address") {
+          $("#tweet-mode").text(data.addr);
+        }
         $("#photoCountdown").hide();
         $("#play").show();
         isCaptureInProgress = false;
@@ -732,6 +743,17 @@
 
       // Inactive
       window.addEventListener('blur', pauseCamera);
+
+      $('#mode-toggle').change(
+          function(){
+              if (this.checked) {
+                  $("#tweet-mode").text("your face");
+                  privacyWarning();
+              } else {
+                $("#tweet-mode").text("your IP address");
+              }
+      });
+
     };
 
     $(document).ready(function() {

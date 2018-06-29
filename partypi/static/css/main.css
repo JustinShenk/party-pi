@@ -165,7 +165,7 @@
 }
 
 #prompt {
-  top: 80%;
+  top: 74%;
   left: 30%;
   position: absolute;
   margin: 0px 0 20px 0;
@@ -195,14 +195,13 @@
 }
 
 #output {
-  max-width: 640px !important;
-  max-height: 480px !important;
   position: relative;
 }
 
 #output img {
   width: 640px;
   height: 480px;
+  padding: inherit;
 }
 
 .img-overlay {
@@ -221,9 +220,10 @@ text-align: center;
   height: 50%;
 }
 
-*, ::before, ::after {
+/* *, ::before, ::after {
   box-sizing: inherit;
-}
+} */
+
 #gallery div {
   /* margin: 20px;
   padding-left: 30px; */
@@ -265,16 +265,18 @@ text-align: center;
 }
 
 .leaderCol {
-  float: left; width: 100px;
-  text
+  float: left;
+  width: 30%;
 }
 
 .leaderboardCard {
   max-width: 100% !important;
+  padding-left: 5px;
+  padding-right: 5px;
 }
 
 .leaderboardCard .card-img-top {
-  height: 120px;
+  /* height: 120px; */
 }
 
 .top-section {
@@ -343,3 +345,61 @@ text-align: center;
 #jumbo {
   padding-top: 50px;
 }
+
+/* The switch - the box around the slider */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input {
+  position: absolute;
+  opacity: 0;
+}
+
+/**
+ * 1. Adjust this to size
+ */
+
+.switch {
+  display: inline-block;
+  font-size: 20px; /* 1 */
+  height: 1em;
+  width: 2em;
+  background: #BDB9A6;
+  border-radius: 1em;
+}
+
+.switch div {
+  height: 1em;
+  width: 1em;
+  border-radius: 1em;
+  background: #FFF;
+  box-shadow: 0 0.1em 0.3em rgba(0,0,0,0.3);
+  -webkit-transition: all 300ms;
+     -moz-transition: all 300ms;
+          transition: all 300ms;
+}
+
+.switch input:checked + div {
+  -webkit-transform: translate3d(100%, 0, 0);
+     -moz-transform: translate3d(100%, 0, 0);
+          transform: translate3d(100%, 0, 0);
+}
+
+.btn-default:hover, .btn-default:focus, .btn-default:active, .btn-default.active, .open>.dropdown-toggle.btn-default {
+    color: #333;
+    background-color: #e6e6e6;
+    border-color: #adadad;
+  }
+
+.btn-default {
+    color: #333;
+    background-color: #fff;
+    border-color: #ccc;
+}
+
+.toggle.ios, .toggle-on.ios, .toggle-off.ios { border-radius: 20px; }
+.toggle.ios .toggle-handle { border-radius: 20px; }
