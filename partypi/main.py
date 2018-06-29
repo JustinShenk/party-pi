@@ -309,7 +309,10 @@ def image():
                 if form.get('canTweetPhoto') == 'true':
                     tweet_image(photo_path, message)
                 else:
-                    tweet_message("Somebody is {} at {}".format(emotion, addr))
+                    showing = False
+                    if emotion in ['fear', 'surprise']:
+                        showing = True
+                    tweet_message("Someone is {}{} at {}".format("showing " if showing else "", emotion, addr))
             except Exception as e:
                 print(e)
             response = jsonify(success=True, photoPath=photo_path, emotion=emotion, facesWithScores=faces_with_scores, addr=addr)
