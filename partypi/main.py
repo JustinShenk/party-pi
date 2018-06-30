@@ -332,7 +332,7 @@ def index():
     try:
         debug_js = 'true' if debug else 'false'
         print("Page accessed from {}".format(request.environ.get('HTTP_X_REAL_IP', request.remote_addr)))
-        return render_template('index.html', debug=debug_js)
+        return render_template('index2.html')
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]

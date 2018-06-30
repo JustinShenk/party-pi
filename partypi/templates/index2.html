@@ -11,17 +11,17 @@
   <script type="text/javascript" src="{{ url_for('static',filename='js/fontawesome-all.js') }}"></script>
   <!-- Latest compiled and minified CSS -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous" />
-  <link rel="stylesheet" href="{{ url_for('static',filename='css/main.css') }}" />
+  <!-- <link rel="stylesheet" href="{{ url_for('static',filename='css/main.css') }}" /> -->
   <!-- jQuery library -->
   <script type="text/javascript" src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.3.1.min.js"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}"></script>
   <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='js/adapter-latest.js') }}"></script>
-  <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap-filestyle.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='js/exif.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='js/main.js') }}"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
   <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/style4.css') }}" rel="stylesheet">
 <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
   <script src="{{ url_for('static', filename='js/holder.min.js') }}"></script>
   <script id="mcjs">
@@ -49,245 +49,53 @@
 </head>
 
 <body>
-  <header>
-    <div class="collapse bg-dark" id="navbarHeader">
-      <div class="container">
-        <div class="row">
-          <div class="col-sm-8 col-md-7 py-4">
-            <h4 class="text-white">About</h4>
-            <p class="text-muted">Computer vision game build with OpenCV and TensorFlow.</p>
-          </div>
-          <div class="col-sm-4 offset-md-1 py-4">
-            <h4 class="text-white">Contact</h4>
-            <ul class="list-unstyled">
-              <li><a href="https://github.com/justinshenk/party-pi" class="text-white">Get the code</a></li>
-              <li><a href="https://linkedin.com/in/justinshenk" class="text-white">Connect on LinkedIn</a></li>
-              <li><a href="mailto:shenk.justin@gmail.com?subject=Party-Pi" class="text-white">Email me</a></li>
+  <div class="wrapper">
+
+      <!-- Page Content  -->
+      <div id="content" style="padding:0;">
+          <video autoplay loop width=100% height=auto src="{{ url_for('static', filename='images/rain.mp4') }} ">
+      </div>
+      <!-- Sidebar  -->
+      <nav id="sidebar">
+
+          <i class="fa fa-trophy fa-5x" style="color:#f7b35b; margin-left:30%; margin-top:30%; margin-bottom:10%"></i>
+
+          <ul class="list-unstyled components">
+              <li class="active">
+                <div class="wideCircle" id="firstPlace">
+                <div class="leaderboardPosition">
+                  Name Namesson
+                </div>
+                <span class="positionNumber">1</span>
+                <div class="leaderboardPortrait">
+                  <img src="{{ url_for('static',filename='justin.png') }}">
+                </div>
+              </div>
+              </li>
+              <li>
+                <div class="wideCircle">
+                <div class="leaderboardPosition">
+                </div>
+                <span class="positionNumber">2</span>
+                <div class="leaderboardPortrait">
+                  <img src="{{ url_for('static',filename='justin.png') }}">
+                </div>
+              </div>
+              </li>
+              <li>
+                <div class="wideCircle" id='activePlace'>
+                <div class="leaderboardPosition">
+                </div>
+                <span class="positionNumber">3</span>
+                <div class="leaderboardPortrait">
+                  <img src="{{ url_for('static',filename='justin.png') }}">
+                </div>
+              </div>
+              </li>
             </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="navbar navbar-dark bg-dark box-shadow">
-      <div class="container d-flex">
-        <a href="#" class="navbar-brand d-flex align-items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-          <strong>Party Pi</strong>
-        </a>
-        <label id='tweet-warning' class='checkbox-inline text-muted'>
-          <input id="mode-toggle" type="checkbox" data-toggle="toggle" data-on="<i class='fab fa-twitter'></i>" data-off="IP" data-onstyle="warning" data-style="ios">
-            Tweeting <span id="tweet-mode">your IP address</span> to #PlayPartyPi
-        </label>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarHeader" aria-controls="navbarHeader" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <main role="main">
-    <div class='top-section row'>
-      <!-- begin left column -->
-      <div class="col-sm-8">
-        <!-- Modal -->
-        <div id="gameInfoModal" class="modal fade" role="dialog">
-          <div class="modal-dialog">
-
-            <!-- Modal content-->
-            <div class="modal-content">
-              <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">About Party Pi</h4>
-              </div>
-              <div class="modal-body">
-                <p>Emotion classification is performed with a neural network trained with Keras on the FER2013 dataset. The website runs with Flask on Heroku. Party Pi was developed by <a href="https://linkedin.com/in/justinshenk"><img alt="Justin Shenk" src="{{ url_for('static',filename='justin.png') }}" width=42 /></a>.</p>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="alert alert-warning browser-warning">
-          <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-          <strong>Warning</strong> Browser not supported. Use Safari for iOS or desktop Chrome for best results.
-        </div>
-        <div class="alert alert-danger privacy-warning">
-          <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-          <strong>Warning</strong> Your photos will be instantly shared via <a href="https://twitter.com/playpartypi">Twitter</a>.
-        </div>
-        <section id="jumbo" class="jumbotron text-center">
-
-          <!-- <img src="{{ url_for('static', filename='images/PartyPi.jpg') }}" width=100/> -->
-
-          <p class='lead text-muted'> Let's play Party Pi, a computer vision emotion detection <a href="#gameInfoModal" data-toggle="modal" data-target="#gameInfoModal">game.</a></br>
-            <div id="inputFile" class="row justify-content-md-center" style="display: none;">
-              <div class="col col-lg-2">
-              </div>
-              <div class="col-md-auto">
-                <span>
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-          <circle cx="12" cy="12" r="3.2"/>
-          <path d="M9 2l-1.83 2h-3.17c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2v-12c0-1.1-.9-2-2-2h-3.17l-1.83-2h-6zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
-          <path d="M0 0h24v24h-24z" fill="none"/>
-        </svg>
-      </span>
-                <input name="Select File" type="file" accept="image/*" capture="user" />
-              </div>
-              <div class="col col-lg-2">
-              </div>
-            </div>
-            <div id='output' class='container'>
-              <div class='img-overlay'>
-                <div class='row justify-content-center'>
-                  <p id="prompt">Show happiness_</p>
-                  <button id="play">Play</button>
-                </div>
-              </div>
-              <!-- <input id='imageInput' type="file" accept="image/*;" capture="camera" style="display: none"> -->
-              <!-- <div id='output' class='container'> -->
-              <div id='spinner'>
-              </div>
-              <video width='640' height='480' playsinline muted autoplay id="videoElement">Your browser does not support HTML5 video.</video>
-              <image id='placeholderImage' width='640' height='480' style='display: none; background-color: gray;'></image>
-              <div class='' id="photoCountdown" style='::after'>
-                <div id="countdownBar">
-                </div>
-              </div>
-              <img id="myImg" class="img-responsive" crossorigin="anonymous" src="" style="display:none;" />
-              <canvas id="myCanvas" hidden='true'></canvas>
-
-              <!-- <image id='placeholder' src="{{ url_for('static', filename='loading.jpg')}}" height="480px" width="640px"></image> -->
-              <div id='mobilePrompt' class='row justify-content-center lead'>
-              </div>
-            </div>
-        </section>
-
-        <div id='gallery' class="album py-5 bg-light" style="display: none;">
-          <div class="container">
-            <h1>Gallery</h1>
-            <br>
-            <div class='row' id='galleryImages'>
-              <canvas id="c" style="display:none" />
-              <!-- <p id='purchaseNote'></p>
-        <div id='secretImages'></div> -->
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- end left column -->
-      <div class="col-sm-3" id="leaderboard" style="background-color:#aaa;">
-        <h2>Leaderboard</h2>
-        <div id="leaderboardContent">
-          <div id='leaderboardHappy' style="display:none">
-            <h3>Happy</h3>
-            <div class="row">
-              <div id="happyPlace1" class="leaderCol">
-                <div class="overlay">
-                  <a href="#" class="icon" title="User Profile">
-                    <i class="fa fa-trophy"></i>
-                  </a>
-                </div>
-              </div>
-              <div id="happyPlace2" class="leaderCol"></div>
-              <div id="happyPlace3" class="leaderCol"></div>
-            </div>
-          </div>
-          <div id='leaderboardSurprise' style="display:none">
-            <h3>Surprise</h3>
-            <div class="row">
-              <div id="surprisePlace1" class="leaderCol">
-                <div class="overlay">
-                  <a href="#" class="icon" title="User Profile">
-                    <i class="fa fa-trophy"></i>
-                  </a>
-                </div>
-              </div>
-              <div id="surprisePlace2" class="leaderCol">
-              </div>
-              <div id="surprisePlace3" class="leaderCol"></div>
-            </div>
-          </div>
-          <div id='leaderboardAngry' style="display:none">
-            <h3>Angry</h3>
-            <div class="row">
-              <div id="angryPlace1" class="leaderCol">
-                <div class="overlay">
-                  <a href="#" class="icon" title="User Profile">
-                    <i class="fa fa-trophy"></i>
-                  </a>
-                </div>
-              </div>
-              <div id="angryPlace2" class="leaderCol"></div>
-              <div id="angryPlace3" class="leaderCol"></div>
-            </div>
-          </div>
-          <div id='leaderboardSad' style="display:none">
-            <h3>Sad</h3>
-            <div class="row">
-              <div id="sadPlace1" class="leaderCol">
-                <div class="overlay">
-                  <a href="#" class="icon" title="User Profile">
-                    <i class="fa fa-trophy"></i>
-                  </a>
-                </div>
-              </div>
-              <div id="sadPlace2" class="leaderCol"></div>
-              <div id="sadPlace3" class="leaderCol"></div>
-            </div>
-          </div>
-          <div id='leaderboardNeutral' style="display:none">
-            <h3>Neutral</h3>
-            <div class="row">
-              <div id="neutralPlace1" class="leaderCol">
-                <div class="overlay">
-                  <a href="#" class="icon" title="User Profile">
-                    <i class="fa fa-trophy"></i>
-                  </a>
-                </div></div>
-              <div id="neutralPlace2" class="leaderCol"></div>
-              <div id="neutralPlace3" class="leaderCol"></div>
-            </div>
-          </div>
-          <div id='leaderboardFear' style="display:none">
-            <h3>Fear</h3>
-            <div class="row">
-              <div id="fearPlace1" class="leaderCol">
-                <div class="overlay">
-                  <a href="#" class="icon" title="User Profile">
-                    <i class="fa fa-trophy"></i>
-                  </a>
-                </div>
-              </div>
-              <div id="fearPlace2" class="leaderCol"></div>
-              <div id="fearPlace3" class="leaderCol"></div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-      <!-- <script type="text/javascript" src="//downloads.mailchimp.com/js/signup-forms/popup/embed.js" data-dojo-config="usePlainJson: true, isDebug: false"></script>
-      <script type="text/javascript">
-        require(["mojo/signup-forms/Loader"], function(L) {
-          L.start({
-            "baseUrl": "mc.us12.list-manage.com",
-            "uuid": "37227b4f5e1bbd80f404cfef6",
-            "lid": "0229295406"
-          })
-        })
-      </script> -->
-    </div>
-  </main>
-
-  <footer class="text-muted">
-    <div class="container">
-      <p class="float-right">
-        <a href="#">Back to top</a>
-      </p>
-      <p>Party Pi is &copy; 2018 Justin Shenk</p>
-      <p>Want the code? <a href="https://github.com/justinshenk/partypi">Visit the GitHub repo</a>.</p>
-    </div>
-  </footer>
+          <a href="#"><i class="fab fa-twitter"> </i> Click here to share your score on Twitter.</a>
+      </nav>
+  </div>
 
   <script type="text/javascript">
   // TODO: Scope variables properly
@@ -743,31 +551,31 @@
       var iOSNotSafari = iOS && webkit && ua.match(/CriOS/i);
       if (iOSNotSafari) browserWarning();
 
-      // Active
-      window.addEventListener('focus', startCamera);
-
-      // Inactive
-      window.addEventListener('blur', pauseCamera);
-
-      $('#mode-toggle').change(
-          function(){
-              if (this.checked) {
-                  $("#tweet-mode").text("your face");
-                  privacyWarning();
-              } else {
-                $("#tweet-mode").text("your IP address");
-                $(".privacy-warning").hide();
-              }
-      });
-    };
-
+    //   // Active
+    //   window.addEventListener('focus', startCamera);
+    //
+    //   // Inactive
+    //   window.addEventListener('blur', pauseCamera);
+    //
+    //   $('#mode-toggle').change(
+    //       function(){
+    //           if (this.checked) {
+    //               $("#tweet-mode").text("your face");
+    //               privacyWarning();
+    //           } else {
+    //             $("#tweet-mode").text("your IP address");
+    //             $(".privacy-warning").hide();
+    //           }
+    //   });
+    // };
+  }
     $(document).ready(function() {
       "use strict";
       initialize();
     });
   </script>
-  <script type="text/javascript" src="{{ url_for('static', filename='js/shuffler.js') }}"></script>
-  <script type="text/javascript" src="{{ url_for('static', filename='js/video.js') }}"></script>
+  <!-- <script type="text/javascript" src="{{ url_for('static', filename='js/shuffler.js') }}"></script> -->
+  <!-- <script type="text/javascript" src="{{ url_for('static', filename='js/video.js') }}"></script> -->
 </body>
 
 </html>
