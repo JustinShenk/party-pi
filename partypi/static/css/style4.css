@@ -2,7 +2,7 @@
     DEMO STYLE
 */
 
-@import "https://fonts.googleapis.com/css?family=Karlas:300,400,500,600,700";
+@import "https://fonts.googleapis.com/css?family=Karla:300,400,500,600,700";
 body {
     font-family: 'Karla', sans-serif;
     background: #fafafa;
@@ -25,7 +25,7 @@ a:focus {
 }
 
 .navbar {
-    padding: 15px 10px;
+    padding: 0;
     background: #fff;
     border: none;
     border-radius: 0;
@@ -58,6 +58,8 @@ span {
 .wrapper {
     display: flex;
     align-items: stretch;
+    background-color: #343a41;
+    min-height: 100vh;
 }
 
 #sidebar {
@@ -197,12 +199,20 @@ a.article:hover {
 
 #content {
     width: 100%;
-    padding: 20px;
-    min-height: 100vh;
+    height: 100%;
     transition: all 0.3s;
-    background-color: #343a41;
+    text-align: center;
+    padding: 0;
+    position: relative;
+    height: 100%;
 }
 
+#content #logo {
+  position: absolute;
+  left: 10px;
+  z-index: 100;
+  bottom: 10px;
+}
 /* ---------------------------------------------------
     MEDIAQUERIES
 ----------------------------------------------------- */
@@ -256,6 +266,20 @@ a.article:hover {
     }
 }
 
+#sidebarCollapse {
+  z-index: 10;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+
+#sidebarTrophy {
+  color:#f7b35b;
+  margin-top:30%;
+  margin-bottom:10%;
+  min-width: inherit;
+}
+
 .leaderboardPortrait {
   position: relative;
   width: 74px;
@@ -293,7 +317,8 @@ div.wideCircle {
   border-radius: 60px/60px;
   border: #fff solid 5px;
   height: 73px;
-  margin-top: 10px;
+  margin-top: 20px;
+  margin-right: 15px;
 }
 
 div.wideCircle:after{
@@ -303,62 +328,172 @@ div.wideCircle:after{
   -webkit-border-radius: 0.8em;
   display: inline-block;
   font-weight: bold;
-  margin-right: 5px;
+  margin-right: 20px;
   text-align: center;
   width: 1.6em;
   right: 0;
   position: absolute;
-  content: 'X';
+  content: attr(data-rank);
   font-size: 42.2px;
   margin-top: -73.4px;
 }
 
-#firstPlace {
-  background-color: #fcd473;
-  border: #ffe094 solid 5px;
-}
-
-#firstPlace:after {
-  background: #fcd473;
-  border: #ffe094 solid 5px;
-  content: '1';
-}
-
-#firstPlace .positionNumber {
-  background: #fcd473;
-  border: #ffe094 solid 2px;
-}
-
-#firstPlace .leaderboardPortrait {
-  border: #ffe094 solid 5px;
-}
-
-#activePlace {
+.activePlace {
   color: white;
   background-color: #343a41;
   border: #5c5f62 solid 5px;
 }
 
-#activePlace:after {
+.activePlace:after {
   background: #343a41;
   border: #5c5f62 solid 5px;
   content: 'A';
 }
 
-#activePlace .positionNumber {
+.activePlace .positionNumber {
   color: white;
   background: #343a41;
   border: #5c5f62 solid 2px;
 }
 
-#activePlace .leaderboardPortrait {
+.activePlace .leaderboardPortrait {
   border: #5c5f62 solid 5px;
+}
+
+#place1 {
+  background-color: #fcd473;
+  border: #ffe094 solid 5px;
+}
+
+#place1:after {
+  background: #fcd473;
+  border: #ffe094 solid 5px;
+  content: '1';
+}
+
+#place1 .positionNumber {
+  background: #fcd473;
+  border: #ffe094 solid 2px;
+}
+
+#place1 .leaderboardPortrait {
+  border: #ffe094 solid 5px;
 }
 
 .leaderboardPosition {
   position: absolute;
+  margin-top: 5px;
   margin-left: 80px;
+  width: 200px;
+  line-height: 1.2em;
+}
+.leaderboardPosition .name {
   font-weight: bold;
   word-wrap: break-word;
-  width: 200px;
+  display: block;
+  word-spacing: 100vw;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.leaderboardPosition .score:before {
+  content
+}
+.leaderboardPosition .score {
+}
+
+video {
+  -moz-transform: scale(-1, 1);
+  -webkit-transform: scale(-1, 1);
+  -o-transform: scale(-1, 1);
+  transform: scale(-1, 1);
+  filter: FlipH;
+}
+
+span#prompt {
+  font-size: 24px;
+  color: white;
+  border: solid white 2px;
+  padding: 10px 40px;
+  background:rgba(0,0,0,0.5);
+}
+
+.overlay {
+  z-index: 1;
+  position: absolute;
+  margin-top: 55%;
+  width: inherit;
+  bottom: 10%;
+}
+
+/** GaugeMeter Style **/
+
+.GaugeMeter{
+    Position:        Relative;
+    Text-Align:      Center;
+    Overflow:        Hidden;
+    Cursor:          Default;
+  }
+
+  .GaugeMeter SPAN,
+  .GaugeMeter B{
+    Margin:          -5% 30%;
+    /* Width:           5%; */
+    Position:        Absolute;
+    Text-align:      Center;
+    Display:         Inline-Block;
+    Color:           RGBa(0,0,0,.8);
+    Font-Weight:     100;
+    Font-Family:     "Open Sans", Arial;
+    Overflow:        Hidden;
+    White-Space:     NoWrap;
+    Text-Overflow:   Ellipsis;
+  }
+  .GaugeMeter[data-style="Semi"] B{
+    Margin:          0 10%;
+    Width:           80%;
+  }
+
+  .GaugeMeter S,
+  .GaugeMeter U{
+    Text-Decoration: None;
+    Font-Size:       .5em;
+    Opacity:         .5;
+  }
+
+  .GaugeMeter B{
+    Color:           Black;
+    Font-Weight:     300;
+    Font-Size:       .5em;
+    Opacity:         .8;
+  }
+
+.gaugeMeter {
+  left: 50%;
+  background-color: rgba(0,0,0,0.5);
+  border-radius: 50%;
+  margin-left: -175px;
+  bottom: 20px;
+
+}
+
+.gaugeMeter B{
+  font-size: 1.5em;
+}
+
+p#shareLinks {
+  color: #fff;
+}
+
+.overlayTrophy {
+  position:absolute;
+  color:#f7b35b;
+  margin-left: -0.55em;
+  margin-top: -1.8em;
+}
+
+#content .container-fluid {
+  padding: 0px; /* HACK */
 }

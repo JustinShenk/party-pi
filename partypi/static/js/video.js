@@ -18,10 +18,10 @@ var constraints = {
   audio: false,
   video: {
     width: {
-      exact: 640
+      // exact: 640
     },
     height: {
-      exact: 480
+      // exact: 480
     },
     facingMode: "user"
   }

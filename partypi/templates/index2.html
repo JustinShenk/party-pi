@@ -22,6 +22,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
   <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
   <link href="{{ url_for('static', filename='css/style4.css') }}" rel="stylesheet">
+  <script src="{{ url_for('static', filename='js/GaugeMeter.js') }}"></script>
 <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
   <script src="{{ url_for('static', filename='js/holder.min.js') }}"></script>
   <script id="mcjs">
@@ -52,46 +53,68 @@
   <div class="wrapper">
 
       <!-- Page Content  -->
-      <div id="content" style="padding:0;">
-          <video autoplay loop width=100% height=auto src="{{ url_for('static', filename='images/rain.mp4') }} ">
+      <div id="content">
+        <nav class="">
+            <div class="container-fluid">
+                <button type="button" id="sidebarCollapse" class="btn btn-info">
+                  <i class="fas fa-align-left"></i>
+                  <span>Toggle Sidebar</span>
+                </button>
+
+          <img id="logo" src="{{ url_for('static',filename='images/Peltarion_logotype.png') }}"></img>
+          <video playsinline muted autoplay loop id="videoElement" width=100% height=auto></video>
+          <image id='placeholderImage' width='640' height='480' style='display: none; background-color: gray;'></image>
+          <div class="overlay">
+            <div class="GaugeMeter" id="GaugeMeter_1"
+              data-percent="10"
+              data-append="%"
+              data-size="350"
+              data-color="#f7b35b"
+              data-style="Arch"
+              data-back="RGBa(255,255,255,1)"
+              data-width="50"
+              data-animate_text_colors="true"
+              data-label="surprised"
+              data-label_color="#FFF">
+            </div>
+            <i class="overlayTrophy fa fa-trophy fa-3x"></i>
+            <p id="shareLinks">
+            <a href="#"><i class="fab fa-twitter"> </i> Click here to share your score on Twitter.</a>
+              <br/>
+            <a href="#"><i class="fa fa-envelope"> </i> Get an email with your score.</a>
+            </p>
+            <span id="prompt">Show surprise</span>
+          </div>
+          <div class='' id="photoCountdown" style='::after'>
+            <div id="countdownBar">
+            </div>
+          </div>
+          <img id="myImg" class="img-responsive" crossorigin="anonymous" src="" style="display:none;" />
+          <canvas id="myCanvas" hidden='true'></canvas>
       </div>
+    </nav>
+  </div>
+
       <!-- Sidebar  -->
       <nav id="sidebar">
 
-          <i class="fa fa-trophy fa-5x" style="color:#f7b35b; margin-left:30%; margin-top:30%; margin-bottom:10%"></i>
+          <i id="sidebarTrophy" class="fa fa-trophy fa-5x"></i>
 
           <ul class="list-unstyled components">
-              <li class="active">
-                <div class="wideCircle" id="firstPlace">
-                <div class="leaderboardPosition">
-                  Name Namesson
-                </div>
-                <span class="positionNumber">1</span>
-                <div class="leaderboardPortrait">
-                  <img src="{{ url_for('static',filename='justin.png') }}">
-                </div>
+            {% for n in range(1,6) %}
+            <li>
+              <div class="wideCircle" id="place{{n}}" data-rank={{n}}>
+              <div class="leaderboardPosition">
+                <span class="name">Name Namesson</span>
+                <span class="score">67p</span>
               </div>
-              </li>
-              <li>
-                <div class="wideCircle">
-                <div class="leaderboardPosition">
-                </div>
-                <span class="positionNumber">2</span>
-                <div class="leaderboardPortrait">
-                  <img src="{{ url_for('static',filename='justin.png') }}">
-                </div>
+              <span class="positionNumber">{{n}}</span>
+              <div class="leaderboardPortrait">
+                <img src="{{ url_for('static',filename='justin.png') }}">
               </div>
-              </li>
-              <li>
-                <div class="wideCircle" id='activePlace'>
-                <div class="leaderboardPosition">
-                </div>
-                <span class="positionNumber">3</span>
-                <div class="leaderboardPortrait">
-                  <img src="{{ url_for('static',filename='justin.png') }}">
-                </div>
-              </div>
-              </li>
+            </div>
+          </li>
+            {% endfor %}
             </ul>
           <a href="#"><i class="fab fa-twitter"> </i> Click here to share your score on Twitter.</a>
       </nav>
@@ -512,12 +535,12 @@
     }
 
     function startCamera() {
-      $("#videoElement").get(0).srcObject.getVideoTracks().forEach(track => track.enabled = true);
         if ($("#videoElement").css('display') === 'block') { // camera visible
           try {
             // start camera again
-            // navigator.mediaDevices.getUserMedia(constraints).
-            //     then(handleSuccess).catch(handleError);
+            $("#videoElement").get(0).srcObject.getVideoTracks().forEach(track => track.enabled = true);
+            navigator.mediaDevices.getUserMedia(constraints).
+                then(handleSuccess).catch(handleError);
             clearTimeout(captureImageTimerID);
             clearTimeout(countdownTimerID);
             $("#photoCountdown").hide();
@@ -550,6 +573,11 @@
       var webkit = !!ua.match(/WebKit/i);
       var iOSNotSafari = iOS && webkit && ua.match(/CriOS/i);
       if (iOSNotSafari) browserWarning();
+      startCamera();
+      $(".GaugeMeter").gaugeMeter();
+      $('#sidebarCollapse').on('click', function() {
+        $('#sidebar').toggleClass('active');
+      })
 
     //   // Active
     //   window.addEventListener('focus', startCamera);
@@ -575,7 +603,7 @@
     });
   </script>
   <!-- <script type="text/javascript" src="{{ url_for('static', filename='js/shuffler.js') }}"></script> -->
-  <!-- <script type="text/javascript" src="{{ url_for('static', filename='js/video.js') }}"></script> -->
+  <script type="text/javascript" src="{{ url_for('static', filename='js/video.js') }}"></script>
 </body>
 
 </html>
