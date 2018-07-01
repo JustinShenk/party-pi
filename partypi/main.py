@@ -305,16 +305,16 @@ def image():
             print("Saved image to {}".format(photo_path))
             addr = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
             message = "Look who's {} at ICML".format(emotion)
-            try:
-                if form.get('canTweetPhoto') == 'true':
-                    tweet_image(photo_path, message)
-                else:
-                    showing = False
-                    if emotion in ['fear', 'surprise']:
-                        showing = True
-                    tweet_message("Someone is {}{} at {}".format("showing " if showing else "", emotion, addr))
-            except Exception as e:
-                print(e)
+            # try:
+            #     if form.get('canTweetPhoto') == 'true':
+            #         tweet_image(photo_path, message)
+            #     else:
+            #         showing = False
+            #         if emotion in ['fear', 'surprise']:
+            #             showing = True
+            #         tweet_message("Someone is {}{} at {}".format("showing " if showing else "", emotion, addr))
+            # except Exception as e:
+            #     print(e)
             response = jsonify(success=True, photoPath=photo_path, emotion=emotion, facesWithScores=faces_with_scores, addr=addr)
             status_code = 200
         except Exception as e:

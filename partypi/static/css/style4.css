@@ -73,6 +73,7 @@ span {
     position: absolute;
     right: 0;
     height: 100vh;
+    z-index: 3;
 }
 
 #sidebar.active {
@@ -229,7 +230,7 @@ a.article:hover {
     text-align: center;
     padding: 0;
     position: relative;
-    height: 100%;
+    height: 100vh;
 }
 
 #content #logo {
@@ -478,27 +479,44 @@ div.wideCircle:after{
   -webkit-box-orient: vertical;
 }
 
-.leaderboardPosition .score:before {
-  content
-}
 .leaderboardPosition .score {
+  display: none;
 }
 
 video {
+  filter: FlipH;
+  max-height: 100vh;
+  width: 100%;
+  height: auto;
+  visibility: hidden;
+}
+
+.flipH {
   -moz-transform: scale(-1, 1);
   -webkit-transform: scale(-1, 1);
   -o-transform: scale(-1, 1);
   transform: scale(-1, 1);
   filter: FlipH;
-  max-height: 100vh;
 }
 
-span#prompt {
+.blur {
+  -webkit-filter: blur(10px);
+  -moz-filter: blur(10px);
+  -o-filter: blur(10px);
+  -ms-filter: blur(10px);
+  filter: blur(10px);
+}
+
+.main-btn {
   font-size: 24px;
   color: white;
   border: solid white 2px;
   padding: 10px 40px;
   background:rgba(0,0,0,0.5);
+  display: none;
+  position: absolute;
+  margin-left: -10%;
+  margin-top: 45%;
 }
 
 .overlay {
@@ -506,6 +524,12 @@ span#prompt {
   position: absolute;
   top: 20%;
   width: inherit;
+}
+
+.overlay .score {
+  display: none;
+  margin-left: 36%;
+  position: absolute;
 }
 
 /** GaugeMeter Style **/
@@ -530,7 +554,7 @@ span#prompt {
     Text-align:      Center;
     Display:         Inline-Block;
     Color:           RGBa(0,0,0,.8);
-    Font-Weight:     100;
+    Font-Weight:     900;
     Overflow:        Hidden;
     White-Space:     NoWrap;
     Text-Overflow:   Ellipsis;
@@ -575,4 +599,168 @@ span#prompt {
 
 p#shareLinks {
   color: #fff;
+}
+
+#startScreen {
+  margin-top: 15%;
+  display: block;
+}
+
+#startScreenLogo {
+  height: 400px;
+  width: 400px;
+  background-image: url(/static/images/PartyPi.jpg);
+  background-repeat: no-repeat;
+  background-color: white;
+  display: block;
+  border-radius: 50%;
+  background-position: center;
+  border: #95989c solid 20px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#gameInfo {
+  display: block;
+  margin-top: 5%;
+}
+
+#gameInfo span{
+  color: white;
+  font-size: 20px;
+}
+
+#letsPlay {
+  display: inline-block;
+  margin-top: 5%;
+}
+
+#letsPlay button{
+  font-size: 24px;
+  padding: 10px 40px;
+  background: white;
+  color: #343a41;
+}
+
+/** Spinner **/
+
+/* :not(:required) hides these rules from IE9 and below */
+/* .loading:not(:required) {
+  /* hide "loading..." text */
+  font: 0/0 a;
+  color: transparent;
+  text-shadow: none;
+  background-color: transparent;
+  border: 0;
+} */
+
+.loading:not(:required):after {
+  content: '';
+  display: block;
+  font-size: 10px;
+  width: 1em;
+  height: 1em;
+  margin-top: -0.5em;
+  -webkit-animation: spinner 1500ms infinite linear;
+  -moz-animation: spinner 1500ms infinite linear;
+  -ms-animation: spinner 1500ms infinite linear;
+  -o-animation: spinner 1500ms infinite linear;
+  animation: spinner 1500ms infinite linear;
+  border-radius: 0.5em;
+  -webkit-box-shadow: rgba(0, 0, 0, 0.75) 1.5em 0 0 0, rgba(0, 0, 0, 0.75) 1.1em 1.1em 0 0, rgba(0, 0, 0, 0.75) 0 1.5em 0 0, rgba(0, 0, 0, 0.75) -1.1em 1.1em 0 0, rgba(0, 0, 0, 0.5) -1.5em 0 0 0, rgba(0, 0, 0, 0.5) -1.1em -1.1em 0 0, rgba(0, 0, 0, 0.75) 0 -1.5em 0 0, rgba(0, 0, 0, 0.75) 1.1em -1.1em 0 0;
+  box-shadow: rgba(0, 0, 0, 0.75) 1.5em 0 0 0, rgba(0, 0, 0, 0.75) 1.1em 1.1em 0 0, rgba(0, 0, 0, 0.75) 0 1.5em 0 0, rgba(0, 0, 0, 0.75) -1.1em 1.1em 0 0, rgba(0, 0, 0, 0.75) -1.5em 0 0 0, rgba(0, 0, 0, 0.75) -1.1em -1.1em 0 0, rgba(0, 0, 0, 0.75) 0 -1.5em 0 0, rgba(0, 0, 0, 0.75) 1.1em -1.1em 0 0;
+}
+
+/* Animation */
+
+@-webkit-keyframes spinner {
+  0% {
+    -webkit-transform: rotate(0deg);
+    -moz-transform: rotate(0deg);
+    -ms-transform: rotate(0deg);
+    -o-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+    -moz-transform: rotate(360deg);
+    -ms-transform: rotate(360deg);
+    -o-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+@-moz-keyframes spinner {
+  0% {
+    -webkit-transform: rotate(0deg);
+    -moz-transform: rotate(0deg);
+    -ms-transform: rotate(0deg);
+    -o-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+    -moz-transform: rotate(360deg);
+    -ms-transform: rotate(360deg);
+    -o-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+@-o-keyframes spinner {
+  0% {
+    -webkit-transform: rotate(0deg);
+    -moz-transform: rotate(0deg);
+    -ms-transform: rotate(0deg);
+    -o-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+    -moz-transform: rotate(360deg);
+    -ms-transform: rotate(360deg);
+    -o-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+@keyframes spinner {
+  0% {
+    -webkit-transform: rotate(0deg);
+    -moz-transform: rotate(0deg);
+    -ms-transform: rotate(0deg);
+    -o-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+    -moz-transform: rotate(360deg);
+    -ms-transform: rotate(360deg);
+    -o-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+.loader {
+  position: absolute;
+  height: 60px;
+  width: 60px;
+  left: 50%;
+  top: 50%;
+  margin-top: -50px;
+  margin-left: -40px;
+  border: 16px solid #f3f3f3; /* Light grey */
+  border-top: 16px solid #3498db; /* Blue */
+  border-radius: 50%;
+  /* width: 60px;
+  height: 60px; */
+  animation: spin 2s linear infinite;
+  z-index: 1000;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";       /* IE 8 */
+  filter: alpha(opacity=50);  /* IE 5-7 */
+  -moz-opacity: 0.5;          /* Netscape */
+  -khtml-opacity: 0.5;        /* Safari 1.x */
+  opacity: 0.5;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }

@@ -54,42 +54,50 @@
 
       <!-- Page Content  -->
       <div id="content">
-            <div class="container-fluid">
-                <button type="button" id="sidebarCollapse" class="navbar-btn">
-                  <!-- <i class="fas fa-align-left"></i> -->
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                </button>
+        <div class="container-fluid">
+          <div id="spinner"></div>
+          <button type="button" id="sidebarCollapse" class="navbar-btn">
+            <!-- <i class="fas fa-align-left"></i> -->
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
 
-          <img id="logo" src="{{ url_for('static',filename='images/Peltarion_logotype.png') }}"></img>
-          <video playsinline muted autoplay loop id="videoElement" width=100% height=auto></video>
-          <image id='placeholderImage' width='640' height='480' style='display: none; background-color: gray;'></image>
-          <div class="overlay">
-            <div class="GaugeMeter" id="GaugeMeter_1"
-              data-percent="10"
-              data-append="%"
-              data-size="350"
-              data-color="#f7b35b"
-              data-style="Arch"
-              data-back="RGBa(255,255,255,1)"
-              data-width="40"
-              data-animate_text_colors="true"
-              data-label="surprised"
-              data-label_color="#FFF">
+          <div id="startScreen">
+            <div id="startScreenLogo">
             </div>
-            <span class="overlayTrophy fa-layers fa-fw">
-              <i class="fa fa-trophy fa-3x"></i>
-                <span class="fa-layers-text" data-fa-transform="right-7 grow-6">3</span>
+            <div id="gameInfo">
+              <span>
+            Let's play Party Pi, a computer vision emotion detection game.
             </span>
-
-            <p id="shareLinks">
-            <a href="#"><i class="fab fa-twitter"> </i> Click here to share your score on Twitter</a>
-              <br/>
-            <a href="#"><i class="fa fa-envelope"> </i> Get an email with your score</a>
-            </p>
-            <span id="prompt" data-emotion="surprise">Show </span>
           </div>
+          <div id="letsPlay">
+            <!-- <span>Let's play</span> -->
+            <button id="btn-letsPlay" onclick="startGame();" type="button" class="btn btn-light btn-lg">Let's play</button>
+          </div>
+        </div>
+          <img id="logo" src="{{ url_for('static',filename='images/Peltarion_logotype.png') }}"></img>
+          <video class="flipH" playsinline muted autoplay loop id="videoElement" style="display:none;"></video>
+          <image id='placeholderImage' width='640' height='480' style='display: none; background-color: gray;'></image>
+
+          <div class="overlay">
+            <div class="score">
+
+              <span class="overlayTrophy fa-layers fa-fw">
+                <i class="fa fa-trophy fa-3x"></i>
+                  <span class="fa-layers-text" data-fa-transform="right-7 grow-6">3</span>
+              </span>
+
+              <p id="shareLinks">
+              <a href="#"><i class="fab fa-twitter"> </i> Click here to share your score on Twitter</a>
+                <br/>
+              <a href="#"><i class="fa fa-envelope"> </i> Get an email with your score</a>
+              </p>
+            </div>
+            <button id="prompt" class="main-btn" onclick="takePhoto()" type="button" class="btn-outline-secondary" data-emotion="surprise">Show </button>
+            <button id="playAgain" class="main-btn" onclick="playAgain()" type="button" class="btn-outline-secondary">Let's play again</button>
+          </div>
+
           <div id="photoCountdown">
             <div id="countdownBar">
             </div>
@@ -136,7 +144,7 @@
       'surprise',
       'neutral'
     ]
-    var captureImageTimerID;
+    var takePhotoTimerID;
     var currentEmotion = 'happy';
     var playButtonInitialized = false;
     var countdownTimerID;
@@ -187,7 +195,7 @@
         // Start timer
         countdown();
         // Capture image and load image
-        captureImageTimerID = setTimeout(captureImage, 3000);
+        takePhotoTimerID = setTimeout(takePhoto, 3000);
       });
     }
     /**
@@ -269,53 +277,6 @@
 
       // Draw img into canvas
       ctx.drawImage(img, 0, 0, width, height);
-    }
-
-    /*
-     * Send POST request with uploaded image in canvas to API.
-     */
-    function sendFile(canvas) {
-      var resizedCanvas = document.createElement("canvas");
-      var resizedContext = resizedCanvas.getContext("2d");
-
-      resizedCanvas.height = String(480 * canvas.width / canvas.height);
-      resizedCanvas.width = "480";
-
-      resizedContext.drawImage(canvas, 0, 0, resizedCanvas.width, resizedCanvas.height);
-      var dataURL = resizedCanvas.toDataURL('image/jpeg', 0.7);
-      var fd = new FormData(document.forms[0]);
-      fd.append("imageBase64", dataURL);
-      fd.append("emotion", currentEmotion);
-      $("#spinner").addClass('loader');
-      $("#placeholder").show();
-      // send image to API
-      $.ajax({
-        type: "POST",
-        url: "{{ url_for('image') }}",
-        data: fd,
-        async: true,
-        cache: false,
-        headers: {
-          "cache-control": "no-cache"
-        },
-        processData: false,
-        contentType: false,
-        timeout: 10000
-      }).done(function(data) {
-        // Add photo to top
-        var img = document.createElement('img');
-        img.setAttribute('id', 'photo');
-        img.src = data.photoPath;
-        img.classList.add("scoredImage");
-        $("#output").prepend(img);
-        $("#placeholderImage").hide();
-        $("#spinner").removeClass('loader');
-        var emotion = getRandomEmotion();
-        currentEmotion = emotion;
-        $("#mobilePrompt").text("Show " + currentEmotion + "_");
-      }).fail(function(data) {
-        console.log(data.responseCode);
-      });
     }
 
     /*
@@ -466,7 +427,7 @@
     /*
      * Capture image from `#videoElement` and POST to ``/image` endpoint.
      */
-    function captureImage() {
+    function takePhoto() {
       if (isCaptureInProgress) {
         console.log("Capture in progress, skipping");
         return;
@@ -485,11 +446,11 @@
       var fd = new FormData(document.forms[0]);
       fd.append("imageBase64", dataURL);
       fd.append("emotion", currentEmotion);
-      fd.append("canTweetPhoto", $("#mode-toggle").get(0).checked);
-      $("#placeholderImage").show();
-      $output = $("#output");
+      // fd.append("canTweetPhoto", $("#mode-toggle").get(0).checked);
+      // $("#placeholderImage").show();
+      // $output = $("#output");
       $("#spinner").addClass("loader");
-      video.style.display = 'none';
+      // video.style.display = 'none';
       console.log('submitting');
 
       $.ajax({
@@ -502,17 +463,19 @@
       }).done(function(data) {
         $("#placeholderImage").hide();
         $("#spinner").removeClass("loader");
-        // Add photo to top
-        var img = document.createElement('img');
-        img.src = data.photoPath;
-        img.classList.add("scoredImage");
-        updateLeaderboard(data.facesWithScores);
-        $output.prepend(img);
-        if ($("#tweet-mode").text() === "your IP address") {
-          $("#tweet-mode").text(data.addr);
-        }
-        $("#photoCountdown").hide();
-        $("#play").show();
+        // Show original photo and add to leaderboard
+        var score = '98';
+        showImage(video, dataURL, score);
+        // var img = document.createElement('img');
+        // img.src = data.photoPath;
+        // img.classList.add("scoredImage");
+        // updateLeaderboard(data.facesWithScores);
+        // $output.prepend(img);
+        // if ($("#tweet-mode").text() === "your IP address") {
+        //   $("#tweet-mode").text(data.addr);
+        // }
+        // $("#photoCountdown").hide();
+        // $("#play").show();
         isCaptureInProgress = false;
       }).fail(function(data) {
         console.log(data.responseCode);
@@ -542,10 +505,11 @@
         if ($("#videoElement").css('display') === 'block') { // camera visible
           try {
             // start camera again
-            $("#videoElement").get(0).srcObject.getVideoTracks().forEach(track => track.enabled = true);
+            // $("#videoElement").css('visibility','visible');
             navigator.mediaDevices.getUserMedia(constraints).
                 then(handleSuccess).catch(handleError);
-            clearTimeout(captureImageTimerID);
+            $("#videoElement").addClass("flipH");
+            clearTimeout(takePhotoTimerID);
             clearTimeout(countdownTimerID);
             $("#photoCountdown").hide();
             // If showing results, continue showing results, else stream video
@@ -565,6 +529,45 @@
       } catch {}
     }
 
+    function showPrompt() {
+      $('#prompt').show();
+    }
+
+    function startGame() {
+      $("#startScreen").hide();
+      $("#videoElement").css('visibility','visible');
+      $("#videoElement").addClass('flipH');
+      startCamera();
+      showPrompt();
+    }
+
+    function playAgain() {
+      $("#playAgain").hide();
+      $(".overlay .score").hide();
+      $("#prompt").show();
+      $("#videoElement").removeClass('blur');
+      $("#videoElement").get(0).poster = '';
+      $("#videoElement").css('visibility','visible')
+      startCamera();
+    }
+
+    function streamWebcam() {
+
+    }
+
+    function showImage(video, dataURL, score) {
+      video.src = '';
+      video.setAttribute('poster', dataURL);
+      video.classList.remove('flipH');
+      video.classList.add('blur');
+      $(".overlay .score").show();
+      var gauge = '<div class="GaugeMeter" id="GaugeMeter_1" data-percent="' + score + '" data-append="%" data-size="350" data-color="#f7b35b" data-style="Arch" data-back="RGBa(255,255,255,1)" data-width="40" data-animate_text_colors="true" data-label="surprised" data-label_color="#FFF"></div>'
+      $("#score").prepend(gauge);
+      $(".gaugeMeter").gaugeMeter();
+      $("#prompt").hide();
+      $("#playAgain").show();
+    }
+
     /*
      * Start webcam and prepare app.
      */
@@ -577,6 +580,7 @@
       var webkit = !!ua.match(/WebKit/i);
       var iOSNotSafari = iOS && webkit && ua.match(/CriOS/i);
       if (iOSNotSafari) browserWarning();
+
       startCamera();
       $(".GaugeMeter").gaugeMeter();
       $('#sidebarCollapse').on('click', function() {
