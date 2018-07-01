@@ -56,9 +56,11 @@
       <div id="content">
         <nav class="">
             <div class="container-fluid">
-                <button type="button" id="sidebarCollapse" class="btn btn-info">
-                  <i class="fas fa-align-left"></i>
-                  <span>Toggle Sidebar</span>
+                <button type="button" id="sidebarCollapse" class="navbar-btn">
+                  <!-- <i class="fas fa-align-left"></i> -->
+                  <span></span>
+                  <span></span>
+                  <span></span>
                 </button>
 
           <img id="logo" src="{{ url_for('static',filename='images/Peltarion_logotype.png') }}"></img>
@@ -72,20 +74,24 @@
               data-color="#f7b35b"
               data-style="Arch"
               data-back="RGBa(255,255,255,1)"
-              data-width="50"
+              data-width="40"
               data-animate_text_colors="true"
               data-label="surprised"
               data-label_color="#FFF">
             </div>
-            <i class="overlayTrophy fa fa-trophy fa-3x"></i>
+            <span class="overlayTrophy fa-layers fa-fw">
+              <i class="fa fa-trophy fa-3x"></i>
+                <span class="fa-layers-text" data-fa-transform="right-7 grow-6">3</span>
+            </span>
+
             <p id="shareLinks">
-            <a href="#"><i class="fab fa-twitter"> </i> Click here to share your score on Twitter.</a>
+            <a href="#"><i class="fab fa-twitter"> </i> Click here to share your score on Twitter</a>
               <br/>
-            <a href="#"><i class="fa fa-envelope"> </i> Get an email with your score.</a>
+            <a href="#"><i class="fa fa-envelope"> </i> Get an email with your score</a>
             </p>
-            <span id="prompt">Show surprise</span>
+            <span id="prompt" data-emotion="surprise">Show </span>
           </div>
-          <div class='' id="photoCountdown" style='::after'>
+          <div id="photoCountdown">
             <div id="countdownBar">
             </div>
           </div>
@@ -577,6 +583,7 @@
       $(".GaugeMeter").gaugeMeter();
       $('#sidebarCollapse').on('click', function() {
         $('#sidebar').toggleClass('active');
+        $(this).toggleClass('active');
       })
 
     //   // Active

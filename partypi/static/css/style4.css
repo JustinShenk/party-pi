@@ -72,8 +72,8 @@ span {
 }
 
 #sidebar.active {
-    min-width: 80px;
-    max-width: 80px;
+    min-width: 110px;
+    max-width: 110px;
     text-align: center;
 }
 
@@ -84,6 +84,13 @@ span {
 
 #sidebar.active .sidebar-header strong {
     display: block;
+}
+
+#sidebar.active .sidebarTrophy {
+  min-width: 0;
+}
+
+#sidebar.active .leaderboardPortrait:after{
 }
 
 #sidebar ul li a {
@@ -114,6 +121,20 @@ span {
     -webkit-transform: translateX(50%);
     -ms-transform: translateX(50%);
     transform: translateX(50%);
+}
+
+#sidebar.active .wideCircle {
+  display: inline-block;
+}
+#sidebar.active .wideCircle:after {
+  display: none;
+}
+
+#sidebar.active .leaderboardPosition {
+  display: none;
+}
+#sidebar.active .positionNumber {
+  margin-left: 15px;
 }
 
 #sidebar .sidebar-header {
@@ -213,6 +234,15 @@ a.article:hover {
   z-index: 100;
   bottom: 10px;
 }
+
+#content .container-fluid {
+  padding: 0px; /* HACK */
+}
+
+#prompt:after {
+  content: attr(data-emotion);
+}
+
 /* ---------------------------------------------------
     MEDIAQUERIES
 ----------------------------------------------------- */
@@ -266,11 +296,56 @@ a.article:hover {
     }
 }
 
+@media screen and (max-device-width : 480px) {
+.overlay {
+  -webkit-transform:scale(0.5);
+  -moz-transform:scale(0.5);
+  -ms-transform:scale(0.5);
+  transform:scale(0.5);
+  bottom: -300px;
+  margin-top: auto;
+}
+}
+
 #sidebarCollapse {
+  width: 40px;
+  height: 40px;
+  background: transparent;
   z-index: 10;
   position: absolute;
   top: 10px;
   left: 10px;
+}
+
+#sidebarCollapse span {
+  width: 80%;
+  height: 2px;
+  margin: 0 auto;
+  display: block;
+  background: #fff;
+  transition: all 0.8s cubic-bezier(0.810, -0.330, 0.345, 1.375);
+}
+
+#sidebarCollapse span:first-of-type {
+    /* rotate first one */
+    transform: rotate(45deg) translate(2px, 2px);
+}
+#sidebarCollapse span:nth-of-type(2) {
+    /* second one is not visible */
+    opacity: 0;
+}
+
+#sidebarCollapse span:last-of-type {
+    /* rotate third one */
+    transform: rotate(-45deg) translate(1px, -1px);
+}
+
+#sidebarCollapse.active span {
+    /* no rotation */
+    transform: none;
+    /* all bars are visible */
+    opacity: 1;
+    margin: 5px auto;
 }
 
 #sidebarTrophy {
@@ -289,6 +364,7 @@ a.article:hover {
   border-radius: 50%;
   margin-top: -5px;
   margin-left: -5px;
+  z-index: 2;
 }
 
 .leaderboardPortrait img {
@@ -435,18 +511,22 @@ span#prompt {
     Text-Align:      Center;
     Overflow:        Hidden;
     Cursor:          Default;
+    left: 50%;
+    background-color: rgba(0,0,0,0.5);
+    border-radius: 50%;
+    margin-left: -175px;
+    bottom: 20px;
   }
 
   .GaugeMeter SPAN,
   .GaugeMeter B{
-    Margin:          -5% 30%;
+    Margin:          -5% 29%;
     /* Width:           5%; */
     Position:        Absolute;
     Text-align:      Center;
     Display:         Inline-Block;
     Color:           RGBa(0,0,0,.8);
     Font-Weight:     100;
-    Font-Family:     "Open Sans", Arial;
     Overflow:        Hidden;
     White-Space:     NoWrap;
     Text-Overflow:   Ellipsis;
@@ -463,37 +543,32 @@ span#prompt {
     Opacity:         .5;
   }
 
+  .GaugeMeter SPAN {
+    font-size: 7em;
+  }
+
   .GaugeMeter B{
     Color:           Black;
     Font-Weight:     300;
-    Font-Size:       .5em;
+    Font-Size:       1.5em;
     Opacity:         .8;
+    margin-left: 35%;
   }
-
-.gaugeMeter {
-  left: 50%;
-  background-color: rgba(0,0,0,0.5);
-  border-radius: 50%;
-  margin-left: -175px;
-  bottom: 20px;
-
-}
-
-.gaugeMeter B{
-  font-size: 1.5em;
-}
-
-p#shareLinks {
-  color: #fff;
-}
 
 .overlayTrophy {
   position:absolute;
   color:#f7b35b;
-  margin-left: -0.55em;
-  margin-top: -1.8em;
+  margin-left: -1.55em;
+  margin-top: -4.8em;
 }
 
-#content .container-fluid {
-  padding: 0px; /* HACK */
+.overlayTrophy span {
+  font-weight:900;
+  left:20px;
+  top:2px;
+  color:black;
+}
+
+p#shareLinks {
+  color: #fff;
 }
