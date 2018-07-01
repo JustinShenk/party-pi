@@ -25,6 +25,7 @@ a:focus {
 }
 
 .navbar {
+    z-index: 3;
     padding: 0;
     background: #fff;
     border: none;
@@ -69,6 +70,9 @@ span {
     color: #000;
     transition: all 0.3s;
     padding: 15px;
+    position: absolute;
+    right: 0;
+    height: 100vh;
 }
 
 #sidebar.active {
@@ -486,6 +490,7 @@ video {
   -o-transform: scale(-1, 1);
   transform: scale(-1, 1);
   filter: FlipH;
+  max-height: 100vh;
 }
 
 span#prompt {
@@ -499,9 +504,8 @@ span#prompt {
 .overlay {
   z-index: 1;
   position: absolute;
-  margin-top: 55%;
+  top: 20%;
   width: inherit;
-  bottom: 10%;
 }
 
 /** GaugeMeter Style **/

@@ -54,7 +54,6 @@
 
       <!-- Page Content  -->
       <div id="content">
-        <nav class="">
             <div class="container-fluid">
                 <button type="button" id="sidebarCollapse" class="navbar-btn">
                   <!-- <i class="fas fa-align-left"></i> -->
@@ -98,7 +97,6 @@
           <img id="myImg" class="img-responsive" crossorigin="anonymous" src="" style="display:none;" />
           <canvas id="myCanvas" hidden='true'></canvas>
       </div>
-    </nav>
   </div>
 
       <!-- Sidebar  -->
@@ -108,21 +106,21 @@
 
           <ul class="list-unstyled components">
             {% for n in range(1,6) %}
-            <li>
-              <div class="wideCircle" id="place{{n}}" data-rank={{n}}>
-              <div class="leaderboardPosition">
-                <span class="name">Name Namesson</span>
-                <span class="score">67p</span>
-              </div>
-              <span class="positionNumber">{{n}}</span>
-              <div class="leaderboardPortrait">
-                <img src="{{ url_for('static',filename='justin.png') }}">
-              </div>
-            </div>
-          </li>
+              <li>
+                <div class="wideCircle" id="place{{n}}" data-rank={{n}}>
+                  <div class="leaderboardPosition">
+                    <span class="name">Name Namesson</span>
+                    <span class="score">67p</span>
+                  </div>
+                  <span class="positionNumber">{{n}}</span>
+                  <div class="leaderboardPortrait">
+                    <img src="{{ url_for('static',filename='justin.png') }}">
+                  </div>
+                </div>
+              </li>
             {% endfor %}
-            </ul>
-          <a href="#"><i class="fab fa-twitter"> </i> Click here to share your score on Twitter.</a>
+          </ul>
+          <a href="#"><i class="fab fa-twitter"> </i> Click here to share your score on Twitter</a>
       </nav>
   </div>
 
