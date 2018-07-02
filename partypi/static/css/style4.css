@@ -608,7 +608,7 @@ p#shareLinks {
 #startScreenLogo {
   height: 400px;
   width: 400px;
-  background-image: url(/static/images/PartyPi.jpg);
+  background-image: url(/static/PartyPi.jpg);
   background-repeat: no-repeat;
   background-color: white;
   display: block;
