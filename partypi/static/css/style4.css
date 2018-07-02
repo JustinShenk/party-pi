@@ -360,7 +360,7 @@ a.article:hover {
 
 #sidebarTrophy {
   color:#f7b35b;
-  margin-top:30%;
+  margin-top:20%;
   margin-bottom:10%;
   min-width: inherit;
 }
@@ -571,7 +571,7 @@ video {
   }
 
   .GaugeMeter SPAN {
-    font-size: 7em;
+    font-size: 7em !important;
   }
 
   .GaugeMeter B{
@@ -601,7 +601,7 @@ p#shareLinks {
 }
 
 #startScreen {
-  margin-top: 15%;
+  margin-top: 6%;
   display: block;
 }
 
@@ -621,7 +621,7 @@ p#shareLinks {
 
 #gameInfo {
   display: block;
-  margin-top: 5%;
+  margin-top: 4%;
 }
 
 #gameInfo span{
@@ -631,7 +631,7 @@ p#shareLinks {
 
 #letsPlay {
   display: inline-block;
-  margin-top: 5%;
+  margin-top: 4%;
 }
 
 #letsPlay button{
@@ -762,4 +762,8 @@ p#shareLinks {
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+.alert{
+    display: none;
 }

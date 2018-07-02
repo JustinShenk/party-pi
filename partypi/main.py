@@ -323,7 +323,7 @@ def image():
             photo = draw_logo(photo)
             photo_path = 'static/images/{}.jpg'.format(str(uuid.uuid4()))
             cv2.imwrite(photo_path, photo)
-            app.logger("Saved image to {}".format(photo_path))
+            app.logger.info("Saved image to {}".format(photo_path))
             addr = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
             message = "Look who's {} at ICML".format(emotion)
             # try:
@@ -396,6 +396,18 @@ def singleplayer():
 
 @app.route('/')
 def index():
+    try:
+        debug_js = 'true' if debug else 'false'
+        app.logger.info("Page accessed from {}".format(request.environ.get('HTTP_X_REAL_IP', request.remote_addr)))
+        return render_template('index.html')
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fname, exc_tb.tb_lineno)
+
+
+@app.route('/v2')
+def v2():
     try:
         debug_js = 'true' if debug else 'false'
         app.logger.info("Page accessed from {}".format(request.environ.get('HTTP_X_REAL_IP', request.remote_addr)))

@@ -55,6 +55,10 @@
       <!-- Page Content  -->
       <div id="content">
         <div class="container-fluid">
+          <div class="alert alert-info fade show alert-dismissible">
+            <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+            <strong>Information</strong> Links are not yet implemented.
+          </div>
           <div id="spinner"></div>
           <button type="button" id="sidebarCollapse" class="navbar-btn">
             <!-- <i class="fas fa-align-left"></i> -->
@@ -68,7 +72,8 @@
             </div>
             <div id="gameInfo">
               <span>
-            Let's play Party Pi, a computer vision emotion detection game.
+            Let's play Party Pi, a computer vision emotion detection game</br>
+            by Justin Shenk.
             </span>
           </div>
           <div id="letsPlay">
@@ -83,12 +88,12 @@
           <div class="overlay">
             <div class="score">
               <p id="shareLinks">
-              <a href="#"><i class="fab fa-twitter"> </i> Click here to share your score on Twitter</a>
+              <a href="#" onclick="notImplementedWarning()"><i class="fab fa-twitter"> </i> Click here to share your score on Twitter</a>
                 <br/>
-              <a href="#"><i class="fa fa-envelope"> </i> Get an email with your score</a>
+              <a href="#" onclick="notImplementedWarning()"><i class="fa fa-envelope"> </i> Get an email with your score</a>
               </p>
             </div>
-            <button id="prompt" class="main-btn" onclick="takePhoto()" type="button" class="btn-outline-secondary" data-emotion="surprise">Show </button>
+            <button id="prompt" class="main-btn" onclick="takePhoto()" type="button" class="btn-outline-secondary" data-emotion="happy">Show </button>
             <button id="playAgain" class="main-btn" onclick="playAgain()" type="button" class="btn-outline-secondary">Let's play again</button>
             <button id="retakePhoto" class="main-btn" onclick="playAgain()" type="button" class="btn-outline-secondary">No face found. Try again!</button>
           </div>
@@ -123,7 +128,7 @@
               </li>
             {% endfor %}
           </ul>
-          <a href="#"><i class="fab fa-twitter"> </i> Click here to share your score on Twitter</a>
+          <a href="#" onclick="notImplementedWarning()"><i class="fab fa-twitter"> </i> Click here to share your score on Twitter</a>
       </nav>
   </div>
 
@@ -141,16 +146,16 @@
     ]
     var takePhotoTimerID;
     var currentEmotion = 'happy';
-    var currentPlayerName = 'John';
+    var currentPlayerName = 'My Name';
     var playButtonInitialized = false;
     var countdownTimerID;
     var isCaptureInProgress = false;
     var leaders = [
-      ['Name Namesson', 66, ''],
-      ['Name Namesson', 66, ''],
-      ['Name Namesson', 64, ''],
-      ['Name Namesson', 63, ''],
-      ['Name Namesson', 62, '']];
+      ['Namn Namnsson', 66, ''],
+      ['Namn Namnsson', 66, ''],
+      ['Namn Namnsson', 64, ''],
+      ['Namn Namnsson', 63, ''],
+      ['Namn Namnsson', 62, '']];
 
     function saveMe(img_id) {
       // Download image with `img_id`
@@ -292,7 +297,9 @@
     function errorMessage(message, e) {
       console.error(message, typeof e == 'undefined' ? '' : e);
     }
+    function notImplemented() {
 
+    }
     /*
      * Show manual upload button and related stuff.
      * NOTE: Not implemented
@@ -680,7 +687,7 @@
 
 
     function initializeLeaderboard() {
-      const defaultImagePath = "{{ url_for('static',filename='justin.png') }}";
+      const defaultImagePath = "{{ url_for('static',filename='playerFace.png') }}";
         $(".leaderboard li").each(function(index) {
           $('.name', this).text(leaders[index][0]);
           $('.leaderboardScore', this).text(leaders[index][1]);
@@ -704,6 +711,13 @@
       $(".fa-layers-text").text(position);
       $(".GaugeMeter").gaugeMeter();
       return [newScore, position];
+    }
+
+    function notImplementedWarning(){
+     $(".alert").show();
+     setTimeout(function(){
+       $(".alert").hide();
+     }, 2000);
     }
 
     /*
