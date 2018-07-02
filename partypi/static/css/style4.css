@@ -129,7 +129,7 @@ span {
 }
 
 #sidebar.active .wideCircle {
-  display: inline-block;
+  /* display: inline-block; */
 }
 #sidebar.active .wideCircle:after {
   display: none;
