@@ -1,6 +1,7 @@
 import base64
 import cv2
 import io
+import logging
 import numpy as np
 import os
 import random
@@ -30,7 +31,7 @@ app.config.update(dict(PREFERRED_URL_SCHEME='https'))
 debug = False
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
-print("Game loaded")
+app.logger.info("Game loaded")
 face_detector = load_detection_model()
 if not os.path.exists('static/images'):
     os.mkdir('static/images')
@@ -56,7 +57,7 @@ def draw_logo(photo, logo="PartyPi.png"):
         photo[y0:y1, x0:x1, c] = logo_slice + bg_slice
     return photo
 
-def rank_players(player_data, photo, current_emotion='happy'):
+def rank_players(player_data, photo, current_emotion='happy', one_player=False):
     """ Rank players and display.
 
     Args:
@@ -72,7 +73,10 @@ def rank_players(player_data, photo, current_emotion='happy'):
             "No faces found - try again!",
             font_scale=text_size,
             color=YELLOW)
-        return photo, []
+        if one_player:
+            return photo, [], 1
+        else:
+            return photo, []
     scores = []
     first_emotion = None
     easy_mode = True
@@ -89,6 +93,10 @@ def rank_players(player_data, photo, current_emotion='happy'):
     scores_list = first_emotion_scores
 
     emotion_offsets = (20, 40)
+
+    largest_face = 0
+    player_index = None
+
     faces_with_scores = []
 
     # Draw the scores for the faces.
@@ -96,6 +104,12 @@ def rank_players(player_data, photo, current_emotion='happy'):
         faceRectangle = currFace['faceRectangle']
         x1, x2 = faceRectangle['left'], faceRectangle['right']
         y1, y2 = faceRectangle['top'], faceRectangle['bottom']
+
+        if one_player: # mode
+            if (x2-x1) * (y2-y1) > largest_face:
+                largest_face = largest_face
+                player_index = i
+
         # Convert back to coordinates to get offset
         face_coordinates = (x1, y1, x2 - x1, y2 - y1)
         # Get points for first emotion.
@@ -104,7 +118,7 @@ def rank_players(player_data, photo, current_emotion='happy'):
         x1, x2, y1, y2 = apply_offsets(face_coordinates, emotion_offsets)
         face_image = photo[y1:y2, x1:x2]
         cv2.imwrite(face_photo_path, face_image)
-        print("saved to {}".format(face_photo_path))
+        app.logger.info("saved to {}".format(face_photo_path))
         faces_with_scores.append((face_photo_path, first_emotion))
         # second_emotion = second_emotion_scores[i]
 
@@ -135,7 +149,7 @@ def rank_players(player_data, photo, current_emotion='happy'):
 
         # Multiple winners - tie breaker.
         if final_scores.count(max_score) > 1:
-            print("Multiple winners!")
+            app.logger.info("Multiple winners!")
             one_winner = False
             tied_winners = []
             for ind, i in enumerate(final_scores):
@@ -157,7 +171,7 @@ def rank_players(player_data, photo, current_emotion='happy'):
             crown_over_faces = [winner]
         else:
             tied_text_height_offset = 40 if easy_mode else 70
-            print("tied_winners:", tied_winners)
+            app.logger.info("tied_winners:", tied_winners)
             for winner in tied_winners:
                 # FIXME: show both
                 first_rect_left = player_data[winner]['faceRectangle']['left']
@@ -171,6 +185,8 @@ def rank_players(player_data, photo, current_emotion='happy'):
                     color=YELLOW,
                     font_scale=text_size)
             # crown_over_faces
+    if one_player:
+        return photo, faces_with_scores, player_index
     return photo, faces_with_scores
 
 
@@ -267,42 +283,47 @@ def get_face(frame):
         draw_bounding_box(face, frame, (255, 0, 0))
     return frame
 
+def getPlayersFace(facesWithScores):
+    player_face = None
+    # for fs in facesWithScores:
+
+    return faceWithScores
 
 @app.route('/image', methods=['POST', 'GET'])
 def image():
     if request.method == 'POST':
-        print("POST request")
+        app.logger.info("POST request")
         try:
             form = request.form
             for key in form.keys():
                 for value in form.getlist(key):
-                    print(key, ":", value[:50])
+                    app.logger.info(key, ":", value[:50])
 
             image_b64 = form.get('imageBase64')
             if image_b64 is None:
-                print("No image in request.")
+                app.logger.error("No image in request.")
                 return jsonify(success=False, photoPath='')
             # Get emotion
             # emotion = json_data['emotion']
             emotion = form.get('emotion')
             if emotion is None:
-                print("No emotion in request.")
+                app.logger.error("No emotion in request.")
                 return jsonify(success=False, photoPath='')
             img = data_uri_to_cv2_img(image_b64)
             w, h, c = img.shape
             if w > 480:
-                print("Check yo' image size.")
+                app.logger.info("Check yo' image size.")
                 img = cv2.resize(img, (int(480 * w / h), 480))
-                print("New size {}.".format(img.shape))
+                app.logger.info("New size {}.".format(img.shape))
             gray_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             faces = detect_faces(face_detector, gray_image)
             player_data = predict_emotions(faces, gray_image, emotion)
             photo, faces_with_scores = rank_players(player_data, img, emotion)
-            print("Faces with scores", faces_with_scores)
+            app.logger.info("Faces with scores", faces_with_scores)
             photo = draw_logo(photo)
             photo_path = 'static/images/{}.jpg'.format(str(uuid.uuid4()))
             cv2.imwrite(photo_path, photo)
-            print("Saved image to {}".format(photo_path))
+            app.logger("Saved image to {}".format(photo_path))
             addr = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
             message = "Look who's {} at ICML".format(emotion)
             # try:
@@ -318,10 +339,56 @@ def image():
             response = jsonify(success=True, photoPath=photo_path, emotion=emotion, facesWithScores=faces_with_scores, addr=addr)
             status_code = 200
         except Exception as e:
-            print("ERROR:", e)
+            app.logger.error("ERROR:", e)
             exc_type, exc_obj, exc_tb = sys.exc_info()
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-            print(exc_type, fname, exc_tb.tb_lineno)
+            app.logger.error(exc_type, fname, exc_tb.tb_lineno)
+            response = jsonify(success=False, photoPath='')
+            status_code = 500
+        return make_response(response, status_code)
+
+@app.route('/singleplayer', methods=['POST', 'GET'])
+def singleplayer():
+    if request.method == 'POST':
+        app.logger.info("POST request")
+        try:
+            form = request.form
+            for key in form.keys():
+                for value in form.getlist(key):
+                    app.logger.info(key, ":", value[:50])
+
+            image_b64 = form.get('imageBase64')
+            if image_b64 is None:
+                app.logger.error("No image in request.")
+                return jsonify(success=False, photoPath='')
+            # Get emotion
+            emotion = form.get('emotion')
+            if emotion is None:
+                print("No emotion in request.")
+                return jsonify(success=False, photoPath='')
+            img = data_uri_to_cv2_img(image_b64)
+            w, h, c = img.shape
+            if w > 480:
+                print("Check yo' image size.")
+                img = cv2.resize(img, (int(480 * w / h), 480))
+                print("New size {}.".format(img.shape))
+            gray_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            faces = detect_faces(face_detector, gray_image)
+            player_data = predict_emotions(faces, gray_image, emotion)
+            photo, faces_with_scores, player_index = rank_players(player_data, img, emotion, one_player=True)
+            app.logger.info("Faces with scores", faces_with_scores)
+            photo_path = 'static/images/{}.jpg'.format(str(uuid.uuid4()))
+            if len(faces_with_scores) is 0:
+                response = jsonify(success=False, photoPath=None, emotion=emotion, facesWithScores=[], playerIndex=None)
+            cv2.imwrite(photo_path, photo)
+            app.logger.info("Saved image to {}".format(photo_path))
+            response = jsonify(success=True, photoPath=photo_path, emotion=emotion, facesWithScores=faces_with_scores, playerIndex=player_index)
+            status_code = 200
+        except Exception as e:
+            app.logger.error("ERROR:", e)
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            app.logger.error(exc_type, fname, exc_tb.tb_lineno)
             response = jsonify(success=False, photoPath='')
             status_code = 500
         return make_response(response, status_code)
@@ -331,7 +398,7 @@ def image():
 def index():
     try:
         debug_js = 'true' if debug else 'false'
-        print("Page accessed from {}".format(request.environ.get('HTTP_X_REAL_IP', request.remote_addr)))
+        app.logger.info("Page accessed from {}".format(request.environ.get('HTTP_X_REAL_IP', request.remote_addr)))
         return render_template('index2.html')
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()

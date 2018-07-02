@@ -82,12 +82,6 @@
 
           <div class="overlay">
             <div class="score">
-
-              <span class="overlayTrophy fa-layers fa-fw">
-                <i class="fa fa-trophy fa-3x"></i>
-                  <span class="fa-layers-text" data-fa-transform="right-7 grow-6">3</span>
-              </span>
-
               <p id="shareLinks">
               <a href="#"><i class="fab fa-twitter"> </i> Click here to share your score on Twitter</a>
                 <br/>
@@ -96,6 +90,7 @@
             </div>
             <button id="prompt" class="main-btn" onclick="takePhoto()" type="button" class="btn-outline-secondary" data-emotion="surprise">Show </button>
             <button id="playAgain" class="main-btn" onclick="playAgain()" type="button" class="btn-outline-secondary">Let's play again</button>
+            <button id="retakePhoto" class="main-btn" onclick="playAgain()" type="button" class="btn-outline-secondary">No face found. Try again!</button>
           </div>
 
           <div id="photoCountdown">
@@ -112,17 +107,17 @@
 
           <i id="sidebarTrophy" class="fa fa-trophy fa-5x"></i>
 
-          <ul class="list-unstyled components">
+          <ul class="list-unstyled leaderboard">
             {% for n in range(1,6) %}
               <li>
                 <div class="wideCircle" id="place{{n}}" data-rank={{n}}>
                   <div class="leaderboardPosition">
-                    <span class="name">Name Namesson</span>
-                    <span class="score">67p</span>
+                    <span class="name"></span>
+                    <span class="leaderboardScore"></span>
                   </div>
                   <span class="positionNumber">{{n}}</span>
                   <div class="leaderboardPortrait">
-                    <img src="{{ url_for('static',filename='justin.png') }}">
+                    <img>
                   </div>
                 </div>
               </li>
@@ -146,9 +141,16 @@
     ]
     var takePhotoTimerID;
     var currentEmotion = 'happy';
+    var currentPlayerName = 'John';
     var playButtonInitialized = false;
     var countdownTimerID;
     var isCaptureInProgress = false;
+    var leaders = [
+      ['Name Namesson', 66, ''],
+      ['Name Namesson', 66, ''],
+      ['Name Namesson', 64, ''],
+      ['Name Namesson', 63, ''],
+      ['Name Namesson', 62, '']];
 
     function saveMe(img_id) {
       // Download image with `img_id`
@@ -280,33 +282,6 @@
     }
 
     /*
-     * Prepare input image and send it in POST request.
-     */
-    function postInputContents(input) {
-
-      if (input.files && input.files[0]) {
-        var reader = new FileReader();
-
-        reader.onloadend = function(e) {
-          var $myImg = $("#myImg");
-          $myImg.attr('src', e.target.result);
-          $myImg.show();
-          // Use EXIF library to handle the loaded image exif orientation
-          EXIF.getData(input.files[0], function() {
-            // Fetch image tag
-            var img = $myImg.get(0);
-            // Fetch canvas
-            var canvas = $("#myCanvas").get(0);
-            // run orientation on img in canvas
-            orientation(img, canvas);
-            sendFile(canvas);
-          });
-        };
-        reader.readAsDataURL(input.files[0]);
-      }
-    };
-
-    /*
      * Get random emotion from `emotionArray`.
      */
     function getRandomEmotion() {
@@ -371,56 +346,67 @@
     /*
      * Update the leaderboard with `facesWithScores`.
      */
-    function updateLeaderboard(facesWithScores) {
-      $leaderboard = $("#leaderboardContent");
-      for (var i = 0; i < facesWithScores.length; i++) {
-        const faceURL = facesWithScores[i][0];
-        const score = parseInt(facesWithScores[i][1]);
-        const imgID = currentEmotion + score;
-        const capEmotion = capitalizeFirstLetter(currentEmotion)
-        const sectionID = "leaderboard" + capEmotion;
-        $leaderboardSection = $('#' + sectionID);
-        const sectionLength = $("#" + sectionID + " img").length;
-        if (sectionLength == 0) {
-          // Show if first image in section
-          $leaderboardSection.show();
-        }
-        // Sort faces in leaderboard section by score
-        var faceRank = 1; // initialize
-        var sameScores = 0;
-        $('#' + sectionID + ' img:visible').each(function(index, value) {
-          var leaderImgID = value.id;
-          // var leaderEmotion = leaderImgID.match(/[a-zA-Z]+/g)[0];
-          const leaderScore = parseInt(leaderImgID.match(/\d+/g)[0]);
-          if (leaderScore > score) {
-            faceRank += 1;
-          } else if (leaderScore === score) {
-            sameScores += 1;
-          }
-        });
-        faceRank += sameScores;
-        if (faceRank <= 3) {
-          $leaderboardPlace = $("#" + currentEmotion + "Place" + faceRank);
+    // function updateLeaderboard(facesWithScores) {
+    //   $leaderboard = $("#leaderboardContent");
+    //   for (var i = 0; i < facesWithScores.length; i++) {
+    //     const faceURL = facesWithScores[i][0];
+    //     const score = parseInt(facesWithScores[i][1]);
+    //     const imgID = currentEmotion + score;
+    //     const capEmotion = capitalizeFirstLetter(currentEmotion)
+    //     const sectionID = "leaderboard" + capEmotion;
+    //     $leaderboardSection = $('#' + sectionID);
+    //     const sectionLength = $("#" + sectionID + " img").length;
+    //     if (sectionLength == 0) {
+    //       // Show if first image in section
+    //       $leaderboardSection.show();
+    //     }
+    //     // Sort faces in leaderboard section by score
+    //     var faceRank = 1; // initialize
+    //     var sameScores = 0;
+    //     $('#' + sectionID + ' img:visible').each(function(index, value) {
+    //       var leaderImgID = value.id;
+    //       // var leaderEmotion = leaderImgID.match(/[a-zA-Z]+/g)[0];
+    //       const leaderScore = parseInt(leaderImgID.match(/\d+/g)[0]);
+    //       if (leaderScore > score) {
+    //         faceRank += 1;
+    //       } else if (leaderScore === score) {
+    //         sameScores += 1;
+    //       }
+    //     });
+    //     faceRank += sameScores;
+    //     if (faceRank <= 3) {
+    //       $leaderboardPlace = $("#" + currentEmotion + "Place" + faceRank);
+    //
+    //       const rankedPlayers = $leaderboardPlace.find('img').length;
+    //       if (faceRank === 1 && rankedPlayers === 0) { // only when empty
+    //         // $firstPlace = $("#" + currentEmotion + "Place1");
+    //         // $firstplace.addClass('overlay');
+    //         // const trophy = '<i class="fa fa-trophy" style="font-size: 20px; color: gold"></i>'
+    //         // $leaderboardSection.prepend(trophy);
+    //       }
+    //
+    //       // Bump players down if rank <= number of rankedPlayers
+    //       bumpLeaderboardCards(faceRank, rankedPlayers);
+    //
+    //       var leaderboardCard = $('<div class="leaderboardCard col-md-4"><div class="card mb-4 box-shadow"><img id="' + imgID + '" class="card-img-top" src="' + faceURL +
+    //         '" alt="Card image cap"><div class="card-body" style="padding: 0.25rem"><div class="d-flex justify-content-between align-items-center"><div class="btn-group"></div><small class="text-muted">' + score + " points" +
+    //         '</small></div></div></div>');
+    //       $leaderboardPlace.append(leaderboardCard);
+    //     } else {
+    //       console.log("Try again! Score:" + score + ", Emotion: " + capEmotion);
+    //     }
+    //   }
+    // }
 
-          const rankedPlayers = $leaderboardPlace.find('img').length;
-          if (faceRank === 1 && rankedPlayers === 0) { // only when empty
-            // $firstPlace = $("#" + currentEmotion + "Place1");
-            // $firstplace.addClass('overlay');
-            // const trophy = '<i class="fa fa-trophy" style="font-size: 20px; color: gold"></i>'
-            // $leaderboardSection.prepend(trophy);
-          }
+    function retakePhoto(video, dataURL) {
+      blurImage(video, dataURL);
+      $("#retakePhoto").show();
+    }
 
-          // Bump players down if rank <= number of rankedPlayers
-          bumpLeaderboardCards(faceRank, rankedPlayers);
-
-          var leaderboardCard = $('<div class="leaderboardCard col-md-4"><div class="card mb-4 box-shadow"><img id="' + imgID + '" class="card-img-top" src="' + faceURL +
-            '" alt="Card image cap"><div class="card-body" style="padding: 0.25rem"><div class="d-flex justify-content-between align-items-center"><div class="btn-group"></div><small class="text-muted">' + score + " points" +
-            '</small></div></div></div>');
-          $leaderboardPlace.append(leaderboardCard);
-        } else {
-          console.log("Try again! Score:" + score + ", Emotion: " + capEmotion);
-        }
-      }
+    function hideButtons() {
+      $(".overlay button").each(function (index) {
+        $(this).hide();
+      })
     }
 
 
@@ -428,6 +414,7 @@
      * Capture image from `#videoElement` and POST to ``/image` endpoint.
      */
     function takePhoto() {
+      hideButtons();
       if (isCaptureInProgress) {
         console.log("Capture in progress, skipping");
         return;
@@ -455,17 +442,35 @@
 
       $.ajax({
         type: "POST",
-        url: "{{ url_for('image') }}",
+        url: "{{ url_for('singleplayer') }}",
         data: fd,
         processData: false,
         contentType: false,
         timeout: 10000
       }).done(function(data) {
+        isCaptureInProgress = false;
         $("#placeholderImage").hide();
         $("#spinner").removeClass("loader");
         // Show original photo and add to leaderboard
-        var score = '98';
-        showImage(video, dataURL, score);
+        const playerCount = data.facesWithScores.length;
+
+        if (playerCount === 0) {
+          retakePhoto(video, dataURL);
+          return;
+        }
+        const faceWithScore = data.facesWithScores[data.playerIndex];
+        console.log(faceWithScore);
+        const playerFaceURL = faceWithScore[0];
+        var score = faceWithScore[1];
+        var newScoreAndPosition = showRank(video, dataURL, score, currentEmotion);
+        var newScore = newScoreAndPosition[0];
+        var position = newScoreAndPosition[1];
+        console.log(position + "pos1");
+        leaders.push([currentPlayerName, newScore, playerFaceURL]);
+        updateLeaderboard(playerFaceURL, position, newScore);
+        $("#prompt").hide();
+        $("#playAgain").show();
+        $(".overlay .score").show();
         // var img = document.createElement('img');
         // img.src = data.photoPath;
         // img.classList.add("scoredImage");
@@ -476,7 +481,6 @@
         // }
         // $("#photoCountdown").hide();
         // $("#play").show();
-        isCaptureInProgress = false;
       }).fail(function(data) {
         console.log(data.responseCode);
         isCaptureInProgress = false;
@@ -541,31 +545,165 @@
       showPrompt();
     }
 
+    function sortPlayers() {
+      leaders.sort(function(a, b) {
+        return parseInt(b[1], 10 - parseInt(a[1], 10));
+      })
+    }
+
+    function sortLeaderboard(ul){
+      var new_ul = ul.cloneNode(false);
+
+      var lis = [];
+      for(var i = ul.children.length; i--;){
+          if(ul.children[i].nodeName === 'LI')
+              lis.push(ul.children[i]);
+      }
+
+      lis.sort(function(a, b){
+         return parseInt(a.children[0].dataset.rank, 10) -
+                parseInt(b.children[0].dataset.rank, 10);
+      });
+
+      for(var i = 0; i < lis.length; i++)
+          new_ul.appendChild(lis[i]);
+      ul.parentNode.replaceChild(new_ul, ul);
+    }
+
     function playAgain() {
-      $("#playAgain").hide();
-      $(".overlay .score").hide();
+      hideButtons();
+      $(".leaderboard div").removeClass("activePlace");
+      $(".leaderboard").removeClass("lowRanking");
       $("#prompt").show();
       $("#videoElement").removeClass('blur');
       $("#videoElement").get(0).poster = '';
       $("#videoElement").css('visibility','visible')
+      $(".GaugeMeter").remove();
+      $(".score").hide();
+      resetLeaderboard();
       startCamera();
     }
 
-    function streamWebcam() {
+    function rankPlayer(score, ranking="ordinal") {
+      var scores = [];
+      leaders.forEach(function (player) {
+        scores.push(parseInt(player[1]));
+      });
+      // const sorted = scores.slice().sort(function(a,b){ return b-a });
+      // const ranks = scores.slice().map(function(v){ return sorted.indexOf(v)+1 });
+      var position = 1;
 
+      for (var i = 0; i < scores.length; i++) {
+        if (ranking === "ordinal") {
+          if (scores[i] > score ) {
+            position++;
+          } else if (scores[i] == score) {
+              score--;
+              position++;
+          }
+        }
+      }
+      console.log("scores:" + scores + " " + score + " position" + position);
+      return [score, position];
     }
 
-    function showImage(video, dataURL, score) {
+    function bumpPlayers(leaderboardItem, position) {
+      if (position > 5) { // hide 5th player and add current player
+        $(".leaderboard li").get(4).style.display = "none";
+        $(".leaderboard").after('<ul class="list-unstyled">' + leaderboardItem + '</ul>');
+      }
+      // shift lower ranks down
+      var leaderboardCount = $(".leaderboard li").length;
+      for (var i = leaderboardCount; i >= position; i--) {
+        if (i == 5) {
+          $(".leaderboard li").get(4).remove();
+        } else {
+          console.log("i:"+i+" position:" + position + $(".leaderboard li").length)
+          var currItem = $(".leaderboard li").get(i-1);
+          var wideCircle = currItem.children[0]; // wideCircle
+          wideCircle.dataset.rank = i+1;
+          wideCircle.children[1].textContent = i+1; // positionNumber
+        }
+      }
+      if (position <= 5) {
+        $(".leaderboard").append(leaderboardItem);
+      }
+      var leaderboard = $("ul.leaderboard").get(0);
+      sortLeaderboard(leaderboard);
+    }
+
+    function resetLeaderboard() {
+      try {
+        var leaderCount = $(".leaderboard li").length;
+        if (leaderCount == 5) {
+
+          $(".leaderboard li").get(4).style.display = ""; // show 5th player
+        }
+        var listCount = $("#sidebar ul").length;
+        if (listCount > 1) {
+          $("#sidebar ul").get(1).remove(); // remove low-rank player from bottom\
+        }
+      } catch {
+          console.log("caught error restoring 5th player");
+        }
+      }
+
+    function updateLeaderboard(playerFaceURL, position, score) {
+      extraClass = ""
+      if (position > 1) {
+        extraClass = "activePlace"
+      }
+      var leaderboardItem = '<li><div class="wideCircle ' + extraClass + '" data-rank=' + position + '><div class="leaderboardPosition"><span class="name">' + currentPlayerName + '</span><span class="leaderboardScore">' + score + 'p</span></div><span class="positionNumber">' + position + '</span><div class="leaderboardPortrait"><img src=' + playerFaceURL + '></div></div></li>'
+      // add player to leaderboard
+      if (position > 5) {
+        $(".leaderboard").addClass("lowRanking"); // draw line between players
+      }
+      bumpPlayers(leaderboardItem, position);
+    }
+
+    function emotion2adj(emotion) {
+      if (emotion === "surprise") {
+        return "surprised"
+      }
+      else if (emotion === "fear") {
+        return "afraid"
+      }
+      return emotion;
+    }
+
+    function blurImage(video, dataURL) {
       video.src = '';
       video.setAttribute('poster', dataURL);
       video.classList.remove('flipH');
       video.classList.add('blur');
+    }
+
+
+    function initializeLeaderboard() {
+      const defaultImagePath = "{{ url_for('static',filename='justin.png') }}";
+        $(".leaderboard li").each(function(index) {
+          $('.name', this).text(leaders[index][0]);
+          $('.leaderboardScore', this).text(leaders[index][1]);
+          $('.leaderboardPortrait img', this).attr('src', defaultImagePath);
+        })
+    }
+
+    function showRank(video, dataURL, score, currentEmotion) {
+      blurImage(video, dataURL);
       $(".overlay .score").show();
-      var gauge = '<div class="GaugeMeter" id="GaugeMeter_1" data-percent="' + score + '" data-append="%" data-size="350" data-color="#f7b35b" data-style="Arch" data-back="RGBa(255,255,255,1)" data-width="40" data-animate_text_colors="true" data-label="surprised" data-label_color="#FFF"></div>'
-      $("#score").prepend(gauge);
-      $(".gaugeMeter").gaugeMeter();
-      $("#prompt").hide();
-      $("#playAgain").show();
+      var newScoreAndPosition = rankPlayer(score);
+      var newScore = newScoreAndPosition[0];
+      var position = newScoreAndPosition[1];
+      const emotion = emotion2adj(currentEmotion);
+      $(".Gaugemeter").remove();
+      console.log("pos" + position);
+      var gauge = '<div class="GaugeMeter" id="GaugeMeter_1" data-percent="' + newScore + '" data-append="%" data-size="350" data-color="#f7b35b" data-style="Arch" data-back="RGBa(255,255,255,1)" data-width="40" data-animate_text_colors="true" data-label="' + emotion + '" data-label_color="#FFF"></div>'
+      var gaugeTrophy = '<span class="overlayTrophy fa-layers fa-fw"><i class="fa fa-trophy fa-3x"></i><span class="fa-layers-text" data-fa-transform="right-7 grow-6"></span></span>'
+      gauge = gauge.concat(gaugeTrophy);
+      $(".overlay .score").prepend(gauge);
+      $(".fa-layers-text").text(position);
+      $(".GaugeMeter").gaugeMeter();
+      return [newScore, position];
     }
 
     /*
@@ -581,8 +719,8 @@
       var iOSNotSafari = iOS && webkit && ua.match(/CriOS/i);
       if (iOSNotSafari) browserWarning();
 
+      initializeLeaderboard();
       startCamera();
-      $(".GaugeMeter").gaugeMeter();
       $('#sidebarCollapse').on('click', function() {
         $('#sidebar').toggleClass('active');
         $(this).toggleClass('active');
@@ -611,7 +749,6 @@
       initialize();
     });
   </script>
-  <!-- <script type="text/javascript" src="{{ url_for('static', filename='js/shuffler.js') }}"></script> -->
   <script type="text/javascript" src="{{ url_for('static', filename='js/video.js') }}"></script>
 </body>
 
