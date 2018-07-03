@@ -12,6 +12,7 @@
 var videoElement = document.querySelector('video');
 var videoSelect = document.querySelector('select#videoSource');
 var selectors = [videoSelect];
+var firstTime = true;
 
 function gotDevices(deviceInfos) {
   // Handles being called several times to update labels. Preserve values.
@@ -39,6 +40,13 @@ function gotDevices(deviceInfos) {
       select.value = values[selectorIndex];
     }
   });
+  if (firstTime){ // set default to Front camera
+    for (var i = 0; i < videoSelect.options.length; i++) {
+      if (videoSelect.options[i].text.includes("Front")) {
+        videoSelect.value = videoSource.options[i].value;
+      }
+    }
+  }
 }
 
 navigator.mediaDevices.enumerateDevices().then(gotDevices).catch(handleError);
@@ -65,12 +73,6 @@ function start(stopTracks=true) {
         track.stop();
       }
     });
-  }
-
-  for (var i = 0; i < videoSelect.options.length; i++) {
-    if (videoSelect.options[i].text.includes("Front")) {
-      videoSelect.value = videoSource.options[i].value;
-    }
   }
 
   var videoSource = videoSelect.value;
