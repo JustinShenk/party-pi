@@ -11,3 +11,7 @@ function privacyWarning(){
    $(".privacy-warning").hide();
  }, 5000);
 }
+
+function selectDevice(){
+  $("#sidebar .select").toggle();
+}

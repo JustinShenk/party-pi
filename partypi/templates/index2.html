@@ -81,7 +81,7 @@
             <button id="btn-letsPlay" onclick="startGame();" type="button" class="btn btn-light btn-lg">Let's play</button>
           </div>
         </div>
-          <img id="logo" src="{{ url_for('static',filename='Peltarion_logotype.png') }}"></img>
+          <img onclick="selectDevice()" id="logo" src="{{ url_for('static',filename='Peltarion_logotype.png') }}"></img>
           <video class="flipH" playsinline muted autoplay loop id="videoElement" style="display:none;"></video>
           <image id='placeholderImage' width='640' height='480' style='display: none; background-color: gray;'></image>
 
@@ -109,7 +109,9 @@
 
       <!-- Sidebar  -->
       <nav id="sidebar">
-
+        <div class="select" style="display:none;">
+          <label for="videoSource">Video source: </label><select id="videoSource"></select>
+        </div>
           <i id="sidebarTrophy" class="fa fa-trophy fa-5x"></i>
 
           <ul class="list-unstyled leaderboard">
@@ -300,27 +302,6 @@
     function notImplemented() {
 
     }
-    /*
-     * Show manual upload button and related stuff.
-     * NOTE: Not implemented
-     */
-
-    function showManualUpload() {
-      $("#inputFile").show();
-      var fileUpload = $("#imageInput");
-      fileUpload.show();
-      fileUpload.on('change', function() {
-        moveToGallery(); // move old images to gallery
-        postInputContents(this); // rotate and POST image
-      });
-      $('#videoElement').hide();
-      $('#play').hide();
-      $('#photoCoundown').hide();
-      $('#prompt').hide();
-      $('#mobilePrompt').show();
-      $("#mobilePrompt").text("Show " + currentEmotion + "_");
-    }
-
 
     /*
      * Capitalize first letter in string.
