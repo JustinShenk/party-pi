@@ -147,6 +147,10 @@ span {
     /* background: #6d7fcc; */
 }
 
+#sidebar.active .positionNumber {
+  display: inline-block;
+}
+
 #sidebar .sidebar-header strong {
     display: none;
     font-size: 1.8em;
@@ -259,10 +263,10 @@ a.article:hover {
 
 @media (max-width: 768px) {
     #sidebar {
-        min-width: 80px;
-        max-width: 80px;
-        text-align: center;
-        margin-left: -80px !important;
+        /* min-width: 80px;
+        max-width: 80px; */
+        /* text-align: center;
+        margin-left: -80px !important; */
     }
     .dropdown-toggle::after {
         top: auto;
@@ -387,7 +391,7 @@ a.article:hover {
   border: #fff solid 2px;
   -moz-border-radius: 0.8em;
   -webkit-border-radius: 0.8em;
-  display: inline-block;
+  display: none;
   font-weight: bold;
   margin-right: 5px;
   text-align: center;
