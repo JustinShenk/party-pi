@@ -69,9 +69,7 @@ function start(stopTracks=true) {
 
   for (var i = 0; i < videoSelect.options.length; i++) {
     if (videoSelect.options[i].text.includes("Front")) {
-      alert(i + videoSelect.options[i].value);
       videoSelect.value = videoSource.options[i].value;
-      alert("selecting " + i);
     }
   }
 
