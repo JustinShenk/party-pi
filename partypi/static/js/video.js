@@ -30,8 +30,6 @@ function gotDevices(deviceInfos) {
     if (deviceInfo.kind === 'videoinput') {
       option.text = deviceInfo.label || 'camera ' + (videoSelect.length + 1);
       videoSelect.appendChild(option);
-    } else {
-      console.log('Some other kind of source/device: ', deviceInfo);
     }
   }
   selectors.forEach(function(select, selectorIndex) {
@@ -56,32 +54,16 @@ function gotStream(stream) {
   return navigator.mediaDevices.enumerateDevices();
 }
 
-function start() {
-  if (window.stream) {
-    window.stream.getTracks().forEach(function(track) {
-      track.stop();
-    });
-  }
-  var videoSource = videoSelect.value;
-  var constraints = {
-    audio: false,
-    video: {
-      deviceId: videoSource ? {exact: videoSource} : undefined,
-      facingMode: "user"
-    }
-  };
-  navigator.mediaDevices.getUserMedia(constraints).
-      then(gotStream).then(gotDevices).catch(handleError);
-}
-
 videoSelect.onchange = start;
 
 start();
 
-function start() {
+function start(stopTracks=true) {
   if (window.stream) {
     window.stream.getTracks().forEach(function(track) {
-      track.stop();
+      if (stopTracks) {
+        track.stop();
+      }
     });
   }
   var videoSource = videoSelect.value;

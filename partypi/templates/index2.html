@@ -498,8 +498,7 @@
           try {
             // start camera again
             // $("#videoElement").css('visibility','visible');
-            navigator.mediaDevices.getUserMedia(constraints).
-                then(handleSuccess).catch(handleError);
+            start(stopTracks=false);
             $("#videoElement").addClass("flipH");
             clearTimeout(takePhotoTimerID);
             clearTimeout(countdownTimerID);
