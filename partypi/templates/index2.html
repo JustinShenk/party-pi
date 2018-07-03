@@ -72,13 +72,13 @@
             </div>
             <div id="gameInfo">
               <span>
-            Let's play Party Pi, a computer vision emotion detection game</br>
+            Let's play Party Pi, a computer vision emotion game</br>
             by Justin Shenk.
             </span>
           </div>
           <div id="letsPlay">
             <!-- <span>Let's play</span> -->
-            <button id="btn-letsPlay" onclick="startGame();" type="button" class="btn btn-light btn-lg">Let's play</button>
+            <button id="btn-letsPlay" onclick="startGame();" type="button" class="btn btn-light btn-lg btn-square">Let's play</button>
           </div>
         </div>
           <img onclick="selectDevice()" id="logo" src="{{ url_for('static',filename='Peltarion_logotype.png') }}"></img>
@@ -93,9 +93,9 @@
               <a href="#" onclick="notImplementedWarning()"><i class="fa fa-envelope"> </i> Get an email with your score</a>
               </p>
             </div>
-            <button id="prompt" class="main-btn" onclick="takePhoto()" type="button" class="btn-outline-secondary" data-emotion="happy">Show </button>
-            <button id="playAgain" class="main-btn" onclick="playAgain()" type="button" class="btn-outline-secondary">Let's play again</button>
-            <button id="retakePhoto" class="main-btn" onclick="playAgain()" type="button" class="btn-outline-secondary">No face found. Try again!</button>
+            <button id="prompt" class="main-btn" onclick="takePhoto()" type="button" class="btn-outline-secondary btn-square" data-emotion="happy">Show </button>
+            <button id="playAgain" class="main-btn" onclick="playAgain()" type="button" class="btn-outline-secondary btn-square">Let's play again</button>
+            <button id="retakePhoto" class="main-btn" onclick="playAgain()" type="button" class="btn-outline-secondary btn-square">No face found. Try again!</button>
           </div>
 
           <div id="photoCountdown">
@@ -221,7 +221,7 @@
         const galleryLength = $(".card-img-top").length;
         const img_filename = "img_" + galleryLength;
         const download_button = '<button type="button" id="btn_' + galleryLength +
-        '" class="btn btn-sm btn-outline-secondary view-btn" onclick="saveMe(&apos;img_' + galleryLength + '&apos;)"><i class="fa fa-download"></i></button>'
+        '" class="btn btn-sm btn-outline-secondary view-btn btn-square" onclick="saveMe(&apos;img_' + galleryLength + '&apos;)"><i class="fa fa-download"></i></button>'
         const img = '<img id="' + img_filename + '" class="card-img-top" src="' + img_src +
           '" alt="Card image cap">'
         const myCard = $('<div class="col-md-4" style=""><div class="card mb-4 box-shadow">' +
