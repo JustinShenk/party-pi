@@ -111,6 +111,7 @@
       <nav id="sidebar">
         <div class="select" style="display:none;">
           <label for="videoSource">Video source: </label><select id="videoSource"></select>
+          <span id="alpha"></span>
         </div>
           <i id="sidebarTrophy" class="fa fa-trophy fa-5x"></i>
 
@@ -494,7 +495,8 @@
     }
 
     function startCamera() {
-        if ($("#videoElement").css('display') === 'block') { // camera visible
+        // if ($("#videoElement").css('display') === 'block') { // camera visible
+        if (true) {
           try {
             // start camera again
             // $("#videoElement").css('visibility','visible');
@@ -529,6 +531,7 @@
       $("#videoElement").css('visibility','visible');
       $("#videoElement").addClass('flipH');
       startCamera();
+      $(".overlay").show();
       showPrompt();
     }
 

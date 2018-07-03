@@ -56,7 +56,7 @@ function gotStream(stream) {
 
 videoSelect.onchange = start;
 
-start();
+// start();
 
 function start(stopTracks=true) {
   if (window.stream) {
@@ -66,7 +66,17 @@ function start(stopTracks=true) {
       }
     });
   }
+
+  for (var i = 0; i < videoSelect.options.length; i++) {
+    if (videoSelect.options[i].text.includes("Front")) {
+      alert(i + videoSelect.options[i].value);
+      videoSelect.value = videoSource.options[i].value;
+      alert("selecting " + i);
+    }
+  }
+
   var videoSource = videoSelect.value;
+
   var constraints = {
     audio: false,
     video: {
@@ -77,9 +87,28 @@ function start(stopTracks=true) {
   navigator.mediaDevices.getUserMedia(constraints).
       then(gotStream).then(gotDevices).catch(handleError);
 }
-var videoSource = videoSelect.value;
+
 videoSelect.onchange = start;
 
 function handleError(error) {
   console.log('navigator.getUserMedia error: ', error);
 }
+
+function handleOrientation(event) {
+  try {
+    var alpha = event.alpha;
+    $("#alpha").text(alpha);
+    if (alpha >= 150 && alpha <= 210) {
+        $("video").addClass("flipV");
+    } else {
+      $("video").removeClass("flipV");
+    }
+  }
+  catch {
+    console.log("No alpha for device.");
+  }
+}
+
+window.addEventListener('deviceorientation', handleOrientation, true);
+
+handleOrientation();
