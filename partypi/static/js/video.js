@@ -112,6 +112,6 @@ function handleOrientation(event) {
   }
 }
 
-window.addEventListener('deviceorientation', handleOrientation, true, once=true);
+window.addEventListener('deviceorientation', handleOrientation, true);
 
 handleOrientation();
