@@ -443,3 +443,9 @@ if __name__ == '__main__':
     app.run(host='localhost',
             debug=debug,
             threaded=threaded)
+
+if __name__ != '__main__':
+    # Gunicorn running
+    gunicorn_logger = logging.getLogger('gunicorn.error')
+    app.logger.handlers = gunicorn_logger.handlers
+    app.logger.setLevel(gunicorn_logger.level)
