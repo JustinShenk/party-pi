@@ -97,16 +97,16 @@ function handleError(error) {
 
 function handleOrientation(event) {
   try {
-    if (navigator.userAgent.match(/iPad/i)) {
-      var alpha = event.alpha;
-      $("#alpha").text(alpha);
-      if (alpha >= 0 && alpha <= 40) {
-          $("video").addClass("flipV");
-      } else {
-        $("video").removeClass("flipV");
-      }
+    // if (navigator.userAgent.match(/iPad/i)) {
+    var alpha = event.alpha;
+    $("#alpha").text(alpha);
+    if (alpha >= 0 && alpha <= 40) {
+        $("video").addClass("flipV");
+    } else {
+      $("video").removeClass("flipV");
     }
   }
+  // }
   catch {
     console.log("No alpha for device.");
   }
