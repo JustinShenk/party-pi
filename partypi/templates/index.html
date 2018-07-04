@@ -182,6 +182,7 @@
           <div class="select" style="display:none;">
             <label for="videoSource">Video source: </label><select id="videoSource"></select>
             <span id="alpha"></span>
+          </div>
           <div id='leaderboardHappy' style="display:none">
             <h3>Happy</h3>
             <div class="row">
@@ -339,7 +340,6 @@
         $("#placeholderImage").hide();
         $("#prompt").show();
         $("#videoElement").show();
-        startCamera();
         $("#photoCountdown").show();
         if (showGallery) {
           // move photo from main display to gallery
@@ -579,6 +579,7 @@
      * Update the leaderboard with `facesWithScores`.
      */
     function updateLeaderboard(facesWithScores) {
+      console.log(facesWithScores);
       $leaderboard = $("#leaderboardContent");
       for (var i = 0; i < facesWithScores.length; i++) {
         const faceURL = facesWithScores[i][0];
@@ -708,11 +709,12 @@
 
     function startCamera() {
       $("#videoElement").get(0).srcObject.getVideoTracks().forEach(track => track.enabled = true);
-        if ($("#videoElement").css('display') === 'block') { // camera visible
+        if ($("#videoElement").css('display') != 'none') { // camera visible
           try {
             // start camera again
             // navigator.mediaDevices.getUserMedia(constraints).
             //     then(handleSuccess).catch(handleError);
+            start();
             clearTimeout(captureImageTimerID);
             clearTimeout(countdownTimerID);
             $("#photoCountdown").hide();
@@ -751,6 +753,8 @@
 
       // Inactive
       window.addEventListener('blur', pauseCamera);
+      start();
+      initPlayButton();
 
       $('#mode-toggle').change(
           function(){
