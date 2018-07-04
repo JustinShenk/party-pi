@@ -100,7 +100,7 @@ function handleOrientation(event) {
     if (navigator.userAgent.match(/iPad/i)) {
       var alpha = event.alpha;
       $("#alpha").text(alpha);
-      if (alpha >= 150 && alpha <= 210) {
+      if (alpha >= 0 && alpha <= 40) {
           $("video").addClass("flipV");
       } else {
         $("video").removeClass("flipV");
