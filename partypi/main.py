@@ -297,7 +297,7 @@ def image():
             form = request.form
             for key in form.keys():
                 for value in form.getlist(key):
-                    app.logger.info(key, ":", value[:50])
+                    app.logger.debug(key, ":", value[:50])
 
             image_b64 = form.get('imageBase64')
             if image_b64 is None:
@@ -324,18 +324,18 @@ def image():
             photo_path = 'static/images/{}.jpg'.format(str(uuid.uuid4()))
             cv2.imwrite(photo_path, photo)
             app.logger.info("Saved image to {}".format(photo_path))
-            addr = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
+            addr = request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
             message = "Look who's {} at ICML".format(emotion)
-            # try:
-            #     if form.get('canTweetPhoto') == 'true':
-            #         tweet_image(photo_path, message)
-            #     else:
-            #         showing = False
-            #         if emotion in ['fear', 'surprise']:
-            #             showing = True
-            #         tweet_message("Someone is {}{} at {}".format("showing " if showing else "", emotion, addr))
-            # except Exception as e:
-            #     print(e)
+            try:
+                if form.get('canTweetPhoto') == 'true':
+                    tweet_image(photo_path, message)
+                else:
+                    showing = False
+                    if emotion in ['fear', 'surprise']:
+                        showing = True
+                    tweet_message("Someone is {}{} at {}".format("showing " if showing else "", emotion, addr))
+            except Exception as e:
+                print(e)
             response = jsonify(success=True, photoPath=photo_path, emotion=emotion, facesWithScores=faces_with_scores, addr=addr)
             status_code = 200
         except Exception as e:
@@ -398,7 +398,7 @@ def singleplayer():
 def index():
     try:
         debug_js = 'true' if debug else 'false'
-        app.logger.info("Page accessed from {}".format(request.environ.get('HTTP_X_REAL_IP', request.remote_addr)))
+        app.logger.info("Page accessed from {}".format(request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)))
         return render_template('index.html')
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()
@@ -410,8 +410,7 @@ def index():
 def v2():
     try:
         debug_js = 'true' if debug else 'false'
-        app.logger.info("Page accessed from {}".format(request.environ.get('HTTP_X_REAL_IP', request.remote_addr)))
-        app.logger.info("ENV variables {}".format(request.environ))
+        app.logger.info("Page accessed from {}".format(request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)))
         return render_template('index2.html')
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()
