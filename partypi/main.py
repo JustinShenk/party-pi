@@ -411,6 +411,7 @@ def v2():
     try:
         debug_js = 'true' if debug else 'false'
         app.logger.info("Page accessed from {}".format(request.environ.get('HTTP_X_REAL_IP', request.remote_addr)))
+        app.logger.info("ENV variables {}".format(request.environ))
         return render_template('index2.html')
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()
