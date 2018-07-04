@@ -46,6 +46,7 @@ function gotDevices(deviceInfos) {
         videoSelect.value = videoSource.options[i].value;
       }
     }
+    firstTime = false;
   }
 }
 
@@ -96,12 +97,14 @@ function handleError(error) {
 
 function handleOrientation(event) {
   try {
-    var alpha = event.alpha;
-    $("#alpha").text(alpha);
-    if (alpha >= 150 && alpha <= 210) {
-        $("video").addClass("flipV");
-    } else {
-      $("video").removeClass("flipV");
+    if (navigator.userAgent.match(/iPad/i)) {
+      var alpha = event.alpha;
+      $("#alpha").text(alpha);
+      if (alpha >= 150 && alpha <= 210) {
+          $("video").addClass("flipV");
+      } else {
+        $("video").removeClass("flipV");
+      }
     }
   }
   catch {
@@ -109,6 +112,6 @@ function handleOrientation(event) {
   }
 }
 
-window.addEventListener('deviceorientation', handleOrientation, true);
+window.addEventListener('deviceorientation', handleOrientation, true, once=true);
 
 handleOrientation();
