@@ -96,9 +96,9 @@ def add_to_current(score, service):
     print(len(values) - 1)
     last_row = len(values)
     next_col = chr(65 + len(values[-1]))
-    if next_col < "F":
-        next_col = "F"  # don't overwrite phone, etc.
-    if next_col > "L":  # googleapiclient.errors.HttpError only to L
+    if next_col < "G":
+        next_col = "G"  # don't overwrite phone, etc.
+    if next_col > "S":  # googleapiclient.errors.HttpError only to width of sheet
         return "Too many tries"
     range_name = 'ICML2018!{}{}'.format(next_col, last_row)
     values = [
@@ -179,7 +179,7 @@ def rank_players(player_data, photo, current_emotion='happy',
         x1, x2, y1, y2 = apply_offsets(face_coordinates, emotion_offsets)
         face_image = photo[y1:y2, x1:x2]
         cv2.imwrite(face_photo_path, face_image)
-        app.logger.info("saved to {}".format(face_photo_path))
+        app.logger.info("Saved face to {}".format(face_photo_path))
         faces_with_scores.append((face_photo_path, first_emotion))
         # second_emotion = second_emotion_scores[i]
 

@@ -15,4 +15,4 @@ tweepy
 google_auth_oauthlib
 google-api-python-client
 boto3
-
+flask-mail

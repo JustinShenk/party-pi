@@ -54,7 +54,8 @@ setup(
         'gevent'
         'google-auth-oauthlib',
         'google-api-python-client',
-        'boto3'
+        'boto3',
+        'flask-mail'
     ],
     url=REPOSITORY,
     download_url='{}/tarball/{}'.format(REPOSITORY, VERSION),
