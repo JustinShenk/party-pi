@@ -4,6 +4,7 @@ import google.oauth2.credentials
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
 import io
+import json
 import flask
 import logging
 import numpy as np
@@ -54,6 +55,12 @@ face_detector = load_detection_model()
 if not os.path.exists('static/images'):
     os.mkdir('static/images')
 
+CLIENT_SECRETS_FILE = 'client_secret.json'
+if not os.path.exists(CLIENT_SECRETS_FILE):
+    goog = json.loads(os.environ.get('GOOG'))
+    with open(CLIENT_SECRETS_FILE,'w') as outfile:
+        json.dump(goog, outfile)
+SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 RANGE_NAME = 'ICML2018!A:Z'
 SPREADSHEET_ID = os.environ.get('SPREADSHEET_ID')
 API_SERVICE_NAME = 'sheets'
@@ -338,8 +345,11 @@ def get_face(frame):
 
 
 def update_spreadsheet(faces_with_scores):
-    score = faces_with_scores[0][1]
-    add_score(score)
+    try:
+        score = faces_with_scores[0][1]
+        return add_score(score)
+    except IndexError:
+        return None
 
 
 @app.route('/image', methods=['POST', 'GET'])
@@ -348,10 +358,6 @@ def image():
         app.logger.info("POST request")
         try:
             form = request.form
-            # for key in form.keys():
-            #     for value in form.getlist(key):
-            #         app.logger.debug(key, ":", value[:50])
-
             image_b64 = form.get('imageBase64')
             if image_b64 is None:
                 app.logger.error("No image in request.")
@@ -390,7 +396,7 @@ def image():
                         "showing " if showing else "", emotion, addr))
             except Exception as e:
                 print(e)
-            response = jsonify(
+            return jsonify(
                 success=True,
                 photoPath=photo_path,
                 emotion=emotion,
@@ -402,8 +408,7 @@ def image():
             exc_type, exc_obj, exc_tb = sys.exc_info()
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
             app.logger.error(exc_type, fname, exc_tb.tb_lineno)
-            response = jsonify(success=False, photoPath='')
-            status_code = 500
+            return jsonify(success=False, photoPath='', statusCode=500)
         return make_response(response, status_code)
 
 
@@ -435,30 +440,31 @@ def singleplayer():
                 player_data, img, emotion, one_player=True)
             photo_path = 'static/images/{}.jpg'.format(str(uuid.uuid4()))
             if len(faces_with_scores) is 0:
-                response = jsonify(
+                app.logger.error("No face found")
+                return jsonify(
                     success=False,
                     photoPath=None,
                     emotion=emotion,
                     facesWithScores=[],
-                    playerIndex=None)
-            cv2.imwrite(photo_path, photo)
-            app.logger.info("Saved image to {}".format(photo_path))
-            update_spreadsheet(faces_with_scores)
-            response = jsonify(
-                success=True,
-                photoPath=photo_path,
-                emotion=emotion,
-                facesWithScores=faces_with_scores,
-                playerIndex=player_index)
-            status_code = 200
+                    playerIndex=None,
+                    statusCode = 500)
+            else:
+                cv2.imwrite(photo_path, photo)
+                app.logger.info("Saved image to {}".format(photo_path))
+                update_spreadsheet(faces_with_scores)
+                return jsonify(
+                    success=True,
+                    photoPath=photo_path,
+                    emotion=emotion,
+                    facesWithScores=faces_with_scores,
+                    playerIndex=player_index,
+                    statusCode = 200)
         except Exception as e:
             app.logger.error("ERROR:", e)
             exc_type, exc_obj, exc_tb = sys.exc_info()
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
             app.logger.error(exc_type, fname, exc_tb.tb_lineno)
-            response = jsonify(success=False, photoPath='')
-            status_code = 500
-        return make_response(response, status_code)
+            return jsonify(success=False, photoPath='', emotion=emotion, facesWithScores = faces_with_scores, statusCode=501)
 
 
 def get_recent_player():
@@ -480,18 +486,20 @@ def email():
         app.logger.error("No image in request.")
         return jsonify(success=False, photoPath='')
     img = data_uri_to_cv2_img(image_b64)
-    cv2.imwrite('email.jpg', img)
+    img_path = 'email.jpg'
+    cv2.imwrite(img_path, img)
     email, name, twitter = get_player_contact()
-    print(email, name, twitter)
     with app.app_context():
         msg = Message(
             subject="Happy or Sad at ICML 2018",
             sender=app.config.get("MAIL_USERNAME"),
             recipients=["justin@peltarion.com", "shenk.justin@gmail.com"],  # replace with your email for testing
-            body="Hi {},\nThanks for playing!\n<img src='data:image/jpeg;base64,{}'/>'".
+            body="Hi {},\nThanks for playing!".
             format(name, image_b64))
+        with app.open_resource(img_path) as fp:
+            msg.attach(img_path, "image/jpeg", fp.read())
         mail.send(msg)
-    return jsonify(success=True, photoPath='email.jpg')
+    return jsonify(success=True, photoPath=img_path)
 
 
 @app.route('/tweet', methods=['GET', 'POST'])
@@ -502,7 +510,11 @@ def tweet():
         app.logger.error("No image in request.")
         return jsonify(success=False, photoPath='')
     img = data_uri_to_cv2_img(image_b64)
-    cv2.imwrite('tweet.jpg', img)
+    img_path = 'email.jpg'
+    cv2.imwrite(img_path, img)
+    email, name, twitter = get_player_contact()
+    message = "{} at @Peltarion's Booth at #ICML".format(form.get('emotion'))
+    tweet_image(img_path, message)
     return jsonify(success=True, photoPath='tweet.jpg')
 
 
@@ -588,9 +600,9 @@ def get_service():
 
 @app.route('/test')
 def test_api_request():
-    serivce = get_service()
+    service = get_service()
     values = get_spreadsheet(service)
-    return flask.jsonify(values)
+    return jsonify(values)
 
 
 def credentials_to_dict(credentials):

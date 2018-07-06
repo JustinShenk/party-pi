@@ -188,12 +188,13 @@
       document.body.removeChild(a);
     }
 
-    function sendPic(canvas, destination) {
+    function sendPic(canvas, api) {
       const dataURL = canvas.toDataURL('image/jpeg', 1.0);
       var fd = new FormData(document.forms[0]);
       fd.append("imageBase64", dataURL);
+      fd.append("emotion", currentEmotion);
       let xhr = new XMLHttpRequest();
-      xhr.open("POST", "{{ url_for('" + destination + "')}}");
+      xhr.open("POST", "/"+api);
       xhr.send(fd);
     }
 
@@ -210,23 +211,27 @@
     }
 
     function tweetPic() {
+      const api = 'tweet';
       var photo = getPhoto();
       html2canvas(photo, {
         allowTaint:true,
         backroundColor:null
       }).then(function(canvas){
-        sendPic(canvas,'tweet');
+        sendPic(canvas, api);
       });
+      playAgain();
     }
 
     function emailPic() {
+      const api = 'email';
       var photo = getPhoto();
       html2canvas(photo, {
         allowTaint:true,
         backroundColor:null
       }).then(function(canvas){
-        sendPic(canvas,'email');
+        sendPic(canvas, api);
       });
+      playAgain();
     }
 
     function flipVideoV() {
@@ -385,61 +390,6 @@
       }
     }
 
-    /*
-     * Update the leaderboard with `facesWithScores`.
-     */
-    // function updateLeaderboard(facesWithScores) {
-    //   $leaderboard = $("#leaderboardContent");
-    //   for (var i = 0; i < facesWithScores.length; i++) {
-    //     const faceURL = facesWithScores[i][0];
-    //     const score = parseInt(facesWithScores[i][1]);
-    //     const imgID = currentEmotion + score;
-    //     const capEmotion = capitalizeFirstLetter(currentEmotion)
-    //     const sectionID = "leaderboard" + capEmotion;
-    //     $leaderboardSection = $('#' + sectionID);
-    //     const sectionLength = $("#" + sectionID + " img").length;
-    //     if (sectionLength == 0) {
-    //       // Show if first image in section
-    //       $leaderboardSection.show();
-    //     }
-    //     // Sort faces in leaderboard section by score
-    //     var faceRank = 1; // initialize
-    //     var sameScores = 0;
-    //     $('#' + sectionID + ' img:visible').each(function(index, value) {
-    //       var leaderImgID = value.id;
-    //       // var leaderEmotion = leaderImgID.match(/[a-zA-Z]+/g)[0];
-    //       const leaderScore = parseInt(leaderImgID.match(/\d+/g)[0]);
-    //       if (leaderScore > score) {
-    //         faceRank += 1;
-    //       } else if (leaderScore === score) {
-    //         sameScores += 1;
-    //       }
-    //     });
-    //     faceRank += sameScores;
-    //     if (faceRank <= 3) {
-    //       $leaderboardPlace = $("#" + currentEmotion + "Place" + faceRank);
-    //
-    //       const rankedPlayers = $leaderboardPlace.find('img').length;
-    //       if (faceRank === 1 && rankedPlayers === 0) { // only when empty
-    //         // $firstPlace = $("#" + currentEmotion + "Place1");
-    //         // $firstplace.addClass('overlay');
-    //         // const trophy = '<i class="fa fa-trophy" style="font-size: 20px; color: gold"></i>'
-    //         // $leaderboardSection.prepend(trophy);
-    //       }
-    //
-    //       // Bump players down if rank <= number of rankedPlayers
-    //       bumpLeaderboardCards(faceRank, rankedPlayers);
-    //
-    //       var leaderboardCard = $('<div class="leaderboardCard col-md-4"><div class="card mb-4 box-shadow"><img id="' + imgID + '" class="card-img-top" src="' + faceURL +
-    //         '" alt="Card image cap"><div class="card-body" style="padding: 0.25rem"><div class="d-flex justify-content-between align-items-center"><div class="btn-group"></div><small class="text-muted">' + score + " points" +
-    //         '</small></div></div></div>');
-    //       $leaderboardPlace.append(leaderboardCard);
-    //     } else {
-    //       console.log("Try again! Score:" + score + ", Emotion: " + capEmotion);
-    //     }
-    //   }
-    // }
-
     function retakePhoto(video, dataURL) {
       blurImage(video, dataURL);
       $("#retakePhoto").show();
@@ -471,7 +421,7 @@
       canvasContext.scale(-1, 1);
       canvasContext.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      const dataURL = canvas.toDataURL('image/jpeg', 1.0);
+      var dataURL = canvas.toDataURL('image/jpeg', 1.0);
       var fd = new FormData(document.forms[0]);
       fd.append("imageBase64", dataURL);
       fd.append("emotion", currentEmotion);
@@ -493,7 +443,6 @@
         $("#spinner").removeClass("loader");
         // Show original photo and add to leaderboard
         const playerCount = data.facesWithScores.length;
-
         if (playerCount === 0) {
           retakePhoto(video, dataURL);
           return;
@@ -521,8 +470,8 @@
         // }
         // $("#photoCountdown").hide();
         // $("#play").show();
-      }).fail(function(data) {
-        console.log(data.responseCode);
+      }).fail(function(data, textStatus, xhr) {
+        console.log(textStatus);
         isCaptureInProgress = false;
       });
     };
