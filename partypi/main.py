@@ -469,7 +469,16 @@ def singleplayer():
 
 
 def get_recent_player():
-    service = get_service()
+    if 'credentials' not in flask.session:
+        return flask.redirect('authorize')
+
+    # Load credentials from the session.
+    credentials = google.oauth2.credentials.Credentials(
+        **flask.session['credentials'])
+
+    service = googleapiclient.discovery.build(
+        API_SERVICE_NAME, API_VERSION, credentials=credentials)
+    flask.session['credentials'] = credentials_to_dict(credentials)
     values = get_spreadsheet(service)
     return values[-1]
 
@@ -606,11 +615,6 @@ def get_latest_entry(service):
 
 @app.route('/add/<int:score>')
 def add_score(score):
-    service = get_service()
-    return add_to_current(score, service)
-
-
-def get_service():
     if 'credentials' not in flask.session:
         return flask.redirect('authorize')
 
@@ -621,12 +625,21 @@ def get_service():
     service = googleapiclient.discovery.build(
         API_SERVICE_NAME, API_VERSION, credentials=credentials)
     flask.session['credentials'] = credentials_to_dict(credentials)
-    return service
+    return add_to_current(score, service)
 
 
 @app.route('/test')
 def test_api_request():
-    service = get_service()
+    if 'credentials' not in flask.session:
+        return flask.redirect('authorize')
+
+    # Load credentials from the session.
+    credentials = google.oauth2.credentials.Credentials(
+        **flask.session['credentials'])
+
+    service = googleapiclient.discovery.build(
+        API_SERVICE_NAME, API_VERSION, credentials=credentials)
+    flask.session['credentials'] = credentials_to_dict(credentials)
     values = get_spreadsheet(service)
     return jsonify(values)
 
