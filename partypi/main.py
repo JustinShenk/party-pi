@@ -3,6 +3,7 @@ import cv2
 import google.oauth2.credentials
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
+import boto3
 import io
 import json
 import flask
@@ -514,9 +515,34 @@ def tweet():
     cv2.imwrite(img_path, img)
     email, name, twitter = get_player_contact()
     message = "{} at @Peltarion's Booth at #ICML".format(form.get('emotion'))
-    tweet_image(img_path, message)
+    tweet_image(img_path, twitter, message)
     return jsonify(success=True, photoPath='tweet.jpg')
 
+
+@app.route('/sign_s3/')
+def sign_s3():
+  S3_BUCKET = os.environ.get('S3_BUCKET')
+
+  file_name = request.args.get('file_name')
+  file_type = request.args.get('file_type')
+
+  s3 = boto3.client('s3')
+
+  presigned_post = s3.generate_presigned_post(
+    Bucket = S3_BUCKET,
+    Key = file_name,
+    Fields = {"acl": "public-read", "Content-Type": file_type},
+    Conditions = [
+      {"acl": "public-read"},
+      {"Content-Type": file_type}
+    ],
+    ExpiresIn = 3600
+  )
+
+  return json.dumps({
+    'data': presigned_post,
+    'url': 'https://%s.s3.amazonaws.com/%s' % (S3_BUCKET, file_name)
+  })
 
 @app.route('/')
 def index():

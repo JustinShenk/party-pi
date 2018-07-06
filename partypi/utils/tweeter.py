@@ -35,7 +35,7 @@ def tweet_message(message):
     except tweepy.TweepError as e:
         print(e.reason)
 
-def tweet_image(filename, message):
+def tweet_image(filename, twitter, message):
     api = twitter_api()
     api.update_with_media(filename, status=message)
     print("Tweeted: {}".format(message))
