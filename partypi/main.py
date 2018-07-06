@@ -1,6 +1,10 @@
 import base64
 import cv2
+import google.oauth2.credentials
+import google_auth_oauthlib.flow
+import googleapiclient.discovery
 import io
+import flask
 import logging
 import numpy as np
 import os
@@ -11,6 +15,7 @@ import tensorflow as tf
 import uuid
 
 from flask import Flask, Response, request, render_template, jsonify, make_response
+from flask_mail import Mail, Message
 from io import BytesIO
 from keras.models import load_model
 from keras import backend as K
@@ -25,10 +30,23 @@ graph = tf.get_default_graph()
 
 emotion_classifier = load_model('emotion_model.hdf5', compile=False)
 
+# from flask_googlelogin import GoogleLogin
 app = Flask(__name__)
 app.config.update(dict(PREFERRED_URL_SCHEME='https'))
+app.secret_key = os.environ.get("FLASK_SECRET_KEY")
 
-debug = False
+mail_settings = {
+    "MAIL_SERVER": 'smtp.gmail.com',
+    "MAIL_PORT": 465,
+    "MAIL_USE_TLS": False,
+    "MAIL_USE_SSL": True,
+    "MAIL_USERNAME": os.environ['EMAIL_USER'],
+    "MAIL_PASSWORD": os.environ['EMAIL_PASSWORD']
+}
+
+app.config.update(mail_settings)
+mail = Mail(app)
+
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
 app.logger.info("Game loaded")
@@ -36,18 +54,23 @@ face_detector = load_detection_model()
 if not os.path.exists('static/images'):
     os.mkdir('static/images')
 
+RANGE_NAME = 'ICML2018!A:Z'
+SPREADSHEET_ID = os.environ.get('SPREADSHEET_ID')
+API_SERVICE_NAME = 'sheets'
+API_VERSION = 'v4'
 # Get input model shapes for inference
 emotion_target_size = emotion_classifier.input_shape[1:3]
 
 # Get emotions
 EMOTIONS = list(get_labels().values())
 
+
 def draw_logo(photo, logo="PartyPi.png"):
     """Draws logo on `photo` in bottom right corner."""
     logo = cv2.imread(logo, cv2.IMREAD_UNCHANGED)
     photoRows, photoCols = photo.shape[:2]
-    rows,cols = logo.shape[:2]
-    y0, y1, x0, x1 = photoRows-rows, photoRows, 0, cols
+    rows, cols = logo.shape[:2]
+    y0, y1, x0, x1 = photoRows - rows, photoRows, 0, cols
     for c in range(0, 3):
         logo_slice = logo[:, :, c] * \
             (logo[:, :, 3] / 255.0)
@@ -57,7 +80,37 @@ def draw_logo(photo, logo="PartyPi.png"):
         photo[y0:y1, x0:x1, c] = logo_slice + bg_slice
     return photo
 
-def rank_players(player_data, photo, current_emotion='happy', one_player=False):
+
+def add_to_current(score, service):
+    result = service.spreadsheets().values().get(
+        spreadsheetId=SPREADSHEET_ID, range=RANGE_NAME).execute()
+    values = result.get('values', [])
+    print(len(values) - 1)
+    last_row = len(values)
+    next_col = chr(65 + len(values[-1]))
+    if next_col < "F":
+        next_col = "F"  # don't overwrite phone, etc.
+    if next_col > "L":  # googleapiclient.errors.HttpError only to L
+        return "Too many tries"
+    range_name = 'ICML2018!{}{}'.format(next_col, last_row)
+    values = [
+        [score],
+    ]
+    body = {
+        'values': values,
+    }
+    result = service.spreadsheets().values().update(
+        spreadsheetId=SPREADSHEET_ID,
+        range=range_name,
+        valueInputOption='USER_ENTERED',
+        body=body).execute()
+    response = 'Updated cells in {}'.format(result.get('updatedRange'))
+    print(response)
+    return response
+
+
+def rank_players(player_data, photo, current_emotion='happy',
+                 one_player=False):
     """ Rank players and display.
 
     Args:
@@ -105,8 +158,8 @@ def rank_players(player_data, photo, current_emotion='happy', one_player=False):
         x1, x2 = faceRectangle['left'], faceRectangle['right']
         y1, y2 = faceRectangle['top'], faceRectangle['bottom']
 
-        if one_player: # mode
-            if (x2-x1) * (y2-y1) > largest_face:
+        if one_player:  # mode
+            if (x2 - x1) * (y2 - y1) > largest_face:
                 largest_face = largest_face
                 player_index = i
 
@@ -283,11 +336,11 @@ def get_face(frame):
         draw_bounding_box(face, frame, (255, 0, 0))
     return frame
 
-def getPlayersFace(facesWithScores):
-    player_face = None
-    # for fs in facesWithScores:
 
-    return faceWithScores
+def update_spreadsheet(faces_with_scores):
+    score = faces_with_scores[0][1]
+    add_score(score)
+
 
 @app.route('/image', methods=['POST', 'GET'])
 def image():
@@ -295,9 +348,9 @@ def image():
         app.logger.info("POST request")
         try:
             form = request.form
-            for key in form.keys():
-                for value in form.getlist(key):
-                    app.logger.debug(key, ":", value[:50])
+            # for key in form.keys():
+            #     for value in form.getlist(key):
+            #         app.logger.debug(key, ":", value[:50])
 
             image_b64 = form.get('imageBase64')
             if image_b64 is None:
@@ -319,12 +372,12 @@ def image():
             faces = detect_faces(face_detector, gray_image)
             player_data = predict_emotions(faces, gray_image, emotion)
             photo, faces_with_scores = rank_players(player_data, img, emotion)
-            app.logger.info("Faces with scores", faces_with_scores)
             photo = draw_logo(photo)
             photo_path = 'static/images/{}.jpg'.format(str(uuid.uuid4()))
             cv2.imwrite(photo_path, photo)
             app.logger.info("Saved image to {}".format(photo_path))
-            addr = request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
+            addr = request.environ.get('HTTP_X_FORWARDED_FOR',
+                                       request.remote_addr)
             message = "Look who's {} at ICML".format(emotion)
             try:
                 if form.get('canTweetPhoto') == 'true':
@@ -333,10 +386,16 @@ def image():
                     showing = False
                     if emotion in ['fear', 'surprise']:
                         showing = True
-                    tweet_message("Someone is {}{} at {}".format("showing " if showing else "", emotion, addr))
+                    tweet_message("Someone is {}{} at {}".format(
+                        "showing " if showing else "", emotion, addr))
             except Exception as e:
                 print(e)
-            response = jsonify(success=True, photoPath=photo_path, emotion=emotion, facesWithScores=faces_with_scores, addr=addr)
+            response = jsonify(
+                success=True,
+                photoPath=photo_path,
+                emotion=emotion,
+                facesWithScores=faces_with_scores,
+                addr=addr)
             status_code = 200
         except Exception as e:
             app.logger.error("ERROR:", e)
@@ -347,16 +406,13 @@ def image():
             status_code = 500
         return make_response(response, status_code)
 
+
 @app.route('/singleplayer', methods=['POST', 'GET'])
 def singleplayer():
     if request.method == 'POST':
         app.logger.info("POST request")
         try:
             form = request.form
-            for key in form.keys():
-                for value in form.getlist(key):
-                    app.logger.info(key, ":", value[:50])
-
             image_b64 = form.get('imageBase64')
             if image_b64 is None:
                 app.logger.error("No image in request.")
@@ -375,14 +431,25 @@ def singleplayer():
             gray_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             faces = detect_faces(face_detector, gray_image)
             player_data = predict_emotions(faces, gray_image, emotion)
-            photo, faces_with_scores, player_index = rank_players(player_data, img, emotion, one_player=True)
-            app.logger.info("Faces with scores", faces_with_scores)
+            photo, faces_with_scores, player_index = rank_players(
+                player_data, img, emotion, one_player=True)
             photo_path = 'static/images/{}.jpg'.format(str(uuid.uuid4()))
             if len(faces_with_scores) is 0:
-                response = jsonify(success=False, photoPath=None, emotion=emotion, facesWithScores=[], playerIndex=None)
+                response = jsonify(
+                    success=False,
+                    photoPath=None,
+                    emotion=emotion,
+                    facesWithScores=[],
+                    playerIndex=None)
             cv2.imwrite(photo_path, photo)
             app.logger.info("Saved image to {}".format(photo_path))
-            response = jsonify(success=True, photoPath=photo_path, emotion=emotion, facesWithScores=faces_with_scores, playerIndex=player_index)
+            update_spreadsheet(faces_with_scores)
+            response = jsonify(
+                success=True,
+                photoPath=photo_path,
+                emotion=emotion,
+                facesWithScores=faces_with_scores,
+                playerIndex=player_index)
             status_code = 200
         except Exception as e:
             app.logger.error("ERROR:", e)
@@ -394,11 +461,56 @@ def singleplayer():
         return make_response(response, status_code)
 
 
+def get_recent_player():
+    service = get_service()
+    values = get_spreadsheet(service)
+    return values[-1]
+
+
+def get_player_contact():
+    data = get_recent_player()
+    return data[1:4]  # email, name, twitter
+
+
+@app.route('/email', methods=['GET', 'POST'])
+def email():
+    form = request.form
+    image_b64 = form.get('imageBase64')
+    if image_b64 is None:
+        app.logger.error("No image in request.")
+        return jsonify(success=False, photoPath='')
+    img = data_uri_to_cv2_img(image_b64)
+    cv2.imwrite('email.jpg', img)
+    email, name, twitter = get_player_contact()
+    print(email, name, twitter)
+    with app.app_context():
+        msg = Message(
+            subject="Happy or Sad at ICML 2018",
+            sender=app.config.get("MAIL_USERNAME"),
+            recipients=["justin@peltarion.com", "shenk.justin@gmail.com"],  # replace with your email for testing
+            body="Hi {},\nThanks for playing!\n<img src='data:image/jpeg;base64,{}'/>'".
+            format(name, image_b64))
+        mail.send(msg)
+    return jsonify(success=True, photoPath='email.jpg')
+
+
+@app.route('/tweet', methods=['GET', 'POST'])
+def tweet():
+    form = request.form
+    image_b64 = form.get('imageBase64')
+    if image_b64 is None:
+        app.logger.error("No image in request.")
+        return jsonify(success=False, photoPath='')
+    img = data_uri_to_cv2_img(image_b64)
+    cv2.imwrite('tweet.jpg', img)
+    return jsonify(success=True, photoPath='tweet.jpg')
+
+
 @app.route('/')
 def index():
     try:
-        debug_js = 'true' if debug else 'false'
-        app.logger.info("Page accessed from {}".format(request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)))
+        app.logger.info("Page accessed from {}".format(
+            request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)))
         return render_template('index.html')
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()
@@ -409,13 +521,14 @@ def index():
 @app.route('/v2')
 def v2():
     try:
-        debug_js = 'true' if debug else 'false'
-        app.logger.info("Page accessed from {}".format(request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)))
+        app.logger.info("Page accessed from {}".format(
+            request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)))
         return render_template('index2.html')
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         print(exc_type, fname, exc_tb.tb_lineno)
+
 
 # HTTP Errors handlers
 
@@ -435,13 +548,111 @@ def server_error(e):
     """.format(e), 500
 
 
+def get_spreadsheet(service):
+    result = service.spreadsheets().values().get(
+        spreadsheetId=SPREADSHEET_ID, range='ICML2018!A:Z').execute()
+    values = result.get('values', [])
+    return values
+
+
+def get_latest_entry(service):
+    """Get last entry from spreadsheet"""
+    result = service.spreadsheets().values().get(
+        spreadsheetId=SPREADSHEET_ID, range=RANGE_NAME).execute()
+    values = result.get('values', [])
+    if not values:
+        print('No data found.')
+    else:
+        return values[-1]  # Email, name, Twitter handle
+
+
+@app.route('/add/<int:score>')
+def add_score(score):
+    service = get_service()
+    return add_to_current(score, service)
+
+
+def get_service():
+    if 'credentials' not in flask.session:
+        return flask.redirect('authorize')
+
+    # Load credentials from the session.
+    credentials = google.oauth2.credentials.Credentials(
+        **flask.session['credentials'])
+
+    service = googleapiclient.discovery.build(
+        API_SERVICE_NAME, API_VERSION, credentials=credentials)
+    flask.session['credentials'] = credentials_to_dict(credentials)
+    return service
+
+
+@app.route('/test')
+def test_api_request():
+    serivce = get_service()
+    values = get_spreadsheet(service)
+    return flask.jsonify(values)
+
+
+def credentials_to_dict(credentials):
+    return {
+        'token': credentials.token,
+        'refresh_token': credentials.refresh_token,
+        'token_uri': credentials.token_uri,
+        'client_id': credentials.client_id,
+        'client_secret': credentials.client_secret,
+        'scopes': credentials.scopes
+    }
+
+
+@app.route('/authorize')
+def authorize():
+    # Create flow instance to manage the OAuth 2.0 Authorization Grant Flow steps.
+    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
+        CLIENT_SECRETS_FILE, scopes=SCOPES)
+
+    flow.redirect_uri = flask.url_for('oauth2callback', _external=True)
+
+    authorization_url, state = flow.authorization_url(
+        # Enable offline access so that you can refresh an access token without
+        # re-prompting the user for permission. Recommended for web server apps.
+        access_type='offline',
+        # Enable incremental authorization. Recommended as a best practice.
+        include_granted_scopes='true')
+
+    # Store the state so the callback can verify the auth server response.
+    flask.session['state'] = state
+
+    return flask.redirect(authorization_url)
+
+
+@app.route('/oauth2callback')
+def oauth2callback():
+    # Specify the state when creating the flow in the callback so that it can
+    # verified in the authorization server response.
+    state = flask.session['state']
+
+    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
+        CLIENT_SECRETS_FILE, scopes=SCOPES, state=state)
+    flow.redirect_uri = flask.url_for('oauth2callback', _external=True)
+
+    # Use the authorization server's response to fetch the OAuth 2.0 tokens.
+    authorization_response = flask.request.url
+    flow.fetch_token(authorization_response=authorization_response)
+
+    # Store credentials in the session.
+    # ACTION ITEM: In a production app, you likely want to save these
+    #              credentials in a persistent database instead.
+    credentials = flow.credentials
+    flask.session['credentials'] = credentials_to_dict(credentials)
+
+    return flask.redirect(flask.url_for('test_api_request'))
+
+
 if __name__ == '__main__':
     threaded = False
     if 'TRAVIS' in os.environ:
         sys.exit()
-    app.run(host='localhost',
-            debug=debug,
-            threaded=threaded)
+    app.run(host='localhost', threaded=threaded)
 
 if __name__ != '__main__':
     # Gunicorn running

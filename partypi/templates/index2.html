@@ -19,11 +19,13 @@
   <script type="text/javascript" src="{{ url_for('static', filename='js/adapter-latest.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='js/exif.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='js/main.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/html2canvas.min.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='node_modules/rasterizehtml/dist/rasterizeHTML.allinone.js') }}"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
   <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
   <link href="{{ url_for('static', filename='css/style4.css') }}" rel="stylesheet">
   <script src="{{ url_for('static', filename='js/GaugeMeter.js') }}"></script>
-<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+  <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
   <script src="{{ url_for('static', filename='js/holder.min.js') }}"></script>
   <script id="mcjs">
     ! function(c, h, i, m, p) {
@@ -52,26 +54,29 @@
 <body>
   <div class="wrapper">
 
-      <!-- Page Content  -->
-      <div id="content">
-        <div class="container-fluid">
-          <div class="alert alert-info fade show alert-dismissible">
-            <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-            <strong>Information</strong> Links are not yet implemented.
-          </div>
-          <div id="spinner"></div>
-          <button type="button" id="sidebarCollapse" class="navbar-btn">
+    <!-- Page Content  -->
+    <div id="content">
+      <div class="container-fluid">
+        <div class="alert alert-info fade show alert-dismissible">
+          <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+          <strong>Information</strong> Links are not yet implemented.
+        </div>
+        <form enctype="multipart/form-data" action="{{url_for('static',filename='tweet') }}" method="post" style="display:none">
+            <input id="image-file" type="file" />
+        </form>
+        <div id="spinner"></div>
+        <button type="button" id="sidebarCollapse" class="navbar-btn">
             <!-- <i class="fas fa-align-left"></i> -->
             <span></span>
             <span></span>
             <span></span>
           </button>
 
-          <div id="startScreen">
-            <div id="startScreenLogo">
-            </div>
-            <div id="gameInfo">
-              <span>
+        <div id="startScreen">
+          <div id="startScreenLogo">
+          </div>
+          <div id="gameInfo">
+            <span>
             Let's play Party Pi, a computer vision emotion game</br>
             by Justin Shenk.
             </span>
@@ -81,16 +86,17 @@
             <button id="btn-letsPlay" onclick="startGame();" type="button" class="btn btn-light btn-lg btn-square">Let's play</button>
           </div>
         </div>
+        <div id="videoContainer" style='position:relative'>
+          <!-- <img id="placeholder"></img> -->
           <img onclick="selectDevice()" id="logo" src="{{ url_for('static',filename='Peltarion_logotype.png') }}"></img>
           <video class="flipH" playsinline muted autoplay loop id="videoElement" style="display:none;"></video>
-          <image id='placeholderImage' width='640' height='480' style='display: none; background-color: gray;'></image>
 
-          <div class="overlay">
+          <div class="overlay" style="display:none">
             <div class="score">
               <p id="shareLinks">
-              <a href="#" onclick="notImplementedWarning()"><i class="fab fa-twitter"> </i> Click here to share your score on Twitter</a>
+                <a href="#" onclick="tweetPic()"><i class="fab fa-twitter"> </i> Click here to share your score on Twitter</a>
                 <br/>
-              <a href="#" onclick="notImplementedWarning()"><i class="fa fa-envelope"> </i> Get an email with your score</a>
+                <a href="#" onclick="emailPic()"><i class="fa fa-envelope"> </i> Get an email with your score</a>
               </p>
             </div>
             <button id="prompt" class="main-btn" onclick="takePhoto()" type="button" class="btn-outline-secondary btn-square" data-emotion="happy">Show </button>
@@ -102,46 +108,47 @@
             <div id="countdownBar">
             </div>
           </div>
-          <img id="myImg" class="img-responsive" crossorigin="anonymous" src="" style="display:none;" />
-          <canvas id="myCanvas" hidden='true'></canvas>
+        </div>
       </div>
-  </div>
+      <!-- <canvas id="canvas" width="" height=""></canvas> -->
+      <img id="captured"/>
+    </div>
 
-      <!-- Sidebar  -->
-      <nav id="sidebar">
-        <div class="select" style="display:none;">
-          <label for="videoSource">Video source: </label><select id="videoSource"></select>
-          <div>
+    <!-- Sidebar  -->
+    <nav id="sidebar">
+      <div class="select" style="display:none;">
+        <label for="videoSource">Video source: </label><select id="videoSource"></select>
+        <div>
           <span id="alpha"></span>
         </div>
-          <div>
+        <div>
           <button type="button" onclick="flipVideoV()" id="flipVideo" class="btn navbar-btn">FlipV</button>
         </div>
-        </div>
-          <i id="sidebarTrophy" class="fa fa-trophy fa-5x"></i>
+      </div>
+      <i id="sidebarTrophy" class="fa fa-trophy fa-5x"></i>
 
-          <ul class="list-unstyled leaderboard">
-            {% for n in range(1,6) %}
-              <li>
-                <div class="wideCircle" id="place{{n}}" data-rank={{n}}>
-                  <div class="leaderboardPosition">
-                    <span class="name"></span>
-                    <span class="leaderboardScore"></span>
-                  </div>
-                  <span class="positionNumber">{{n}}</span>
-                  <div class="leaderboardPortrait">
-                    <img>
-                  </div>
-                </div>
-              </li>
-            {% endfor %}
-          </ul>
-          <a href="#" onclick="notImplementedWarning()"><i class="fab fa-twitter"> </i> Click here to share your score on Twitter</a>
-      </nav>
+      <ul class="list-unstyled leaderboard">
+        {% for n in range(1,6) %}
+        <li>
+          <div class="wideCircle" id="place{{n}}" data-rank={{n}}>
+            <div class="leaderboardPosition">
+              <span class="name"></span>
+              <span class="leaderboardScore"></span>
+            </div>
+            <span class="positionNumber">{{n}}</span>
+            <div class="leaderboardPortrait">
+              <img>
+            </div>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+      <a href="#" onclick="notImplementedWarning()"><i class="fab fa-twitter"> </i> Click here to share your score on Twitter</a>
+    </nav>
   </div>
 
   <script type="text/javascript">
-  // TODO: Scope variables properly
+    // TODO: Scope variables properly
     var isMobile;
     var showGallery = false;
     const emotionArray = [
@@ -163,7 +170,8 @@
       ['Namn Namnsson', 66, ''],
       ['Namn Namnsson', 64, ''],
       ['Namn Namnsson', 63, ''],
-      ['Namn Namnsson', 62, '']];
+      ['Namn Namnsson', 62, '']
+    ];
 
     function saveMe(img_id) {
       // Download image with `img_id`
@@ -180,11 +188,46 @@
       document.body.removeChild(a);
     }
 
-    /*
-     * Start webcam if possible, otherwise fallback on manual image upload.
-     * `videoMode` indicates if streaming should begin, otherwise video remains
-     * hidden.
-     */
+    function sendPic(canvas, destination) {
+      const dataURL = canvas.toDataURL('image/jpeg', 1.0);
+      var fd = new FormData(document.forms[0]);
+      fd.append("imageBase64", dataURL);
+      let xhr = new XMLHttpRequest();
+      xhr.open("POST", "{{ url_for('" + destination + "')}}");
+      xhr.send(fd);
+    }
+
+    function getPhoto() {
+      $("video").removeClass("blur");
+      $("#shareLinks").hide();
+      $("#playAgain").hide();
+      $(".overlay").addClass('picture');
+      var photo = $("#videoContainer").get(0);
+      var video = $("video").get(0);
+      photo.style.backgroundImage = "url("+video.poster+")";
+      photo.style.backgroundSize = "cover";
+      return photo;
+    }
+
+    function tweetPic() {
+      var photo = getPhoto();
+      html2canvas(photo, {
+        allowTaint:true,
+        backroundColor:null
+      }).then(function(canvas){
+        sendPic(canvas,'tweet');
+      });
+    }
+
+    function emailPic() {
+      var photo = getPhoto();
+      html2canvas(photo, {
+        allowTaint:true,
+        backroundColor:null
+      }).then(function(canvas){
+        sendPic(canvas,'email');
+      });
+    }
 
     function flipVideoV() {
       $("video").toggleClass("flipV");
@@ -195,8 +238,8 @@
       console.log("begin games");
       $("#play").click(function() {
         playButtonInitialized = true;
-        $("#placeholderImage").hide();
-        $("#prompt").show();
+
+        $("#prompt").css('display','inline-block');
         $("#videoElement").show();
         startCamera();
         $("#photoCountdown").show();
@@ -231,7 +274,7 @@
         const galleryLength = $(".card-img-top").length;
         const img_filename = "img_" + galleryLength;
         const download_button = '<button type="button" id="btn_' + galleryLength +
-        '" class="btn btn-sm btn-outline-secondary view-btn btn-square" onclick="saveMe(&apos;img_' + galleryLength + '&apos;)"><i class="fa fa-download"></i></button>'
+          '" class="btn btn-sm btn-outline-secondary view-btn btn-square" onclick="saveMe(&apos;img_' + galleryLength + '&apos;)"><i class="fa fa-download"></i></button>'
         const img = '<img id="' + img_filename + '" class="card-img-top" src="' + img_src +
           '" alt="Card image cap">'
         const myCard = $('<div class="col-md-4" style=""><div class="card mb-4 box-shadow">' +
@@ -309,6 +352,7 @@
     function errorMessage(message, e) {
       console.error(message, typeof e == 'undefined' ? '' : e);
     }
+
     function notImplemented() {
 
     }
@@ -402,7 +446,7 @@
     }
 
     function hideButtons() {
-      $(".overlay button").each(function (index) {
+      $(".overlay button").each(function(index) {
         $(this).hide();
       })
     }
@@ -432,7 +476,6 @@
       fd.append("imageBase64", dataURL);
       fd.append("emotion", currentEmotion);
       // fd.append("canTweetPhoto", $("#mode-toggle").get(0).checked);
-      // $("#placeholderImage").show();
       // $output = $("#output");
       $("#spinner").addClass("loader");
       // video.style.display = 'none';
@@ -447,7 +490,6 @@
         timeout: 10000
       }).done(function(data) {
         isCaptureInProgress = false;
-        $("#placeholderImage").hide();
         $("#spinner").removeClass("loader");
         // Show original photo and add to leaderboard
         const playerCount = data.facesWithScores.length;
@@ -504,40 +546,39 @@
     }
 
     function startCamera() {
-        // if ($("#videoElement").css('display') === 'block') { // camera visible
-        if (true) {
-          try {
-            // start camera again
-            // $("#videoElement").css('visibility','visible');
-            start(stopTracks=false);
-            $("#videoElement").addClass("flipH");
-            clearTimeout(takePhotoTimerID);
-            clearTimeout(countdownTimerID);
-            $("#photoCountdown").hide();
-            // If showing results, continue showing results, else stream video
-            var beginStreaming = $("#output .scoredImage").length === 0;
-          }
-          catch (err) {
-            console.log("Caught an exception: " + err);
+      // if ($("#videoElement").css('display') === 'block') { // camera visible
+      if (true) {
+        try {
+          // start camera again
+          // $("#videoElement").css('visibility','visible');
+          start(stopTracks = false);
+          $("#videoElement").addClass("flipH");
+          clearTimeout(takePhotoTimerID);
+          clearTimeout(countdownTimerID);
+          $("#photoCountdown").hide();
+          // If showing results, continue showing results, else stream video
+          var beginStreaming = $("#output .scoredImage").length === 0;
+        } catch (err) {
+          console.log("Caught an exception: " + err);
         }
       }
     }
 
     function pauseCamera() {
       try {
-        $("#videoElement").get(0).srcObject.getVideoTracks().forEach(track => track.enabled= false);
+        $("#videoElement").get(0).srcObject.getVideoTracks().forEach(track => track.enabled = false);
         // var vid = document.getElementById("videoElement");
         // vid.pause();
       } catch {}
     }
 
     function showPrompt() {
-      $('#prompt').show();
+      $('#prompt').css('display','inline-block');
     }
 
     function startGame() {
       $("#startScreen").hide();
-      $("#videoElement").css('visibility','visible');
+      $("#videoElement").css('visibility', 'visible');
       $("#videoElement").addClass('flipH');
       startCamera();
       $(".overlay").show();
@@ -550,42 +591,44 @@
       })
     }
 
-    function sortLeaderboard(ul){
+    function sortLeaderboard(ul) {
       var new_ul = ul.cloneNode(false);
 
       var lis = [];
-      for(var i = ul.children.length; i--;){
-          if(ul.children[i].nodeName === 'LI')
-              lis.push(ul.children[i]);
+      for (var i = ul.children.length; i--;) {
+        if (ul.children[i].nodeName === 'LI')
+          lis.push(ul.children[i]);
       }
 
-      lis.sort(function(a, b){
-         return parseInt(a.children[0].dataset.rank, 10) -
-                parseInt(b.children[0].dataset.rank, 10);
+      lis.sort(function(a, b) {
+        return parseInt(a.children[0].dataset.rank, 10) -
+          parseInt(b.children[0].dataset.rank, 10);
       });
 
-      for(var i = 0; i < lis.length; i++)
-          new_ul.appendChild(lis[i]);
+      for (var i = 0; i < lis.length; i++)
+        new_ul.appendChild(lis[i]);
       ul.parentNode.replaceChild(new_ul, ul);
     }
 
     function playAgain() {
       hideButtons();
+      $(".overlay").removeClass('picture');
+      $(".score").css('transform', 'scale(1,1)');
       $(".leaderboard div").removeClass("activePlace");
       $(".leaderboard").removeClass("lowRanking");
-      $("#prompt").show();
+      $("#prompt").css('display','inline-block');
       $("#videoElement").removeClass('blur');
       $("#videoElement").get(0).poster = '';
-      $("#videoElement").css('visibility','visible')
+      $("#videoElement").css('visibility', 'visible')
       $(".GaugeMeter").remove();
       $(".score").hide();
       resetLeaderboard();
       startCamera();
     }
 
-    function rankPlayer(score, ranking="ordinal") {
+    function rankPlayer(score, ranking = "ordinal") {
       var scores = [];
-      leaders.forEach(function (player) {
+      leaders.forEach(function(player) {
         scores.push(parseInt(player[1]));
       });
       // const sorted = scores.slice().sort(function(a,b){ return b-a });
@@ -594,11 +637,11 @@
 
       for (var i = 0; i < scores.length; i++) {
         if (ranking === "ordinal") {
-          if (scores[i] > score ) {
+          if (scores[i] > score) {
             position++;
           } else if (scores[i] == score) {
-              score--;
-              position++;
+            score--;
+            position++;
           }
         }
       }
@@ -617,11 +660,11 @@
         if (i == 5) {
           $(".leaderboard li").get(4).remove();
         } else {
-          console.log("i:"+i+" position:" + position + $(".leaderboard li").length)
-          var currItem = $(".leaderboard li").get(i-1);
+          console.log("i:" + i + " position:" + position + $(".leaderboard li").length)
+          var currItem = $(".leaderboard li").get(i - 1);
           var wideCircle = currItem.children[0]; // wideCircle
-          wideCircle.dataset.rank = i+1;
-          wideCircle.children[1].textContent = i+1; // positionNumber
+          wideCircle.dataset.rank = i + 1;
+          wideCircle.children[1].textContent = i + 1; // positionNumber
         }
       }
       if (position <= 5) {
@@ -643,16 +686,17 @@
           $("#sidebar ul").get(1).remove(); // remove low-rank player from bottom\
         }
       } catch {
-          console.log("caught error restoring 5th player");
-        }
+        console.log("caught error restoring 5th player");
       }
+    }
 
     function updateLeaderboard(playerFaceURL, position, score) {
       extraClass = ""
       if (position > 1) {
         extraClass = "activePlace"
       }
-      var leaderboardItem = '<li><div class="wideCircle ' + extraClass + '" data-rank=' + position + '><div class="leaderboardPosition"><span class="name">' + currentPlayerName + '</span><span class="leaderboardScore">' + score + 'p</span></div><span class="positionNumber">' + position + '</span><div class="leaderboardPortrait"><img src=' + playerFaceURL + '></div></div></li>'
+      var leaderboardItem = '<li><div class="wideCircle ' + extraClass + '" data-rank=' + position + '><div class="leaderboardPosition"><span class="name">' + currentPlayerName + '</span><span class="leaderboardScore">' + score +
+        'p</span></div><span class="positionNumber">' + position + '</span><div class="leaderboardPortrait"><img src=' + playerFaceURL + '></div></div></li>'
       // add player to leaderboard
       if (position > 5) {
         $(".leaderboard").addClass("lowRanking"); // draw line between players
@@ -663,8 +707,7 @@
     function emotion2adj(emotion) {
       if (emotion === "surprise") {
         return "surprised"
-      }
-      else if (emotion === "fear") {
+      } else if (emotion === "fear") {
         return "afraid"
       }
       return emotion;
@@ -680,11 +723,11 @@
 
     function initializeLeaderboard() {
       const defaultImagePath = "{{ url_for('static',filename='playerFace.png') }}";
-        $(".leaderboard li").each(function(index) {
-          $('.name', this).text(leaders[index][0]);
-          $('.leaderboardScore', this).text(leaders[index][1]);
-          $('.leaderboardPortrait img', this).attr('src', defaultImagePath);
-        })
+      $(".leaderboard li").each(function(index) {
+        $('.name', this).text(leaders[index][0]);
+        $('.leaderboardScore', this).text(leaders[index][1]);
+        $('.leaderboardPortrait img', this).attr('src', defaultImagePath);
+      })
     }
 
     function showRank(video, dataURL, score, currentEmotion) {
@@ -696,7 +739,8 @@
       const emotion = emotion2adj(currentEmotion);
       $(".Gaugemeter").remove();
       console.log("pos" + position);
-      var gauge = '<div class="GaugeMeter" id="GaugeMeter_1" data-percent="' + newScore + '" data-append="%" data-size="350" data-color="#f7b35b" data-style="Arch" data-back="RGBa(255,255,255,1)" data-width="40" data-animate_text_colors="true" data-label="' + emotion + '" data-label_color="#FFF"></div>'
+      var gauge = '<div class="GaugeMeter" id="GaugeMeter_1" data-percent="' + newScore +
+        '" data-append="%" data-size="350" data-color="#f7b35b" data-style="Arch" data-back="RGBa(255,255,255,1)" data-width="40" data-animate_text_colors="true" data-label="' + emotion + '" data-label_color="#FFF"></div>'
       var gaugeTrophy = '<span class="overlayTrophy fa-layers fa-fw"><i class="fa fa-trophy fa-3x"></i><span class="fa-layers-text" data-fa-transform="right-7 grow-6"></span></span>'
       gauge = gauge.concat(gaugeTrophy);
       $(".overlay .score").prepend(gauge);
@@ -705,11 +749,11 @@
       return [newScore, position];
     }
 
-    function notImplementedWarning(){
-     $(".alert").show();
-     setTimeout(function(){
-       $(".alert").hide();
-     }, 2000);
+    function notImplementedWarning() {
+      $(".alert").show();
+      setTimeout(function() {
+        $(".alert").hide();
+      }, 2000);
     }
 
     /*
@@ -732,24 +776,24 @@
         $(this).toggleClass('active');
       })
 
-    //   // Active
-    //   window.addEventListener('focus', startCamera);
-    //
-    //   // Inactive
-    //   window.addEventListener('blur', pauseCamera);
-    //
-    //   $('#mode-toggle').change(
-    //       function(){
-    //           if (this.checked) {
-    //               $("#tweet-mode").text("your face");
-    //               privacyWarning();
-    //           } else {
-    //             $("#tweet-mode").text("your IP address");
-    //             $(".privacy-warning").hide();
-    //           }
-    //   });
-    // };
-  }
+      //   // Active
+      //   window.addEventListener('focus', startCamera);
+      //
+      //   // Inactive
+      //   window.addEventListener('blur', pauseCamera);
+      //
+      //   $('#mode-toggle').change(
+      //       function(){
+      //           if (this.checked) {
+      //               $("#tweet-mode").text("your face");
+      //               privacyWarning();
+      //           } else {
+      //             $("#tweet-mode").text("your IP address");
+      //             $(".privacy-warning").hide();
+      //           }
+      //   });
+      // };
+    }
     $(document).ready(function() {
       "use strict";
       initialize();

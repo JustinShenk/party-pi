@@ -52,6 +52,8 @@ setup(
         'h5py',
         'tweepy',
         'gevent'
+        'google-auth-oauthlib',
+        'google-api-python-client'
     ],
     url=REPOSITORY,
     download_url='{}/tarball/{}'.format(REPOSITORY, VERSION),

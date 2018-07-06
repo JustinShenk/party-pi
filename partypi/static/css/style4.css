@@ -253,6 +253,11 @@ a.article:hover {
   padding: 0px; /* HACK */
 }
 
+#prompt {
+  margin-top: 50%;
+  display: inline-block;
+}
+
 #prompt:after {
   content: attr(data-emotion);
 }
@@ -492,6 +497,8 @@ video {
   width: 100%;
   height: auto;
   visibility: hidden;
+  display:block;
+  position: relative;
 }
 
 .flipH {
@@ -530,23 +537,35 @@ video {
   padding: 10px 40px;
   background:rgba(0,0,0,0.5);
   display: none;
-  position: absolute;
-  margin-left: -10%;
-  margin-top: 42%;
+}
+
+#videoContainer{
+  position: relative;
 }
 
 .overlay {
   z-index: 1;
   position: absolute;
-  top: 20%;
   width: inherit;
-  display: none;
+  top: 10%;
+  left: 0;
+  right: 0;
+  display: inline-block;
 }
 
+.overlay.picture {
+  right: 10%;
+  bottom: -10%;
+  transform: scale(0.5,0.5);
+  top: auto;
+  left: auto;
+
+}
 .overlay .score {
   display: none;
-  margin-left: 36%;
-  position: absolute;
+  left: 0;
+  right: 0;
+  position: relative;
 }
 
 /** GaugeMeter Style **/
