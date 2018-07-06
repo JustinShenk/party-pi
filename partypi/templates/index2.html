@@ -663,8 +663,8 @@
     }
 
     function blurImage(video, dataURL) {
-      video.src = '';
       video.setAttribute('poster', dataURL);
+      // video.src = '';
       video.classList.remove('flipH');
       video.classList.add('blur');
     }

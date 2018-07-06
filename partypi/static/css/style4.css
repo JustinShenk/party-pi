@@ -82,6 +82,10 @@ span {
     text-align: center;
 }
 
+#sidebar.active #sidebarTrophy {
+  left: -20px;
+}
+
 #sidebar.active .sidebar-header h3,
 #sidebar.active .CTAs {
     display: none;
