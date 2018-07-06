@@ -465,7 +465,7 @@ def singleplayer():
             exc_type, exc_obj, exc_tb = sys.exc_info()
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
             app.logger.error(exc_type, fname, exc_tb.tb_lineno)
-            return jsonify(success=False, photoPath='', emotion=emotion, facesWithScores = faces_with_scores, statusCode=501)
+            return jsonify(success=False, photoPath=photoPath, emotion=emotion, playerIndex=player_index, facesWithScores = faces_with_scores, statusCode=501)
 
 
 def get_recent_player():

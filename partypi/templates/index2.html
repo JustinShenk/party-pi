@@ -16,6 +16,9 @@
   <script type="text/javascript" src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.3.1.min.js"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}"></script>
   <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+  <!-- <script type="text/javascript" src="https://canvg.github.io/canvg/rgbcolor.js"></script>
+<script type="text/javascript" src="https://canvg.github.io/canvg/StackBlur.js"></script>
+<script type="text/javascript" src="https://canvg.github.io/canvg/canvg.js"></script> -->
   <script type="text/javascript" src="{{ url_for('static', filename='js/adapter-latest.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='js/exif.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='js/main.js') }}"></script>
@@ -110,12 +113,12 @@
           </div>
         </div>
       </div>
-      <!-- <canvas id="canvas" width="" height=""></canvas> -->
+      <canvas id="canvas" width="" height=""></canvas>
       <img id="captured"/>
     </div>
 
     <!-- Sidebar  -->
-    <nav id="sidebar">
+    <nav id="sidebar" class="active">
       <div class="select" style="display:none;">
         <label for="videoSource">Video source: </label><select id="videoSource"></select>
         <div>
@@ -188,6 +191,49 @@
       document.body.removeChild(a);
     }
 
+  //   function svgToCanvas (targetElem) {
+  //   var nodesToRecover = [];
+  //   var nodesToRemove = [];
+  //
+  //   var svgElem = targetElem.find('svg');
+  //
+  //   svgElem.each(function(index, node) {
+  //       var parentNode = node.parentNode;
+  //       var svg = parentNode.innerHTML;
+  //
+  //       var canvas = document.createElement('canvas');
+  //
+  //       canvg(canvas, svg);
+  //
+  //       nodesToRecover.push({
+  //           parent: parentNode,
+  //           child: node
+  //       });
+  //       parentNode.removeChild(node);
+  //
+  //       nodesToRemove.push({
+  //           parent: parentNode,
+  //           child: canvas
+  //       });
+  //
+  //       parentNode.appendChild(canvas);
+  //   });
+  //
+  //   html2canvas($("#videoContainer").get(0), {
+  //     profile: true,
+  //     allowTaint : true,
+  //     backgroundColor : null,
+  //     logging: true,
+  //     profile: true,
+  //     useCORS: true,
+  //   }).then(function(canvas) {
+  //           sendPic(canvas,'email');
+  //   });
+  //   // }).then(function(canvas) {
+  //       // $("#videoContainer").append(canvas);
+  //       // sendPic(canvas, api);
+  // }
+
     function sendPic(canvas, api) {
       const dataURL = canvas.toDataURL('image/jpeg', 1.0);
       var fd = new FormData(document.forms[0]);
@@ -198,7 +244,7 @@
       xhr.send(fd);
     }
 
-    function getPhoto() {
+    function getPhotoElem() {
       $("video").removeClass("blur");
       $("#shareLinks").hide();
       $("#playAgain").hide();
@@ -211,27 +257,31 @@
     }
 
     function tweetPic() {
-      const api = 'tweet';
-      var photo = getPhoto();
+      var api = 'tweet';
+      var photo = getPhotoElem();
       html2canvas(photo, {
-        allowTaint:true,
-        backroundColor:null
-      }).then(function(canvas){
-        sendPic(canvas, api);
-      });
-      playAgain();
+          allowTaint:true,
+          backgroundColor:null,
+          profile:true,
+          logging:true
+        }).then(function(canvas){
+          sendPic(canvas, api);
+        });
+      setTimeout(playAgain,2000);
     }
 
     function emailPic() {
-      const api = 'email';
-      var photo = getPhoto();
+      var api = 'email';
+      var photo = getPhotoElem();
       html2canvas(photo, {
-        allowTaint:true,
-        backroundColor:null
-      }).then(function(canvas){
-        sendPic(canvas, api);
-      });
-      playAgain();
+          allowTaint:true,
+          backgroundColor:null,
+          profile:true,
+          logging:true
+        }).then(function(canvas){
+          sendPic(canvas, api);
+        });
+      setTimeout(playAgain,2000);
     }
 
     function flipVideoV() {
@@ -443,23 +493,22 @@
         $("#spinner").removeClass("loader");
         // Show original photo and add to leaderboard
         const playerCount = data.facesWithScores.length;
-        if (playerCount === 0) {
+        if (playerCount === 0 | playerCount === undefined) {
           retakePhoto(video, dataURL);
           return;
         }
         const faceWithScore = data.facesWithScores[data.playerIndex];
-        console.log(faceWithScore);
         const playerFaceURL = faceWithScore[0];
         var score = faceWithScore[1];
         var newScoreAndPosition = showRank(video, dataURL, score, currentEmotion);
         var newScore = newScoreAndPosition[0];
         var position = newScoreAndPosition[1];
-        console.log(position + "pos1");
         leaders.push([currentPlayerName, newScore, playerFaceURL]);
         updateLeaderboard(playerFaceURL, position, newScore);
         $("#prompt").hide();
         $("#playAgain").show();
         $(".overlay .score").show();
+        $("#shareLinks").show();
         // var img = document.createElement('img');
         // img.src = data.photoPath;
         // img.classList.add("scoredImage");
@@ -567,7 +616,7 @@
       $(".leaderboard").removeClass("lowRanking");
       $("#prompt").css('display','inline-block');
       $("#videoElement").removeClass('blur');
-      $("#videoElement").get(0).poster = '';
+      // $("#videoElement").get(0).poster = '';
       $("#videoElement").css('visibility', 'visible')
       $(".GaugeMeter").remove();
       $(".score").hide();
@@ -663,8 +712,8 @@
     }
 
     function blurImage(video, dataURL) {
+      video.src = '';
       video.setAttribute('poster', dataURL);
-      // video.src = '';
       video.classList.remove('flipH');
       video.classList.add('blur');
     }
