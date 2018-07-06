@@ -17,6 +17,7 @@ import tensorflow as tf
 import uuid
 
 from flask import Flask, Response, request, render_template, jsonify, make_response
+from flask_cors import CORS
 from flask_mail import Mail, Message
 from io import BytesIO
 from keras.models import load_model
@@ -34,6 +35,7 @@ emotion_classifier = load_model('emotion_model.hdf5', compile=False)
 
 # from flask_googlelogin import GoogleLogin
 app = Flask(__name__)
+CORS(app)
 app.config.update(dict(PREFERRED_URL_SCHEME='https'))
 app.secret_key = os.environ.get("FLASK_SECRET_KEY")
 

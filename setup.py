@@ -55,7 +55,8 @@ setup(
         'google-auth-oauthlib',
         'google-api-python-client',
         'boto3',
-        'flask-mail'
+        'flask-mail',
+        'flask-cors'
     ],
     url=REPOSITORY,
     download_url='{}/tarball/{}'.format(REPOSITORY, VERSION),
