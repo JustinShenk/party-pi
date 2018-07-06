@@ -468,7 +468,7 @@ def singleplayer():
             return jsonify(success=False, photoPath=photoPath, emotion=emotion, playerIndex=player_index, facesWithScores = faces_with_scores, statusCode=501)
 
 
-def get_recent_player():
+def get_player_contact():
     if 'credentials' not in flask.session:
         return flask.redirect('authorize')
 
@@ -479,13 +479,14 @@ def get_recent_player():
     service = googleapiclient.discovery.build(
         API_SERVICE_NAME, API_VERSION, credentials=credentials)
     flask.session['credentials'] = credentials_to_dict(credentials)
-    values = get_spreadsheet(service)
-    return values[-1]
-
-
-def get_player_contact():
-    data = get_recent_player()
-    return data[1:4]  # email, name, twitter
+    result = service.spreadsheets().values().get(
+        spreadsheetId=SPREADSHEET_ID, range='ICML2018!A:Z').execute()
+    values = result.get('values', [])
+    try:
+        recent_player = values[-1]
+        return recent_player[1:4]  # email, name, twitter
+    except:
+        return None
 
 
 @app.route('/email', methods=['GET', 'POST'])
@@ -498,7 +499,21 @@ def email():
     img = data_uri_to_cv2_img(image_b64)
     img_path = 'email.jpg'
     cv2.imwrite(img_path, img)
-    email, name, twitter = get_player_contact()
+    if 'credentials' not in flask.session:
+        return flask.redirect('authorize')
+
+    # Load credentials from the session.
+    credentials = google.oauth2.credentials.Credentials(
+        **flask.session['credentials'])
+
+    service = googleapiclient.discovery.build(
+        API_SERVICE_NAME, API_VERSION, credentials=credentials)
+    flask.session['credentials'] = credentials_to_dict(credentials)
+    result = service.spreadsheets().values().get(
+        spreadsheetId=SPREADSHEET_ID, range='ICML2018!A:Z').execute()
+    values = result.get('values', [])
+    recent_player = values[-1]
+    email, name, twitter = recent_player[1:4] # email, name, twitter
     with app.app_context():
         msg = Message(
             subject="Happy or Sad at ICML 2018",
@@ -522,7 +537,21 @@ def tweet():
     img = data_uri_to_cv2_img(image_b64)
     img_path = 'email.jpg'
     cv2.imwrite(img_path, img)
-    email, name, twitter = get_player_contact()
+    if 'credentials' not in flask.session:
+        return flask.redirect('authorize')
+
+    # Load credentials from the session.
+    credentials = google.oauth2.credentials.Credentials(
+        **flask.session['credentials'])
+
+    service = googleapiclient.discovery.build(
+        API_SERVICE_NAME, API_VERSION, credentials=credentials)
+    flask.session['credentials'] = credentials_to_dict(credentials)
+    result = service.spreadsheets().values().get(
+        spreadsheetId=SPREADSHEET_ID, range='ICML2018!A:Z').execute()
+    values = result.get('values', [])
+    recent_player = values[-1]
+    email, name, twitter = recent_player[1:4] # email, name, twitter
     message = "{} at @Peltarion's Booth at #ICML".format(form.get('emotion'))
     tweet_image(img_path, twitter, message)
     return jsonify(success=True, photoPath='tweet.jpg')
@@ -640,7 +669,9 @@ def test_api_request():
     service = googleapiclient.discovery.build(
         API_SERVICE_NAME, API_VERSION, credentials=credentials)
     flask.session['credentials'] = credentials_to_dict(credentials)
-    values = get_spreadsheet(service)
+    result = service.spreadsheets().values().get(
+        spreadsheetId=SPREADSHEET_ID, range='ICML2018!A:Z').execute()
+    values = result.get('values', [])
     return jsonify(values)
 
 
