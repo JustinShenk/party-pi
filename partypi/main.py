@@ -446,7 +446,7 @@ def singleplayer():
                 app.logger.error("No face found")
                 return jsonify(
                     success=False,
-                    photoPath=None,
+                    photoPath='',
                     emotion=emotion,
                     facesWithScores=[],
                     playerIndex=None,
@@ -467,7 +467,7 @@ def singleplayer():
             exc_type, exc_obj, exc_tb = sys.exc_info()
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
             app.logger.error(exc_type, fname, exc_tb.tb_lineno)
-            return jsonify(success=False, photoPath=photoPath, emotion=emotion, playerIndex=player_index, facesWithScores = faces_with_scores, statusCode=501)
+            return jsonify(success=False, photoPath='', emotion=emotion, playerIndex=player_index, facesWithScores = faces_with_scores, statusCode=501)
 
 
 def get_player_contact():
@@ -657,7 +657,6 @@ def add_score(score):
         API_SERVICE_NAME, API_VERSION, credentials=credentials)
     flask.session['credentials'] = credentials_to_dict(credentials)
     return add_to_current(score, service)
-
 
 @app.route('/test')
 def test_api_request():
