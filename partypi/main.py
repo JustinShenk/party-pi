@@ -690,6 +690,7 @@ def credentials_to_dict(credentials):
 @app.route('/authorize')
 def authorize():
     # Create flow instance to manage the OAuth 2.0 Authorization Grant Flow steps.
+    app.logger.info("REDIRECT URI", flask.url_for('oauth2callback', _external=True))
     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
         CLIENT_SECRETS_FILE, scopes=SCOPES)
 
