@@ -84,6 +84,7 @@ span {
 
 #sidebar.active #sidebarTrophy {
   left: -20px;
+  min-width: auto;
 }
 
 #sidebar.active .sidebar-header h3,
@@ -246,11 +247,12 @@ a.article:hover {
     height: 100vh;
 }
 
-#content #logo {
+#logo {
   position: absolute;
   left: 10px;
   z-index: 3;
   bottom: 10px;
+  padding: 20px 5px;
 }
 
 #content .container-fluid {
@@ -545,6 +547,7 @@ video {
 
 #videoContainer{
   position: relative;
+  height: 100vh;
 }
 
 .overlay {
@@ -565,6 +568,7 @@ video {
   left: auto;
 
 }
+
 .overlay .score {
   display: none;
   left: 0;
@@ -644,6 +648,10 @@ p#shareLinks {
 #startScreen {
   margin-top: 6%;
   display: block;
+  z-index: 2;
+  position: absolute;
+  left: 0;
+  right: 0;
 }
 
 #startScreenLogo {

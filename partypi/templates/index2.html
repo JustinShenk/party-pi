@@ -268,6 +268,7 @@
         }).then(function(canvas){
           sendPic(canvas, api);
         });
+      removePhoto();
       setTimeout(playAgain,2000);
     }
 
@@ -282,6 +283,7 @@
         }).then(function(canvas){
           sendPic(canvas, api);
         });
+      removePhoto();
       setTimeout(playAgain,2000);
     }
 
@@ -609,15 +611,21 @@
       ul.parentNode.replaceChild(new_ul, ul);
     }
 
-    function playAgain() {
-      hideButtons();
+    function removePhoto() {
+      $("#videoContainer").css('backgroundImage','');
       $(".overlay").removeClass('picture');
-      $(".score").css('transform', 'scale(1,1)');
+      // $(".score").css('transform', 'scale(1,1)');
+    }
+
+    function resetLeaderboard() {
       $(".leaderboard div").removeClass("activePlace");
       $(".leaderboard").removeClass("lowRanking");
+    }
+
+    function playAgain() {
+      hideButtons();
       $("#prompt").css('display','inline-block');
       $("#videoElement").removeClass('blur');
-      // $("#videoElement").get(0).poster = '';
       $("#videoElement").css('visibility', 'visible')
       $(".GaugeMeter").remove();
       $(".score").hide();

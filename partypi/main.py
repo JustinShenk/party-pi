@@ -37,7 +37,8 @@ emotion_classifier = load_model('emotion_model.hdf5', compile=False)
 app = Flask(__name__)
 CORS(app)
 app.config.update(dict(PREFERRED_URL_SCHEME='https'))
-app.secret_key = os.environ.get("FLASK_SECRET_KEY")
+app.secret_key = os.environ["FLASK_SECRET_KEY"]
+app.config['GOOGLE_LOGIN_REDIRECT_SCHEME'] = "https"
 
 mail_settings = {
     "MAIL_SERVER": 'smtp.gmail.com',
@@ -60,7 +61,7 @@ if not os.path.exists('static/images'):
 
 CLIENT_SECRETS_FILE = 'client_secret.json'
 if not os.path.exists(CLIENT_SECRETS_FILE):
-    goog = json.loads(os.environ.get('GOOG'))
+    goog = json.loads(os.environ.get('GOOGWeb'))
     with open(CLIENT_SECRETS_FILE,'w') as outfile:
         json.dump(goog, outfile)
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
@@ -656,7 +657,31 @@ def add_score(score):
     service = googleapiclient.discovery.build(
         API_SERVICE_NAME, API_VERSION, credentials=credentials)
     flask.session['credentials'] = credentials_to_dict(credentials)
-    return add_to_current(score, service)
+    result = service.spreadsheets().values().get(
+        spreadsheetId=SPREADSHEET_ID, range=RANGE_NAME).execute()
+    values = result.get('values', [])
+    print(len(values) - 1)
+    last_row = len(values)
+    next_col = chr(65 + len(values[-1]))
+    if next_col < "G":
+        next_col = "G"  # don't overwrite phone, etc.
+    if next_col > "S":  # googleapiclient.errors.HttpError only to width of sheet
+        return "Too many tries"
+    range_name = 'ICML2018!{}{}'.format(next_col, last_row)
+    values = [
+        [score],
+    ]
+    body = {
+        'values': values,
+    }
+    result = service.spreadsheets().values().update(
+        spreadsheetId=SPREADSHEET_ID,
+        range=range_name,
+        valueInputOption='USER_ENTERED',
+        body=body).execute()
+    response = 'Updated cells in {}'.format(result.get('updatedRange'))
+    print(response)
+    return jsonify(response)
 
 @app.route('/test')
 def test_api_request():
@@ -690,6 +715,7 @@ def credentials_to_dict(credentials):
 @app.route('/authorize')
 def authorize():
     # Create flow instance to manage the OAuth 2.0 Authorization Grant Flow steps.
+    # FIXME Remove statement
     app.logger.info("REDIRECT URI", flask.url_for('oauth2callback', _external=True))
     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
         CLIENT_SECRETS_FILE, scopes=SCOPES)
