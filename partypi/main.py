@@ -364,7 +364,7 @@ def send_pic(image_path, to):
     data = {
         'from': 'Peltarion Email <no-reply@{}>'.format('partypi.net'),
         'to': to,
-        'subject': 'Thanks for stopping by Peltarion\'s booth at ICML,
+        'subject': 'Thanks for stopping by Peltarion\'s booth at ICML',
         'text': 'Thanks for playing!',
         'html': '<html>HTML <strong></strong></html>'
     }
