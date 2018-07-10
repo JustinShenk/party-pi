@@ -604,7 +604,7 @@ def tweet():
     values = result.get('values', [])
     recent_player = values[-1]
     email, name, twitter = recent_player[1:4]  # email, name, twitter
-    message = "{} at @Peltarion's Booth at #ICML".format(form.get('emotion'))
+    message = "{} at #ICML with @Peltarion_ai".format(form.get('emotion'))
     app.logger.info("Tweeting {} {} {}".format(values, email, twitter))
     tweet_image(img_path, message)
     return jsonify(success=True, photoPath='tweet.jpg')
