@@ -566,8 +566,6 @@ def email():
         #     recipients=["justin@peltarion.com", "shenk.justin@gmail.com"],  # replace with your email for testing
         #     body="Hi {},\nThanks for playing!".
         #     format(name, image_b64))
-        with app.open_resource(img_path) as fp:
-            msg.attach(img_path, "image/jpeg", fp.read())
         # mail.send(msg)
     return jsonify(success=True, photoPath=img_path)
 
