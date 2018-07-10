@@ -360,7 +360,7 @@ def update_spreadsheet(faces_with_scores):
 
 def send_pic(image_path, to):
     url = 'https://api.mailgun.net/v3/{}/messages'.format('www.partypi.net')
-    auth = ('api', MAILGUN_API_KEY)
+    auth = ('api', os.environ['MAILGUN_API_KEY'])
     data = {
         'from': 'Peltarion Email <no-reply@{}>'.format('partypi.net'),
         'to': to,
