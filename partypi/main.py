@@ -12,6 +12,7 @@ import numpy as np
 import os
 import random
 import re
+import requests
 import sys
 import tensorflow as tf
 import uuid
@@ -20,7 +21,6 @@ from flask import Flask, Response, request, render_template, jsonify, make_respo
 from flask_cors import CORS
 from flask_mail import Mail, Message
 # from google.oauth2 import id_token
-# from google.auth.transport import requests
 from io import BytesIO
 from keras.models import load_model
 from keras import backend as K
