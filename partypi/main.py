@@ -359,18 +359,23 @@ def update_spreadsheet(faces_with_scores):
 
 
 def send_pic(image_path, to):
+    app.logger.info("Sending {} to {}".format(image_path, to))
     url = 'https://api.mailgun.net/v3/{}/messages'.format('www.partypi.net')
     auth = ('api', os.environ['MAILGUN_API_KEY'])
     data = {
         'from': 'Peltarion Email <no-reply@{}>'.format('partypi.net'),
         'to': to,
-        'subject': 'Thanks for stopping by Peltarion\'s booth at ICML',
+        'subject': 'Emotion Contest with Peltarion at ICML',
         'text': 'Thanks for playing!',
-        'html': '<html>HTML <strong></strong></html>'
+        'html': '<html>Thanks for playing!<strong></strong></html>'
     }
-    files = [("attachment", open(image_path))]
-    with app.open_resource(img_path) as fp:
-        files = [("attachment", fp.read())]
+    files = {
+        "attachment": ("icml.jpg", open(image_path,'rb'))
+    }
+    with app.open_resource(image_path) as fp:
+        files = {
+            "attachment": ("icml.jpg", open(image_path,'rb'))
+        }
     response = requests.post(url, auth=auth, data=data, files=files)
     response.raise_for_status()
 
@@ -477,7 +482,9 @@ def singleplayer():
             player_data = predict_emotions(faces, gray_image, emotion)
             photo, faces_with_scores, player_index = rank_players(
                 player_data, img, emotion, one_player=True)
-            photo_path = 'static/images/{}.jpg'.format(str(uuid.uuid4()))
+            _, player_name, _ = get_player_contact()
+            name_str = "".join([c for c in player_name if c.isalpha() or c.isdigit() or c==' ']).rstrip()
+            photo_path = 'static/images/{}{}.jpg'.format(name_str, str(uuid.uuid4()))
             if len(faces_with_scores) is 0:
                 app.logger.error("No face found")
                 return jsonify(
@@ -486,6 +493,7 @@ def singleplayer():
                     emotion=emotion,
                     facesWithScores=[],
                     playerIndex=None,
+                    playerName=player_name,
                     statusCode=500)
             else:
                 cv2.imwrite(photo_path, photo)
@@ -497,6 +505,7 @@ def singleplayer():
                     emotion=emotion,
                     facesWithScores=faces_with_scores,
                     playerIndex=player_index,
+                    playerName=player_name,
                     statusCode=200)
         except Exception as e:
             app.logger.error("ERROR:", e)
@@ -578,7 +587,7 @@ def tweet():
         app.logger.error("No image in request.")
         return jsonify(success=False, photoPath='')
     img = data_uri_to_cv2_img(image_b64)
-    img_path = 'email.jpg'
+    img_path = 'tweet.jpg'
     cv2.imwrite(img_path, img)
     if 'credentials' not in flask.session:
         return flask.redirect('authorize')
@@ -596,7 +605,8 @@ def tweet():
     recent_player = values[-1]
     email, name, twitter = recent_player[1:4]  # email, name, twitter
     message = "{} at @Peltarion's Booth at #ICML".format(form.get('emotion'))
-    tweet_image(img_path, twitter, message)
+    app.logger.info("Tweeting {} {} {}".format(values, email, twitter))
+    tweet_image(img_path, message)
     return jsonify(success=True, photoPath='tweet.jpg')
 
 

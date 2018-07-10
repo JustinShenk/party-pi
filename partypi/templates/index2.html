@@ -135,7 +135,7 @@
       <i id="sidebarTrophy" class="fa fa-trophy fa-5x"></i>
 
       <ul class="list-unstyled leaderboard">
-        {% for n in range(1,6) %}
+        <!-- {% for n in range(1,6) %}
         <li>
           <div class="wideCircle" id="place{{n}}" data-rank={{n}}>
             <div class="leaderboardPosition">
@@ -148,7 +148,7 @@
             </div>
           </div>
         </li>
-        {% endfor %}
+        {% endfor %} -->
       </ul>
       <a id="#sidebarTweet" href="#" onclick="tweetPic()"><i class="fab fa-twitter"> </i> Click here to share your score on Twitter</a>
     </nav>
@@ -173,11 +173,11 @@
     var countdownTimerID;
     var isCaptureInProgress = false;
     var leaders = [
-      ['Namn Namnsson', 0, ''],
-      ['Namn Namnsson', 1, ''],
-      ['Namn Namnsson', 2, ''],
-      ['Namn Namnsson', 3, ''],
-      ['Namn Namnsson', 4, '']
+      // ['Namn Namnsson', 0, ''],
+      // ['Namn Namnsson', 1, ''],
+      // ['Namn Namnsson', 2, ''],
+      // ['Namn Namnsson', 3, ''],
+      // ['Namn Namnsson', 4, '']
     ];
 
     function saveMe(img_id) {
@@ -220,16 +220,19 @@
     function tweetPic() {
       var api = 'tweet';
       var photo = getPhotoElem();
+
       html2canvas(photo, {
           allowTaint:true,
           backgroundColor:null,
           profile:true,
           logging:true
         }).then(function(canvas){
-          sendPic(canvas, api);
+          setTimeout(function() {
+            sendPic(canvas, api);
+          }, 2000);
         });
-      removePhoto();
-      setTimeout(playAgain,2000);
+      setTimeout(removePhoto,2100);
+      setTimeout(playAgain,2500);
     }
 
     function emailPic() {
@@ -241,10 +244,12 @@
           profile:true,
           logging:true
         }).then(function(canvas){
-          sendPic(canvas, api);
+          setTimeout(function() {
+            sendPic(canvas, api);
+          }, 2000);
         });
-      removePhoto();
-      setTimeout(playAgain,2000);
+      setTimeout(removePhoto,2100);
+      setTimeout(playAgain,2500);
     }
 
     function flipVideoV() {
@@ -462,6 +467,7 @@
         }
         const faceWithScore = data.facesWithScores[data.playerIndex];
         const playerFaceURL = faceWithScore[0];
+        currentPlayerName = data.playerName;
         var score = faceWithScore[1];
         var newScoreAndPosition = showRank(video, dataURL, score, currentEmotion);
         var newScore = newScoreAndPosition[0];
@@ -513,8 +519,8 @@
         try {
           // start camera again
           // $("#videoElement").css('visibility','visible');
-          start(stopTracks = false);
           $("#videoElement").addClass("flipH");
+          start(stopTracks = false);          
           clearTimeout(takePhotoTimerID);
           clearTimeout(countdownTimerID);
           $("#photoCountdown").hide();
