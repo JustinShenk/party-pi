@@ -20,6 +20,8 @@
   <!-- <script type="text/javascript" src="https://canvg.github.io/canvg/rgbcolor.js"></script>
 <script type="text/javascript" src="https://canvg.github.io/canvg/StackBlur.js"></script>
 <script type="text/javascript" src="https://canvg.github.io/canvg/canvg.js"></script> -->
+<script src="https://apis.google.com/js/platform.js" async defer></script>
+<meta name="google-signin-client_id" content="934923410863-j458sf3fbnka5ie0hds765gjtpteoptn.apps.googleusercontent.com">
   <script type="text/javascript" src="{{ url_for('static', filename='js/adapter-latest.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='js/exif.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='js/main.js') }}"></script>
@@ -121,6 +123,7 @@
     <!-- Sidebar  -->
     <nav id="sidebar" class="active">
       <div class="select" style="display:none;">
+        <!-- <div class="g-signin2" data-onsuccess="onSignIn"></div> -->
         <label for="videoSource">Video source: </label><select id="videoSource"></select>
         <div>
           <span id="alpha"></span>
@@ -147,7 +150,7 @@
         </li>
         {% endfor %}
       </ul>
-      <a href="#" onclick="notImplementedWarning()"><i class="fab fa-twitter"> </i> Click here to share your score on Twitter</a>
+      <a id="#sidebarTweet" href="#" onclick="tweetPic()"><i class="fab fa-twitter"> </i> Click here to share your score on Twitter</a>
     </nav>
   </div>
 
@@ -170,11 +173,11 @@
     var countdownTimerID;
     var isCaptureInProgress = false;
     var leaders = [
-      ['Namn Namnsson', 66, ''],
-      ['Namn Namnsson', 66, ''],
-      ['Namn Namnsson', 64, ''],
-      ['Namn Namnsson', 63, ''],
-      ['Namn Namnsson', 62, '']
+      ['Namn Namnsson', 0, ''],
+      ['Namn Namnsson', 1, ''],
+      ['Namn Namnsson', 2, ''],
+      ['Namn Namnsson', 3, ''],
+      ['Namn Namnsson', 4, '']
     ];
 
     function saveMe(img_id) {
@@ -191,49 +194,6 @@
       a.click();
       document.body.removeChild(a);
     }
-
-  //   function svgToCanvas (targetElem) {
-  //   var nodesToRecover = [];
-  //   var nodesToRemove = [];
-  //
-  //   var svgElem = targetElem.find('svg');
-  //
-  //   svgElem.each(function(index, node) {
-  //       var parentNode = node.parentNode;
-  //       var svg = parentNode.innerHTML;
-  //
-  //       var canvas = document.createElement('canvas');
-  //
-  //       canvg(canvas, svg);
-  //
-  //       nodesToRecover.push({
-  //           parent: parentNode,
-  //           child: node
-  //       });
-  //       parentNode.removeChild(node);
-  //
-  //       nodesToRemove.push({
-  //           parent: parentNode,
-  //           child: canvas
-  //       });
-  //
-  //       parentNode.appendChild(canvas);
-  //   });
-  //
-  //   html2canvas($("#videoContainer").get(0), {
-  //     profile: true,
-  //     allowTaint : true,
-  //     backgroundColor : null,
-  //     logging: true,
-  //     profile: true,
-  //     useCORS: true,
-  //   }).then(function(canvas) {
-  //           sendPic(canvas,'email');
-  //   });
-  //   // }).then(function(canvas) {
-  //       // $("#videoContainer").append(canvas);
-  //       // sendPic(canvas, api);
-  // }
 
     function sendPic(canvas, api) {
       const dataURL = canvas.toDataURL('image/jpeg', 1.0);
@@ -510,6 +470,7 @@
         updateLeaderboard(playerFaceURL, position, newScore);
         $("#prompt").hide();
         $("#playAgain").show();
+        $("#sidebarTweet").show();
         $(".overlay .score").show();
         $("#shareLinks").show();
         // var img = document.createElement('img');
@@ -623,6 +584,7 @@
     }
 
     function playAgain() {
+      $("#sidebarTweet").hide();
       hideButtons();
       $("#prompt").css('display','inline-block');
       $("#videoElement").removeClass('blur');

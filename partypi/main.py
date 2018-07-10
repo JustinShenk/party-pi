@@ -19,6 +19,8 @@ import uuid
 from flask import Flask, Response, request, render_template, jsonify, make_response
 from flask_cors import CORS
 from flask_mail import Mail, Message
+# from google.oauth2 import id_token
+# from google.auth.transport import requests
 from io import BytesIO
 from keras.models import load_model
 from keras import backend as K
@@ -62,7 +64,7 @@ if not os.path.exists('static/images'):
 CLIENT_SECRETS_FILE = 'client_secret.json'
 if not os.path.exists(CLIENT_SECRETS_FILE):
     goog = json.loads(os.environ.get('GOOGWeb'))
-    with open(CLIENT_SECRETS_FILE,'w') as outfile:
+    with open(CLIENT_SECRETS_FILE, 'w') as outfile:
         json.dump(goog, outfile)
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 RANGE_NAME = 'ICML2018!A:Z'
@@ -356,6 +358,39 @@ def update_spreadsheet(faces_with_scores):
         return None
 
 
+def send_pic(image_path, to):
+    url = 'https://api.mailgun.net/v3/{}/messages'.format('www.partypi.net')
+    auth = ('api', MAILGUN_API_KEY)
+    data = {
+        'from': 'Peltarion Email <no-reply@{}>'.format('partypi.net'),
+        'to': to,
+        'subject': 'Thanks for stopping by Peltarion\'s booth at ICML,
+        'text': 'Thanks for playing!',
+        'html': '<html>HTML <strong></strong></html>'
+    }
+    files = [("attachment", open(image_path))]
+    with app.open_resource(img_path) as fp:
+        files = [("attachment", fp.read())]
+    response = requests.post(url, auth=auth, data=data, files=files)
+    response.raise_for_status()
+
+
+def send_simple_message():
+    return requests.post(
+        "https://api.mailgun.net/v3/sandboxb77d7a26ac594bf7a5f4e008acb62696.mailgun.org/messages",
+        auth=("api", "cac4b86b5496062cd33ffc688abaff93-770f03c4-d4803e31"),
+        data={
+            "from":
+            "Mailgun Sandbox <postmaster@sandboxb77d7a26ac594bf7a5f4e008acb62696.mailgun.org>",
+            "to":
+            "Justin Shenk <shenkjustin@gmail.com>",
+            "subject":
+            "Hello Justin Shenk",
+            "text":
+            "Congratulations Justin Shenk, you just sent an email with Mailgun!  You are truly awesome!"
+        })
+
+
 @app.route('/image', methods=['POST', 'GET'])
 def image():
     if request.method == 'POST':
@@ -451,7 +486,7 @@ def singleplayer():
                     emotion=emotion,
                     facesWithScores=[],
                     playerIndex=None,
-                    statusCode = 500)
+                    statusCode=500)
             else:
                 cv2.imwrite(photo_path, photo)
                 app.logger.info("Saved image to {}".format(photo_path))
@@ -462,13 +497,19 @@ def singleplayer():
                     emotion=emotion,
                     facesWithScores=faces_with_scores,
                     playerIndex=player_index,
-                    statusCode = 200)
+                    statusCode=200)
         except Exception as e:
             app.logger.error("ERROR:", e)
             exc_type, exc_obj, exc_tb = sys.exc_info()
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
             app.logger.error(exc_type, fname, exc_tb.tb_lineno)
-            return jsonify(success=False, photoPath='', emotion=emotion, playerIndex=player_index, facesWithScores = faces_with_scores, statusCode=501)
+            return jsonify(
+                success=False,
+                photoPath='',
+                emotion=emotion,
+                playerIndex=player_index,
+                facesWithScores=faces_with_scores,
+                statusCode=501)
 
 
 def get_player_contact():
@@ -516,17 +557,18 @@ def email():
         spreadsheetId=SPREADSHEET_ID, range='ICML2018!A:Z').execute()
     values = result.get('values', [])
     recent_player = values[-1]
-    email, name, twitter = recent_player[1:4] # email, name, twitter
+    email, name, twitter = recent_player[1:4]  # email, name, twitter
     with app.app_context():
-        msg = Message(
-            subject="Happy or Sad at ICML 2018",
-            sender=app.config.get("MAIL_USERNAME"),
-            recipients=["justin@peltarion.com", "shenk.justin@gmail.com"],  # replace with your email for testing
-            body="Hi {},\nThanks for playing!".
-            format(name, image_b64))
+        send_pic(img_path, email)
+        # msg = Message(
+        #     subject="Happy or Sad at ICML 2018",
+        #     sender=app.config.get("MAIL_USERNAME"),
+        #     recipients=["justin@peltarion.com", "shenk.justin@gmail.com"],  # replace with your email for testing
+        #     body="Hi {},\nThanks for playing!".
+        #     format(name, image_b64))
         with app.open_resource(img_path) as fp:
             msg.attach(img_path, "image/jpeg", fp.read())
-        mail.send(msg)
+        # mail.send(msg)
     return jsonify(success=True, photoPath=img_path)
 
 
@@ -554,7 +596,7 @@ def tweet():
         spreadsheetId=SPREADSHEET_ID, range='ICML2018!A:Z').execute()
     values = result.get('values', [])
     recent_player = values[-1]
-    email, name, twitter = recent_player[1:4] # email, name, twitter
+    email, name, twitter = recent_player[1:4]  # email, name, twitter
     message = "{} at @Peltarion's Booth at #ICML".format(form.get('emotion'))
     tweet_image(img_path, twitter, message)
     return jsonify(success=True, photoPath='tweet.jpg')
@@ -562,28 +604,34 @@ def tweet():
 
 @app.route('/sign_s3/')
 def sign_s3():
-  S3_BUCKET = os.environ.get('S3_BUCKET')
+    S3_BUCKET = os.environ.get('S3_BUCKET')
 
-  file_name = request.args.get('file_name')
-  file_type = request.args.get('file_type')
+    file_name = request.args.get('file_name')
+    file_type = request.args.get('file_type')
 
-  s3 = boto3.client('s3')
+    s3 = boto3.client('s3')
 
-  presigned_post = s3.generate_presigned_post(
-    Bucket = S3_BUCKET,
-    Key = file_name,
-    Fields = {"acl": "public-read", "Content-Type": file_type},
-    Conditions = [
-      {"acl": "public-read"},
-      {"Content-Type": file_type}
-    ],
-    ExpiresIn = 3600
-  )
+    presigned_post = s3.generate_presigned_post(
+        Bucket=S3_BUCKET,
+        Key=file_name,
+        Fields={
+            "acl": "public-read",
+            "Content-Type": file_type
+        },
+        Conditions=[{
+            "acl": "public-read"
+        }, {
+            "Content-Type": file_type
+        }],
+        ExpiresIn=3600)
 
-  return json.dumps({
-    'data': presigned_post,
-    'url': 'https://%s.s3.amazonaws.com/%s' % (S3_BUCKET, file_name)
-  })
+    return json.dumps({
+        'data':
+        presigned_post,
+        'url':
+        'https://%s.s3.amazonaws.com/%s' % (S3_BUCKET, file_name)
+    })
+
 
 @app.route('/')
 def index():
@@ -606,7 +654,7 @@ def v2():
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        print(exc_type, fname, exc_tb.tb_lineno)
+        app.logger.error(exc_type, fname, exc_tb.tb_lineno)
 
 
 # HTTP Errors handlers
@@ -683,6 +731,7 @@ def add_score(score):
     print(response)
     return jsonify(response)
 
+
 @app.route('/test')
 def test_api_request():
     if 'credentials' not in flask.session:
@@ -712,11 +761,33 @@ def credentials_to_dict(credentials):
     }
 
 
+# @app.route('/tokensignin', methods=['POST'])
+# def tokensignin():
+#     try:
+#         token = request.form['id_token']
+#         idinfo = id_token.verify_oauth2_token(token, requests.Request(),
+#             '934923410863-j458sf3fbnka5ie0hds765gjtpteoptn.apps.googleusercontent.com')
+#
+#         if idinfo['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
+#             raise ValueError('Wrong issuer.')
+#
+#         # If auth request is from a G Suite domain:
+#         # if idinfo['hd'] != GSUITE_DOMAIN_NAME:
+#         #     raise ValueError('Wrong hosted domain.')
+#
+#         # ID token is valid. Get the user's Google Account ID from the decoded token.
+#         userid = idinfo['sub']
+#     except ValueError:
+#         # Invalid token
+#         pass
+
+
 @app.route('/authorize')
 def authorize():
     # Create flow instance to manage the OAuth 2.0 Authorization Grant Flow steps.
     # FIXME Remove statement
-    app.logger.info("REDIRECT URI", flask.url_for('oauth2callback', _external=True))
+    app.logger.info("REDIRECT URI",
+                    flask.url_for('oauth2callback', _external=True))
     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
         CLIENT_SECRETS_FILE, scopes=SCOPES)
 
@@ -759,10 +830,9 @@ def oauth2callback():
 
 
 if __name__ == '__main__':
-    threaded = False
     if 'TRAVIS' in os.environ:
         sys.exit()
-    app.run(host='localhost', threaded=threaded)
+    app.run(host='localhost', port=8080, threaded=False)
 
 if __name__ != '__main__':
     # Gunicorn running
