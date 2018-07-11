@@ -15,8 +15,16 @@ def twitter_api():
         access_token_secret = os.environ.get('TWITTER_TOKEN_SECRET')
     except:
         print("No twitter auth found")
-    import ipdb; ipdb.set_trace()
     auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+    # try:
+    #     redirect_url = auth.get_authorization_url()
+    # except tweepy.TweepError:
+    #     print('Error! Failed to get request token.')
+    # print(redirect_url)
+    # verifier = raw_input('PIN: ').strip()
+    # auth.get_access_token(verifier)
+    # print 'ACCESS_KEY = "%s"' % auth.access_token.key
+    # print 'ACCESS_SECRET = "%s"' % auth.access_token.secret
     auth.set_access_token(access_token, access_token_secret)
     api = tweepy.API(auth)
     return api
@@ -31,8 +39,7 @@ def tweet_message(message):
 
 def tweet_image(filename, message):
     api = twitter_api()
-    print(filename)
-    api.update_with_media(filename, status=message)
+    # api.update_with_media(filename, status=message)
     print("Tweeted: {}".format(message))
 
 if __name__ == '__main__':
