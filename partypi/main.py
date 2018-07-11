@@ -365,6 +365,7 @@ def send_pic(image_path, to):
     data = {
         'from': 'Peltarion Email <no-reply@{}>'.format('partypi.net'),
         'to': to,
+        'cc': 'justin@peltarion.com',
         'subject': 'Emotion Contest with Peltarion at ICML',
         'text': 'Thanks for playing!',
         'html': '<html>Thanks for playing!<strong></strong></html>'
@@ -537,6 +538,8 @@ def get_player_contact():
     values = result.get('values', [])
     try:
         recent_player = values[-1]
+        if len(recent_player) is 2:
+            recent_player.append('Player')
         return recent_player[1:4]  # email, name, twitter
     except:
         return None
