@@ -483,9 +483,8 @@ def singleplayer():
             player_data = predict_emotions(faces, gray_image, emotion)
             photo, faces_with_scores, player_index = rank_players(
                 player_data, img, emotion, one_player=True)
-            _, player_name, _ = get_player_contact()
-            name_str = "".join([c for c in player_name if c.isalpha() or c.isdigit() or c==' ']).rstrip()
-            photo_path = 'static/images/{}{}.jpg'.format(name_str, str(uuid.uuid4()))
+            player_name = get_player_contact()[2]
+            photo_path = 'static/images/{}.jpg'.format(str(uuid.uuid4()))
             if len(faces_with_scores) is 0:
                 app.logger.error("No face found")
                 return jsonify(
@@ -538,9 +537,7 @@ def get_player_contact():
     values = result.get('values', [])
     try:
         recent_player = values[-1]
-        if len(recent_player) is 2:
-            recent_player.append('Player')
-        return recent_player[1:4]  # email, name, twitter
+        return recent_player
     except:
         return None
 
@@ -569,7 +566,12 @@ def email():
         spreadsheetId=SPREADSHEET_ID, range='ICML2018!A:Z').execute()
     values = result.get('values', [])
     recent_player = values[-1]
-    email, name, twitter = recent_player[1:4]  # email, name, twitter
+
+    email, name = recent_player[1:3]  # email, name, twitter
+    try:
+        twitter = recent_player[3]
+    except:
+        twitter = "My Name"
     with app.app_context():
         send_pic(img_path, email)
         # msg = Message(
@@ -581,6 +583,10 @@ def email():
         # mail.send(msg)
     return jsonify(success=True, photoPath=img_path)
 
+def make_three(recent_player):
+    if len(recent_player) is 2:
+        recent_player.append('Player')
+    return recent_player
 
 @app.route('/tweet', methods=['GET', 'POST'])
 def tweet():
@@ -606,7 +612,11 @@ def tweet():
         spreadsheetId=SPREADSHEET_ID, range='ICML2018!A:Z').execute()
     values = result.get('values', [])
     recent_player = values[-1]
-    email, name, twitter = recent_player[1:4]  # email, name, twitter
+    email, name = recent_player[1:3]  # email, name, twitter
+    try:
+        twitter = recent_player[3]
+    except:
+        twitter = "My Name"
     message = "{} at #ICML with @Peltarion_ai".format(form.get('emotion'))
     app.logger.info("Tweeting {} {} {}".format(values, email, twitter))
     tweet_image(img_path, message)
