@@ -39,7 +39,7 @@ def tweet_message(message):
 
 def tweet_image(filename, message):
     api = twitter_api()
-    # api.update_with_media(filename, status=message)
+    api.update_with_media(filename, status=message)
     print("Tweeted: {}".format(message))
 
 if __name__ == '__main__':
