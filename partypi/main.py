@@ -461,6 +461,7 @@ def image():
 def singleplayer():
     if request.method == 'POST':
         app.logger.info("POST request")
+        emotion = 'angry'
         try:
             form = request.form
             image_b64 = form.get('imageBase64')
@@ -515,9 +516,9 @@ def singleplayer():
             return jsonify(
                 success=False,
                 photoPath='',
-                emotion=emotion,
-                playerIndex=player_index,
-                facesWithScores=faces_with_scores,
+                emotion='',
+                playerIndex='',
+                facesWithScores='',
                 statusCode=501)
 
 
