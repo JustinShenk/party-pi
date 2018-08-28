@@ -38,6 +38,8 @@ emotion_classifier = load_model('emotion_model.hdf5', compile=False)
 # from flask_googlelogin import GoogleLogin
 app = Flask(__name__)
 CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
+app.config['CORS_SUPPORTS_CREDENTIALS'] = True
 app.config.update(dict(PREFERRED_URL_SCHEME='https'))
 app.secret_key = os.environ["FLASK_SECRET_KEY"]
 app.config['GOOGLE_LOGIN_REDIRECT_SCHEME'] = "https"
@@ -459,9 +461,12 @@ def image():
 
 @app.route('/singleplayer', methods=['POST', 'GET'])
 def singleplayer():
+    if 'credentials' not in flask.session:
+        return flask.redirect('authorize')
     if request.method == 'POST':
         app.logger.info("POST request")
         emotion = 'angry'
+        player_name = 'Player Name'
         try:
             form = request.form
             image_b64 = form.get('imageBase64')
@@ -484,11 +489,11 @@ def singleplayer():
             player_data = predict_emotions(faces, gray_image, emotion)
             photo, faces_with_scores, player_index = rank_players(
                 player_data, img, emotion, one_player=True)
-            result = get_player_contact()
-            if isinstance(result, list):
-                player_name = result[2]
-            elif isinstance(result, flask.Response):
-                return response
+            response = get_player_contact()
+            try:
+                player_name = response[2]
+            except Exception as e:
+                app.logger.error(e)
             photo_path = 'static/images/{}.jpg'.format(str(uuid.uuid4()))
             if len(faces_with_scores) is 0:
                 app.logger.error("No face found")
@@ -527,9 +532,6 @@ def singleplayer():
 
 
 def get_player_contact():
-    if 'credentials' not in flask.session:
-        return flask.redirect('authorize')
-
     # Load credentials from the session.
     credentials = google.oauth2.credentials.Credentials(
         **flask.session['credentials'])
@@ -812,8 +814,7 @@ def credentials_to_dict(credentials):
 def authorize():
     # Create flow instance to manage the OAuth 2.0 Authorization Grant Flow steps.
     # FIXME Remove statement
-    app.logger.info("REDIRECT URI",
-                    flask.url_for('oauth2callback', _external=True))
+    app.logger.info("/authorize accessed")
     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
         CLIENT_SECRETS_FILE, scopes=SCOPES)
 
@@ -828,7 +829,6 @@ def authorize():
 
     # Store the state so the callback can verify the auth server response.
     flask.session['state'] = state
-
     return flask.redirect(authorization_url)
 
 
@@ -853,7 +853,6 @@ def oauth2callback():
     flask.session['credentials'] = credentials_to_dict(credentials)
 
     return flask.redirect(flask.url_for('test_api_request'))
-
 
 if __name__ == '__main__':
     if 'TRAVIS' in os.environ:
