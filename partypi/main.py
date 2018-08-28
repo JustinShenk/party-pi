@@ -484,7 +484,11 @@ def singleplayer():
             player_data = predict_emotions(faces, gray_image, emotion)
             photo, faces_with_scores, player_index = rank_players(
                 player_data, img, emotion, one_player=True)
-            player_name = get_player_contact()[2]
+            result = get_player_contact()
+            if isinstance(result, list):
+                player_name = result[2]
+            elif isinstance(result, flask.Response):
+                return response
             photo_path = 'static/images/{}.jpg'.format(str(uuid.uuid4()))
             if len(faces_with_scores) is 0:
                 app.logger.error("No face found")
