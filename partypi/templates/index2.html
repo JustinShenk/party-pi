@@ -93,6 +93,15 @@
           </div>
         </div>
         <div id="videoContainer" style='position:relative'>
+          {% with messages = get_flashed_messages() %}
+            {% if messages %}
+              <ul class=flashes>
+              {% for message in messages %}
+                <li>{{ message }}</li>
+              {% endfor %}
+              </ul>
+            {% endif %}
+          {% endwith %}
           <!-- <img id="placeholder"></img> -->
           <img onclick="selectDevice()" id="logo" src="{{ url_for('static',filename='Peltarion_logotype.png') }}"></img>
           <video class="flipH" playsinline muted autoplay loop id="videoElement" style="display:none;"></video>
