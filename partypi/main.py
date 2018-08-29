@@ -69,7 +69,8 @@ if not os.path.exists(CLIENT_SECRETS_FILE):
     with open(CLIENT_SECRETS_FILE, 'w') as outfile:
         json.dump(goog, outfile)
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
-RANGE_NAME = 'ICML2018!A:Z'
+RANGE_PREFIX = 'TechFest2018!'
+RANGE_NAME = RANGE_PREFIX+'A:Z'
 SPREADSHEET_ID = os.environ.get('SPREADSHEET_ID')
 API_SERVICE_NAME = 'sheets'
 API_VERSION = 'v4'
@@ -107,7 +108,7 @@ def add_to_current(score, service):
         next_col = "G"  # don't overwrite phone, etc.
     if next_col > "S":  # googleapiclient.errors.HttpError only to width of sheet
         return "Too many tries"
-    range_name = 'ICML2018!{}{}'.format(next_col, last_row)
+    range_name = '{}{}{}'.format(RANGE_PREFIX, next_col, last_row)
     values = [
         [score],
     ]
@@ -368,16 +369,16 @@ def send_pic(image_path, to):
         'from': 'Peltarion Email <no-reply@{}>'.format('partypi.net'),
         'to': to,
         'cc': 'justin@peltarion.com',
-        'subject': 'Emotion Contest with Peltarion at ICML',
+        'subject': 'Emotion Contest with Peltarion at TechFest',
         'text': 'Thanks for playing!',
         'html': '<html>Thanks for playing!<strong></strong></html>'
     }
     files = {
-        "attachment": ("icml.jpg", open(image_path,'rb'))
+        "attachment": ("techfest.jpg", open(image_path,'rb'))
     }
     with app.open_resource(image_path) as fp:
         files = {
-            "attachment": ("icml.jpg", open(image_path,'rb'))
+            "attachment": ("techfest.jpg", open(image_path,'rb'))
         }
     response = requests.post(url, auth=auth, data=data, files=files)
     response.raise_for_status()
@@ -540,7 +541,7 @@ def get_player_contact():
         API_SERVICE_NAME, API_VERSION, credentials=credentials)
     flask.session['credentials'] = credentials_to_dict(credentials)
     result = service.spreadsheets().values().get(
-        spreadsheetId=SPREADSHEET_ID, range='ICML2018!A:Z').execute()
+        spreadsheetId=SPREADSHEET_ID, range=RANGE_NAME).execute()
     values = result.get('values', [])
     try:
         recent_player = values[-1]
@@ -570,7 +571,7 @@ def email():
         API_SERVICE_NAME, API_VERSION, credentials=credentials)
     flask.session['credentials'] = credentials_to_dict(credentials)
     result = service.spreadsheets().values().get(
-        spreadsheetId=SPREADSHEET_ID, range='ICML2018!A:Z').execute()
+        spreadsheetId=SPREADSHEET_ID, range=RANGE_NAME).execute()
     values = result.get('values', [])
     recent_player = values[-1]
 
@@ -616,7 +617,7 @@ def tweet():
         API_SERVICE_NAME, API_VERSION, credentials=credentials)
     flask.session['credentials'] = credentials_to_dict(credentials)
     result = service.spreadsheets().values().get(
-        spreadsheetId=SPREADSHEET_ID, range='ICML2018!A:Z').execute()
+        spreadsheetId=SPREADSHEET_ID, range=RANGE_NAME).execute()
     values = result.get('values', [])
     recent_player = values[-1]
     email, name = recent_player[1:3]  # email, name, twitter
@@ -624,7 +625,7 @@ def tweet():
         twitter = recent_player[3]
     except:
         twitter = "My Name"
-    message = "{} at #ICML with @Peltarion_ai".format(form.get('emotion'))
+    message = "{} at #TechFest2018 with @Peltarion_ai".format(form.get('emotion'))
     app.logger.info("Tweeting {} {} {}".format(values, email, twitter))
     tweet_image(img_path, message)
     return jsonify(success=True, photoPath='tweet.jpg')
@@ -705,7 +706,7 @@ def server_error(e):
 
 def get_spreadsheet(service):
     result = service.spreadsheets().values().get(
-        spreadsheetId=SPREADSHEET_ID, range='ICML2018!A:Z').execute()
+        spreadsheetId=SPREADSHEET_ID, range=RANGE_NAME).execute()
     values = result.get('values', [])
     return values
 
@@ -743,7 +744,7 @@ def add_score(score):
         next_col = "G"  # don't overwrite phone, etc.
     if next_col > "S":  # googleapiclient.errors.HttpError only to width of sheet
         return "Too many tries"
-    range_name = 'ICML2018!{}{}'.format(next_col, last_row)
+    range_name = '{}{}{}'.format(RANGE_PREFIX, next_col, last_row)
     values = [
         [score],
     ]
@@ -773,7 +774,7 @@ def test_api_request():
         API_SERVICE_NAME, API_VERSION, credentials=credentials)
     flask.session['credentials'] = credentials_to_dict(credentials)
     result = service.spreadsheets().values().get(
-        spreadsheetId=SPREADSHEET_ID, range='ICML2018!A:Z').execute()
+        spreadsheetId=SPREADSHEET_ID, range=RANGE_NAME).execute()
     values = result.get('values', [])
     return jsonify(values)
 
