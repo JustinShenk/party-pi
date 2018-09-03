@@ -69,7 +69,7 @@ if not os.path.exists(CLIENT_SECRETS_FILE):
     with open(CLIENT_SECRETS_FILE, 'w') as outfile:
         json.dump(goog, outfile)
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
-RANGE_PREFIX = 'TechFest2018!'
+RANGE_PREFIX = 'ICML2018!'
 RANGE_NAME = RANGE_PREFIX+'A:Z'
 SPREADSHEET_ID = os.environ.get('SPREADSHEET_ID')
 API_SERVICE_NAME = 'sheets'
