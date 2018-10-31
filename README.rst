@@ -3,7 +3,7 @@ Party Pi
 
 |license| |nbsp|
 
-Emotion detection game using computer vision.
+Emotion detection game using computer vision. Note: This repo is no longer maintained. Contact @justinshenk if you have questions about running it.
 
 Description
 ===========
