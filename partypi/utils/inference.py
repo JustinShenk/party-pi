@@ -22,7 +22,8 @@ def load_detection_model(model_path=None):
 
 
 def detect_faces(detection_model, gray_image_array):
-    return detection_model.detectMultiScale(gray_image_array, 1.3, 5, minSize=(50, 50))
+    return detection_model.detectMultiScale(
+        gray_image_array, 1.3, 5, minSize=(50, 50))
 
 
 def draw_bounding_box(face_coordinates, image_array, color):
@@ -43,11 +44,28 @@ def get_colors(num_classes):
 
 
 def get_labels():
-    return {0: 'angry', 2: 'fear', 3: 'happy',
-            4: 'sad', 5: 'surprise', 6: 'neutral'}
+    return {
+        0: 'angry',
+        2: 'fear',
+        3: 'happy',
+        4: 'sad',
+        5: 'surprise',
+        6: 'neutral'
+    }
 
 
 def get_class_to_arg():
-    return {'angry': 0, 'disgust': 1, 'fear': 2, 'happy': 3, 'sad': 4,
-            'surprise': 5, 'neutral': 6, 'crazy': 5, 'euphoria': 3, 'wonder': 2,
-            'delighted': 3, 'pro-wrestler': 0}
+    return {
+        'angry': 0,
+        'disgust': 1,
+        'fear': 2,
+        'happy': 3,
+        'sad': 4,
+        'surprise': 5,
+        'neutral': 6,
+        'crazy': 5,
+        'euphoria': 3,
+        'wonder': 2,
+        'delighted': 3,
+        'pro-wrestler': 0
+    }

@@ -1,18 +1,15 @@
 import os
 import tweepy
 
+
 def twitter_api():
     consumer_key = None
     consumer_secret = None
     access_token = None
     access_token_secret = None
     try:
-        from credentials import (
-        consumer_key,
-        consumer_secret,
-        access_token,
-        access_token_secret
-        )
+        from credentials import (consumer_key, consumer_secret, access_token,
+                                 access_token_secret)
     except:
         try:
             consumer_key = os.environ.get('TWITTER_KEY')
@@ -27,6 +24,7 @@ def twitter_api():
     api = tweepy.API(auth)
     return api
 
+
 def tweet_message(message):
     api = twitter_api()
     try:
@@ -35,10 +33,12 @@ def tweet_message(message):
     except tweepy.TweepError as e:
         print(e.reason)
 
+
 def tweet_image(filename, twitter, message):
     api = twitter_api()
     api.update_with_media(filename, status=message)
     print("Tweeted: {}".format(message))
+
 
 if __name__ == '__main__':
     tweet_image('PartyPi.png', 'testing the API!')

@@ -2,7 +2,6 @@ import cv2
 import os
 import traceback
 
-
 OPACITY = 0.4
 remote_API = False
 BLUE = (232, 167, 35)
@@ -30,12 +29,18 @@ def preprocess_input(x, v2=True):
     return x
 
 
-def draw_text(coordinates, image_array, text, color=(255, 255, 255), x_offset=0, y_offset=0,
-              font_scale=2, thickness=1):
+def draw_text(coordinates,
+              image_array,
+              text,
+              color=(255, 255, 255),
+              x_offset=0,
+              y_offset=0,
+              font_scale=2,
+              thickness=1):
     x, y = coordinates[:2]
     cv2.putText(image_array, text, (int(x + x_offset), int(y + y_offset)),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                font_scale, color, thickness, cv2.LINE_AA)
+                cv2.FONT_HERSHEY_SIMPLEX, font_scale, color, thickness,
+                cv2.LINE_AA)
 
 
 def new_image_path():
@@ -56,6 +61,6 @@ def new_image_path():
             file_nr = int(file)
             nr = max(nr, file_nr)
     img_nr = nr + 1
-    image_path = os.path.join(photos_path, str(
-        img_prefix) + str(img_nr) + str(extension))
+    image_path = os.path.join(photos_path,
+                              str(img_prefix) + str(img_nr) + str(extension))
     return image_path
