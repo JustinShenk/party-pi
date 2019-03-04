@@ -17,6 +17,8 @@ Demo
 
 `Pics from the first demo at the Institute of Cognitive Science 2016 Christmas Party <https://imgur.com/a/zzf6O>`_
 
+NIPS 2017
+---------
 .. image:: screenshot.png
    :scale: 70 %
    :alt: screenshot of game
