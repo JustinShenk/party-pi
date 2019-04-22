@@ -11,13 +11,8 @@ import uuid
 import flask
 import numpy as np
 import requests
-import tensorflow as tf
 from flask import Flask, Response, request, render_template, jsonify, make_response
-import redis
 from PIL import Image
-import keras
-from keras.models import load_model
-from keras import backend as K
 
 from partypi.utils.inference import (
     load_detection_model,
@@ -28,18 +23,13 @@ from partypi.utils.inference import get_class_to_arg, apply_offsets, get_labels
 from partypi.utils.tweeter import tweet_image, tweet_message
 from partypi.utils.misc import *
 
-graph = tf.get_default_graph()
-emotion_classifier = load_model('emotion_model.hdf5', compile=False)
-
 app = Flask(__name__)
 app.config['CORS_HEADERS'] = 'Content-Type'
 app.config['CORS_SUPPORTS_CREDENTIALS'] = True
 app.config.update(dict(PREFERRED_URL_SCHEME='https'))
 app.secret_key = os.environ["FLASK_SECRET_KEY"]
 app.config['GOOGLE_LOGIN_REDIRECT_SCHEME'] = "https"
-
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
-db = redis.StrictRedis(host='localhost', port=6379, db=0)
 
 app.logger.info("Game loaded")
 face_detector = load_detection_model()
@@ -58,7 +48,7 @@ SPREADSHEET_ID = os.environ.get('SPREADSHEET_ID')
 API_SERVICE_NAME = 'sheets'
 API_VERSION = 'v4'
 # Get input model shapes for inference
-emotion_target_size = emotion_classifier.input_shape[1:3]
+emotion_target_size = (64,64)
 
 # Get emotions
 EMOTIONS = list(get_labels().values())
@@ -282,16 +272,20 @@ def predict_emotions(faces, gray_image, current_emotion='happy'):
         gray_face = np.expand_dims(gray_face, 0)
         gray_face = np.expand_dims(gray_face, -1)
 
-        with graph.as_default():
-            emotion_prediction = emotion_classifier.predict(gray_face)
+        # with graph.as_default():
+        #     emotion_prediction = emotion_classifier.predict(gray_face)
+        SERVER_URL = 'http://localhost:8501/v1/models/emotion_model:predict'
+        response = requests.post(SERVER_URL, json={'instances': gray_face.tolist()})
+        response.raise_for_status()
+        emotion_predictions = response['predictions']
 
         emotion_index = emotion_idx_lookup[current_emotion]
         # app.logger.debug("EMOTION INDEX: ", emotion_index)
-        emotion_score = emotion_prediction[0][emotion_index]
+        emotion_score = emotion_predictions[0][emotion_index]
         x, y, w, h = face_coordinates
         face_dict = {'left': x, 'top': y, 'right': x + w, 'bottom': y + h}
         player_data.append(
-            {'faceRectangle': face_dict, 'scores': emotion_prediction[0]}
+            {'faceRectangle': face_dict, 'scores': emotion_predictions[0]}
         )
     return player_data
 
