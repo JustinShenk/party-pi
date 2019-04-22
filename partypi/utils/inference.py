@@ -43,11 +43,21 @@ def get_colors(num_classes):
 
 
 def get_labels():
-    return {0: 'angry', 2: 'fear', 3: 'happy',
-            4: 'sad', 5: 'surprise', 6: 'neutral'}
+    return {0: 'angry', 2: 'fear', 3: 'happy', 4: 'sad', 5: 'surprise', 6: 'neutral'}
 
 
 def get_class_to_arg():
-    return {'angry': 0, 'disgust': 1, 'fear': 2, 'happy': 3, 'sad': 4,
-            'surprise': 5, 'neutral': 6, 'crazy': 5, 'euphoria': 3, 'wonder': 2,
-            'delighted': 3, 'pro-wrestler': 0}
+    return {
+        'angry': 0,
+        'disgust': 1,
+        'fear': 2,
+        'happy': 3,
+        'sad': 4,
+        'surprise': 5,
+        'neutral': 6,
+        'crazy': 5,
+        'euphoria': 3,
+        'wonder': 2,
+        'delighted': 3,
+        'pro-wrestler': 0,
+    }

@@ -38,7 +38,7 @@ setup(
     packages=['partypi'],
     package_data={'': extra_files},
     install_requires=[
-        'opencv-contrib-python==3.3.0.9',
+        'opencv-contrib-python',
         'pillow',
         'Flask',
         'gunicorn',
@@ -51,7 +51,7 @@ setup(
         'tensorflow',
         'h5py',
         'tweepy',
-        'gevent'
+        'gevent',
         'google-auth-oauthlib',
         'google-api-python-client',
         'boto3',

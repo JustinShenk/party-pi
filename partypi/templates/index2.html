@@ -524,8 +524,7 @@
 
     function startCamera() {
       // if ($("#videoElement").css('display') === 'block') { // camera visible
-      if (true) {
-        try {
+      try {
           // start camera again
           // $("#videoElement").css('visibility','visible');
           $("#videoElement").addClass("flipH");
@@ -538,7 +537,6 @@
         } catch (err) {
           console.log("Caught an exception: " + err);
         }
-      }
     }
 
     function pauseCamera() {

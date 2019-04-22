@@ -3,12 +3,13 @@ from __future__ import unicode_literals
 import os
 import tweepy
 
+
 def twitter_api(public_account=False):
     consumer_key = None
     consumer_secret = None
     access_token = None
     access_token_secret = None
-    if public_account: # @PlayPartyPi
+    if public_account:  # @PlayPartyPi
         try:
             consumer_key = os.environ.get('TWITTER_KEY_PUBLIC')
             consumer_secret = os.environ.get('TWITTER_SECRET_PUBLIC')
@@ -16,7 +17,7 @@ def twitter_api(public_account=False):
             access_token_secret = os.environ.get('TWITTER_TOKEN_SECRET_PUBLIC')
         except:
             print("No twitter auth found")
-    else: # Official/private Twitter account
+    else:  # Official/private Twitter account
         try:
             consumer_key = os.environ.get('TWITTER_KEY')
             consumer_secret = os.environ.get('TWITTER_SECRET')
@@ -38,6 +39,7 @@ def twitter_api(public_account=False):
     api = tweepy.API(auth)
     return api
 
+
 def tweet_message(message, public_account=False):
     api = twitter_api(public_account=public_account)
     try:
@@ -46,10 +48,13 @@ def tweet_message(message, public_account=False):
     except tweepy.TweepError as e:
         print(e.reason)
 
+
 def tweet_image(filename, message, public_account=False):
     api = twitter_api(public_account=public_account)
     api.update_with_media(filename, status=message)
     print("Tweeted: {}".format(message))
 
+
 if __name__ == '__main__':
-    tweet_image('img_car.jpg', 'testing the API!')
+    tweet_message("Testing the API!", True)
+    # tweet_image('img_car.jpg', 'testing the API!')

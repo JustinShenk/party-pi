@@ -1,7 +1,13 @@
 version: '3.1'
-
 services:
   app:
     build: .
     ports:
     - "5000:5000"
+    env_file: config.env
+    image: "gcr.io/${PROJECT_ID}/partypi:v1"
+  tfserving:
+    image: "justinshenk/emotion_serving"
+    ports:
+      - "8501:8501"
+      - "8500:8500"

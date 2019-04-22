@@ -1,4 +1,5 @@
-opencv-contrib-python==3.3.0.9
+redis
+opencv-contrib-python
 pillow
 Flask
 gunicorn

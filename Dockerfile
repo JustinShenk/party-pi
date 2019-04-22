@@ -1,33 +1,34 @@
 FROM python:3.6
-MAINTAINER Justin Shenk "shenk.justin@gmail.com"
+MAINTAINER Justin Shenk <shenkjustin@gmail.com>
 
-RUN apt-get update -y && apt-get install -y \
-        build-essential \
-        openssl \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update
+RUN apt-get install -y python3 python3-dev python3-pip
+#RUN apt-get update -y && apt-get install -y \
+        #build-essential \
+        #openssl \
+    #&& rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p /partypi
 
 WORKDIR /partypi
-#RUN pip3 install --no-cache-dir pipenv
+COPY requirements.txt /partypi
+RUN pip install --upgrade pip
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Disabled until fix for https://github.com/pypa/pipenv/issues/2113
-#ADD Pipfile /partypi/Pipfile
-#ADD Pipfile.lock /partypi/Pipfile.lock
-#RUN pipenv install --system
+COPY . /partypi
 
-ADD requirements.txt /partypi/requirements.txt
-RUN pip3 install -r requirements.txt
+# Install partypi
+RUN pip install .
 
-ADD . /partypi
-
-RUN openssl req \
-    -new \
-    -newkey rsa:4096 \
-    -days 365 \
-    -nodes \
-    -x509 \
-    -subj "/C=US/ST=Denial/L=Springfield/O=Dis/CN=www.example.com" \
-    -keyout www.example.com.key \
-    -out www.example.com.cert
+#RUN openssl req \
+    #-new \
+    #-newkey rsa:4096 \
+    #-days 365 \
+    #-nodes \
+    #-x509 \
+    #-subj "/C=US/ST=Denial/L=Springfield/O=Dis/CN=www.partypi.net" \
+    #-keyout www.partypi.net.key \
+    #-out www.partypi.net.cert
 
 # Expose the web port
 EXPOSE 5000

@@ -1,14 +1,1 @@
-.DS_Store
-*.ipynb
-.git/
-.gitignore
-*.pyc
-__pycache__
-README.md
-Dockerfile
-docker-compose.yml
-.dockerignore
-.travis.yml
-*/static/images/*
-*.cert
-*.key
+partypi/static/images/*
