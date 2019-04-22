@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -
+
 import base64
 from io import BytesIO
 import json
@@ -37,10 +39,12 @@ if not os.path.exists('static/images'):
     os.mkdir('static/images')
 
 CLIENT_SECRETS_FILE = 'client_secret.json'
+
 if not os.path.exists(CLIENT_SECRETS_FILE):
-    goog = json.loads(os.environ.get('GOOGWeb'))
+    goog_config = os.environ.get('GOOGWeb')
     with open(CLIENT_SECRETS_FILE, 'w') as outfile:
-        json.dump(goog, outfile)
+        outfile.write(goog_config)
+
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 RANGE_PREFIX = 'ICML2018!'
 RANGE_NAME = RANGE_PREFIX + 'A:Z'
