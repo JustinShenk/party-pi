@@ -44,7 +44,6 @@ setup(
         'gunicorn',
         'itsdangerous',
         'Jinja2',
-        'scipy',
         'six',
         'Werkzeug',
         'tweepy',
