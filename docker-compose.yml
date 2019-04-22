@@ -1,4 +1,4 @@
-version: '3.1'
+version: '3'
 services:
   app:
     build: .
@@ -6,8 +6,19 @@ services:
     - "5000:5000"
     env_file: config.env
     image: "gcr.io/${PROJECT_ID}/partypi:v1"
+
   tfserving:
     image: "justinshenk/emotion_serving"
     ports:
       - "8501:8501"
       - "8500:8500"
+
+  nginx:
+    restart: always
+    build: ./nginx
+    container_name: production_nginx
+    ports:
+      - 80:80
+      - 443:443
+
+
