@@ -1,1 +1,3 @@
-partypi/static/images/*
+**/static/images/*
+node_modules
+
