@@ -11,16 +11,14 @@ RUN openssl req \
     -nodes \
     -x509 \
     -subj "/C=US/ST=Denial/L=Springfield/O=Dis/CN=www.partypi.net" \
-    -keyout www.partypi.net.key \
-    -out www.partypi.net.cert
+    -keyout /www.partypi.net.key \
+    -out /www.partypi.net.cert
 
 FROM python:3.6
 MAINTAINER Justin Shenk <shenkjustin@gmail.com>
 
 RUN apt-get update
-RUN apt-get install -y python3 python3-dev python3-pip \
-	openssl \
-	&& rm -rf /var/lib/apt/lists*
+RUN rm -rf /var/lib/apt/lists*
 
 RUN mkdir -p /partypi
 
@@ -38,5 +36,5 @@ RUN pip install .
 # Expose the web port
 EXPOSE 5000
 
-COPY --from=openssl /www.partypi.* /partypi/
+COPY --from=openssl /www.partypi.* /partypi/partypi/
 CMD ["gunicorn",  "-c", "gunicorn.conf", "main:app"]

@@ -4,7 +4,6 @@ Flask
 gunicorn
 itsdangerous
 Jinja2
-scipy
 six
 Werkzeug
 gevent
