@@ -274,11 +274,12 @@ def predict_emotions(faces, gray_image, current_emotion='happy'):
 
         # with graph.as_default():
         #     emotion_prediction = emotion_classifier.predict(gray_face)
-        SERVER_URL = 'http://localhost:8501/v1/models/emotion_model:predict'
+        app.logger.info(f"gray_face: {gray_face.shape}")
+        SERVER_URL = 'http://tfserving:8501/v1/models/emotion_model:predict'
         response = requests.post(SERVER_URL, json={'instances': gray_face.tolist()})
         response.raise_for_status()
-        emotion_predictions = response['predictions']
-
+        emotion_predictions = response.json()['predictions']
+        app.logger.info(f"predictions: {emotion_predictions}")
         emotion_index = emotion_idx_lookup[current_emotion]
         # app.logger.debug("EMOTION INDEX: ", emotion_index)
         emotion_score = emotion_predictions[0][emotion_index]
@@ -418,7 +419,7 @@ def image():
                         public_account=True,
                     )
             except Exception as e:
-                print(e)
+                app.logger.error(f"ERROR {e}")
             return jsonify(
                 success=True,
                 photoPath=photo_path,
@@ -428,10 +429,7 @@ def image():
             )
             status_code = 200
         except Exception as e:
-            app.logger.error("ERROR:", e)
-            exc_type, exc_obj, exc_tb = sys.exc_info()
-            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-            app.logger.error(exc_type, fname, exc_tb.tb_lineno)
+            app.logger.error(f"{e}")
             return jsonify(success=False, photoPath='', statusCode=500)
         return make_response(response, status_code)
 
@@ -871,7 +869,6 @@ if __name__ == '__main__':
 
 if __name__ != '__main__':
     # Gunicorn running
-    print("Not equal")
     gunicorn_logger = logging.getLogger('gunicorn.error')
     app.logger.handlers = gunicorn_logger.handlers
     app.logger.setLevel(gunicorn_logger.level)
