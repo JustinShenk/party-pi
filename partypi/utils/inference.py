@@ -1,15 +1,9 @@
 import os
 import cv2
 import numpy as np
-from keras.preprocessing import image
 
 utils_dir = os.path.dirname(__file__)
 base_dir = os.path.dirname(utils_dir)
-
-
-def load_image(image_path, grayscale=False, target_size=None):
-    pil_image = image.load_img(image_path, grayscale, target_size)
-    return image.img_to_array(pil_image)
 
 
 def load_detection_model(model_path=None):
@@ -44,6 +38,7 @@ def get_colors(num_classes):
 
 
 def get_labels():
+<<<<<<< HEAD
     return {
         0: 'angry',
         2: 'fear',
@@ -52,6 +47,9 @@ def get_labels():
         5: 'surprise',
         6: 'neutral'
     }
+=======
+    return {0: 'angry', 2: 'fear', 3: 'happy', 4: 'sad', 5: 'surprise', 6: 'neutral'}
+>>>>>>> k8s
 
 
 def get_class_to_arg():
@@ -67,5 +65,9 @@ def get_class_to_arg():
         'euphoria': 3,
         'wonder': 2,
         'delighted': 3,
+<<<<<<< HEAD
         'pro-wrestler': 0
+=======
+        'pro-wrestler': 0,
+>>>>>>> k8s
     }

@@ -5,7 +5,7 @@ import re
 import sys
 
 
-VERSION = '0.2.0'  # x.y.z[-dev#]
+VERSION = '0.2.1'  # x.y.z[-dev#]
 REPOSITORY = 'https://github.com/JustinShenk/party-pi'
 
 PACKAGES = find_packages(where='partypi')
@@ -38,24 +38,16 @@ setup(
     packages=['partypi'],
     package_data={'': extra_files},
     install_requires=[
-        'opencv-contrib-python==3.3.0.9',
+        'opencv-contrib-python',
         'pillow',
         'Flask',
         'gunicorn',
         'itsdangerous',
         'Jinja2',
-        'scipy',
         'six',
         'Werkzeug',
-        'keras',
-        'tensorflow',
-        'h5py',
         'tweepy',
         'gevent',
-        'google-auth-oauthlib',
-        'google-api-python-client',
-        'boto3',
-        'flask-mail',
         'flask-cors'
     ],
     url=REPOSITORY,

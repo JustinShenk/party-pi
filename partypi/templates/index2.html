@@ -93,6 +93,15 @@
           </div>
         </div>
         <div id="videoContainer" style='position:relative'>
+          {% with messages = get_flashed_messages() %}
+            {% if messages %}
+              <ul class=flashes>
+              {% for message in messages %}
+                <li>{{ message }}</li>
+              {% endfor %}
+              </ul>
+            {% endif %}
+          {% endwith %}
           <!-- <img id="placeholder"></img> -->
           <img onclick="selectDevice()" id="logo" src="{{ url_for('static',filename='Peltarion_logotype.png') }}"></img>
           <video class="flipH" playsinline muted autoplay loop id="videoElement" style="display:none;"></video>
@@ -105,7 +114,7 @@
                 <a href="#" onclick="emailPic()"><i class="fa fa-envelope"> </i> Get an email with your score</a>
               </p>
             </div>
-            <button id="prompt" class="main-btn" onclick="takePhoto()" type="button" class="btn-outline-secondary btn-square" data-emotion="happy">Show </button>
+            <button id="prompt" class="main-btn" onclick="takePhoto()" type="button" class="btn-outline-secondary btn-square" data-emotion="surprise">Show </button>
             <button id="playAgain" class="main-btn" onclick="playAgain()" type="button" class="btn-outline-secondary btn-square">Let's play again</button>
             <button id="retakePhoto" class="main-btn" onclick="playAgain()" type="button" class="btn-outline-secondary btn-square">No face found. Try again!</button>
           </div>
@@ -135,7 +144,7 @@
       <i id="sidebarTrophy" class="fa fa-trophy fa-5x"></i>
 
       <ul class="list-unstyled leaderboard">
-        {% for n in range(1,6) %}
+        <!-- {% for n in range(1,6) %}
         <li>
           <div class="wideCircle" id="place{{n}}" data-rank={{n}}>
             <div class="leaderboardPosition">
@@ -148,7 +157,7 @@
             </div>
           </div>
         </li>
-        {% endfor %}
+        {% endfor %} -->
       </ul>
       <a id="#sidebarTweet" href="#" onclick="tweetPic()"><i class="fab fa-twitter"> </i> Click here to share your score on Twitter</a>
     </nav>
@@ -167,17 +176,17 @@
       'neutral'
     ]
     var takePhotoTimerID;
-    var currentEmotion = 'happy';
+    var currentEmotion = 'surprise';
     var currentPlayerName = 'My Name';
     var playButtonInitialized = false;
     var countdownTimerID;
     var isCaptureInProgress = false;
     var leaders = [
-      ['Namn Namnsson', 0, ''],
-      ['Namn Namnsson', 1, ''],
-      ['Namn Namnsson', 2, ''],
-      ['Namn Namnsson', 3, ''],
-      ['Namn Namnsson', 4, '']
+      // ['Namn Namnsson', 0, ''],
+      // ['Namn Namnsson', 1, ''],
+      // ['Namn Namnsson', 2, ''],
+      // ['Namn Namnsson', 3, ''],
+      // ['Namn Namnsson', 4, '']
     ];
 
     function saveMe(img_id) {
@@ -220,16 +229,19 @@
     function tweetPic() {
       var api = 'tweet';
       var photo = getPhotoElem();
+
       html2canvas(photo, {
           allowTaint:true,
           backgroundColor:null,
           profile:true,
           logging:true
         }).then(function(canvas){
-          sendPic(canvas, api);
+          setTimeout(function() {
+            sendPic(canvas, api);
+          }, 2000);
         });
-      removePhoto();
-      setTimeout(playAgain,2000);
+      setTimeout(removePhoto,2100);
+      setTimeout(playAgain,2500);
     }
 
     function emailPic() {
@@ -241,10 +253,12 @@
           profile:true,
           logging:true
         }).then(function(canvas){
-          sendPic(canvas, api);
+          setTimeout(function() {
+            sendPic(canvas, api);
+          }, 2000);
         });
-      removePhoto();
-      setTimeout(playAgain,2000);
+      setTimeout(removePhoto,2100);
+      setTimeout(playAgain,2500);
     }
 
     function flipVideoV() {
@@ -462,6 +476,7 @@
         }
         const faceWithScore = data.facesWithScores[data.playerIndex];
         const playerFaceURL = faceWithScore[0];
+        currentPlayerName = data.playerName;
         var score = faceWithScore[1];
         var newScoreAndPosition = showRank(video, dataURL, score, currentEmotion);
         var newScore = newScoreAndPosition[0];
@@ -509,12 +524,11 @@
 
     function startCamera() {
       // if ($("#videoElement").css('display') === 'block') { // camera visible
-      if (true) {
-        try {
+      try {
           // start camera again
           // $("#videoElement").css('visibility','visible');
-          start(stopTracks = false);
           $("#videoElement").addClass("flipH");
+          start(stopTracks = false);
           clearTimeout(takePhotoTimerID);
           clearTimeout(countdownTimerID);
           $("#photoCountdown").hide();
@@ -523,7 +537,6 @@
         } catch (err) {
           console.log("Caught an exception: " + err);
         }
-      }
     }
 
     function pauseCamera() {
@@ -647,7 +660,6 @@
       try {
         var leaderCount = $(".leaderboard li").length;
         if (leaderCount == 5) {
-
           $(".leaderboard li").get(4).style.display = ""; // show 5th player
         }
         var listCount = $("#sidebar ul").length;

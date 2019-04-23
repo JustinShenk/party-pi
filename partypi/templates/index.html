@@ -18,7 +18,7 @@
   <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}"></script>
   <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='js/adapter-latest.js') }}"></script>
-  <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap-filestyle.js') }}"></script>
+  <!-- <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap-filestyle.js') }}"></script> -->
   <script type="text/javascript" src="{{ url_for('static', filename='js/exif.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='js/main.js') }}"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
@@ -54,6 +54,10 @@
     <div class="collapse bg-dark" id="navbarHeader">
       <div class="container">
         <div class="row">
+          <div class="select" style="display:none;">
+            <!-- <div class="g-signin2" data-onsuccess="onSignIn"></div> -->
+            <label for="videoSource">Video source: </label><select id="videoSource"></select>
+          </div>
           <div class="col-sm-8 col-md-7 py-4">
             <h4 class="text-white">About</h4>
             <p class="text-muted">Computer vision game build with OpenCV and TensorFlow.</p>
@@ -634,7 +638,7 @@
 
 
     /*
-     * Capture image from `#videoElement` and POST to ``/image` endpoint.
+     * Capture image from `#videoElement` and POST to `/image` endpoint.
      */
     function captureImage() {
       if (isCaptureInProgress) {
@@ -709,13 +713,13 @@
     }
 
     function startCamera() {
-      $("#videoElement").get(0).srcObject.getVideoTracks().forEach(track => track.enabled = true);
+
         if ($("#videoElement").css('display') != 'none') { // camera visible
           try {
             // start camera again
             // navigator.mediaDevices.getUserMedia(constraints).
             //     then(handleSuccess).catch(handleError);
-            start();
+            start(stopTracks = false);
             clearTimeout(captureImageTimerID);
             clearTimeout(countdownTimerID);
             $("#photoCountdown").hide();

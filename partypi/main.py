@@ -1,59 +1,36 @@
+# -*- coding: utf-8 -
+
 import base64
-import cv2
-import google.oauth2.credentials
-import google_auth_oauthlib.flow
-import googleapiclient.discovery
-import boto3
-import io
+from io import BytesIO
 import json
-import flask
 import logging
-import numpy as np
 import os
 import random
 import re
 import sys
-import tensorflow as tf
 import uuid
 
+import flask
+import numpy as np
+import requests
 from flask import Flask, Response, request, render_template, jsonify, make_response
-from flask_cors import CORS
-from flask_mail import Mail, Message
-# from google.oauth2 import id_token
-# from google.auth.transport import requests
-from io import BytesIO
-from keras.models import load_model
-from keras import backend as K
-from utils.inference import load_detection_model, detect_faces, draw_bounding_box
-from utils.inference import get_class_to_arg, apply_offsets, get_labels
-from utils.tweeter import tweet_image, tweet_message
-from utils.misc import *
 from PIL import Image
 
-# tf.keras.backend.clear_session()
-graph = tf.get_default_graph()
+from partypi.utils.inference import (
+    load_detection_model,
+    detect_faces,
+    draw_bounding_box,
+)
+from partypi.utils.inference import get_class_to_arg, apply_offsets, get_labels
+from partypi.utils.tweeter import tweet_image, tweet_message
+from partypi.utils.misc import *
 
-emotion_classifier = load_model('emotion_model.hdf5', compile=False)
-
-# from flask_googlelogin import GoogleLogin
 app = Flask(__name__)
-CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
+app.config['CORS_SUPPORTS_CREDENTIALS'] = True
 app.config.update(dict(PREFERRED_URL_SCHEME='https'))
 app.secret_key = os.environ["FLASK_SECRET_KEY"]
 app.config['GOOGLE_LOGIN_REDIRECT_SCHEME'] = "https"
-
-mail_settings = {
-    "MAIL_SERVER": 'smtp.gmail.com',
-    "MAIL_PORT": 465,
-    "MAIL_USE_TLS": False,
-    "MAIL_USE_SSL": True,
-    "MAIL_USERNAME": os.environ['EMAIL_USER'],
-    "MAIL_PASSWORD": os.environ['EMAIL_PASSWORD']
-}
-
-app.config.update(mail_settings)
-mail = Mail(app)
-
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
 app.logger.info("Game loaded")
@@ -62,17 +39,20 @@ if not os.path.exists('static/images'):
     os.mkdir('static/images')
 
 CLIENT_SECRETS_FILE = 'client_secret.json'
+
 if not os.path.exists(CLIENT_SECRETS_FILE):
-    goog = json.loads(os.environ.get('GOOGWeb'))
+    goog_config = os.environ.get('GOOGWeb')
     with open(CLIENT_SECRETS_FILE, 'w') as outfile:
-        json.dump(goog, outfile)
+        outfile.write(goog_config)
+
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
-RANGE_NAME = 'ICML2018!A:Z'
+RANGE_PREFIX = 'ICML2018!'
+RANGE_NAME = RANGE_PREFIX + 'A:Z'
 SPREADSHEET_ID = os.environ.get('SPREADSHEET_ID')
 API_SERVICE_NAME = 'sheets'
 API_VERSION = 'v4'
 # Get input model shapes for inference
-emotion_target_size = emotion_classifier.input_shape[1:3]
+emotion_target_size = (64,64)
 
 # Get emotions
 EMOTIONS = list(get_labels().values())
@@ -85,18 +65,19 @@ def draw_logo(photo, logo="PartyPi.png"):
     rows, cols = logo.shape[:2]
     y0, y1, x0, x1 = photoRows - rows, photoRows, 0, cols
     for c in range(0, 3):
-        logo_slice = logo[:, :, c] * \
-            (logo[:, :, 3] / 255.0)
-        bg_slice = photo[y0:y1, x0:x1, c] * \
-            (1.0 - logo[:, :, 3]
-                / 255.0)
+        logo_slice = logo[:, :, c] * (logo[:, :, 3] / 255.0)
+        bg_slice = photo[y0:y1, x0:x1, c] * (1.0 - logo[:, :, 3] / 255.0)
         photo[y0:y1, x0:x1, c] = logo_slice + bg_slice
     return photo
 
 
 def add_to_current(score, service):
-    result = service.spreadsheets().values().get(
-        spreadsheetId=SPREADSHEET_ID, range=RANGE_NAME).execute()
+    result = (
+        service.spreadsheets()
+        .values()
+        .get(spreadsheetId=SPREADSHEET_ID, range=RANGE_NAME)
+        .execute()
+    )
     values = result.get('values', [])
     print(len(values) - 1)
     last_row = len(values)
@@ -105,32 +86,33 @@ def add_to_current(score, service):
         next_col = "G"  # don't overwrite phone, etc.
     if next_col > "S":  # googleapiclient.errors.HttpError only to width of sheet
         return "Too many tries"
-    range_name = 'ICML2018!{}{}'.format(next_col, last_row)
-    values = [
-        [score],
-    ]
-    body = {
-        'values': values,
-    }
-    result = service.spreadsheets().values().update(
-        spreadsheetId=SPREADSHEET_ID,
-        range=range_name,
-        valueInputOption='USER_ENTERED',
-        body=body).execute()
+    range_name = '{}{}{}'.format(RANGE_PREFIX, next_col, last_row)
+    values = [[score]]
+    body = {'values': values}
+    result = (
+        service.spreadsheets()
+        .values()
+        .update(
+            spreadsheetId=SPREADSHEET_ID,
+            range=range_name,
+            valueInputOption='USER_ENTERED',
+            body=body,
+        )
+        .execute()
+    )
     response = 'Updated cells in {}'.format(result.get('updatedRange'))
     print(response)
     return response
 
 
-def rank_players(player_data, photo, current_emotion='happy',
-                 one_player=False):
+def rank_players(player_data, photo, current_emotion='happy', one_player=False):
     """ Rank players and display.
 
     Args:
         player_data : list of dicts
         photo : numpy nd array
-    """
 
+    """
     text_size = 0.5
     if len(player_data) < 1:
         draw_text(
@@ -138,7 +120,8 @@ def rank_players(player_data, photo, current_emotion='happy',
             photo,
             "No faces found - try again!",
             font_scale=text_size,
-            color=YELLOW)
+            color=YELLOW,
+        )
         if one_player:
             return photo, [], 1
         else:
@@ -150,8 +133,9 @@ def rank_players(player_data, photo, current_emotion='happy',
     # Get lists of player points.
     first_emotion_idx = emotion_idx_lookup[current_emotion]
     # second_emotion_idx = emotion_idx_lookup[second_current_emotion]
-    first_emotion_scores = [(round(x['scores'][first_emotion_idx] * 100))
-                            for x in player_data]
+    first_emotion_scores = [
+        (round(x['scores'][first_emotion_idx] * 100)) for x in player_data
+    ]
 
     # Collect scores into `scores_list`.
     scores_list = []
@@ -190,22 +174,23 @@ def rank_players(player_data, photo, current_emotion='happy',
 
         # Format points.
         if first_emotion == 1:  # singular 'point'
-            first_emotion_caption = "%i point: %s" % (first_emotion,
-                                                      current_emotion)
+            first_emotion_caption = "%i point: %s" % (first_emotion, current_emotion)
         else:
-            first_emotion_caption = "%i points: %s" % (first_emotion,
-                                                       current_emotion)
+            first_emotion_caption = "%i points: %s" % (first_emotion, current_emotion)
         #
         # Display points.
         score_height_offset = 10
-        first_emotion_coord = (faceRectangle['left'],
-                               faceRectangle['top'] - score_height_offset)
+        first_emotion_coord = (
+            faceRectangle['left'],
+            faceRectangle['top'] - score_height_offset,
+        )
         draw_text(
             first_emotion_coord,
             photo,
             first_emotion_caption,
             font_scale=text_size,
-            color=YELLOW)
+            color=YELLOW,
+        )
 
         # Display 'Winner: ' above player with highest score.
         one_winner = True
@@ -233,7 +218,8 @@ def rank_players(player_data, photo, current_emotion='happy',
                 photo,
                 "Winner: ",
                 color=YELLOW,
-                font_scale=text_size)
+                font_scale=text_size,
+            )
             crown_over_faces = [winner]
         else:
             tied_text_height_offset = 40 if easy_mode else 70
@@ -242,14 +228,10 @@ def rank_players(player_data, photo, current_emotion='happy',
                 # FIXME: show both
                 first_rect_left = player_data[winner]['faceRectangle']['left']
                 first_rect_top = player_data[winner]['faceRectangle']['top']
-                tied_coord = (first_rect_left,
-                              first_rect_top - tied_text_height_offset)
+                tied_coord = (first_rect_left, first_rect_top - tied_text_height_offset)
                 draw_text(
-                    tied_coord,
-                    photo,
-                    "Tied: ",
-                    color=YELLOW,
-                    font_scale=text_size)
+                    tied_coord, photo, "Tied: ", color=YELLOW, font_scale=text_size
+                )
             # crown_over_faces
     if one_player:
         return photo, faces_with_scores, player_index
@@ -264,8 +246,7 @@ def random_emotion():
     current_emotion = random.choice(EMOTIONS)
     # Select another emotion for second emotion
     current_emotion_idx = EMOTIONS.index(current_emotion)
-    new_emotion_idx = (
-        current_emotion_idx + random.choice(list(range(1, 7)))) % 7
+    new_emotion_idx = (current_emotion_idx + random.choice(list(range(1, 7)))) % 7
     second_current_emotion = EMOTIONS[new_emotion_idx]
     # if easy_mode:
     return current_emotion
@@ -294,17 +275,23 @@ def predict_emotions(faces, gray_image, current_emotion='happy'):
         gray_face = preprocess_input(gray_face, True)
         gray_face = np.expand_dims(gray_face, 0)
         gray_face = np.expand_dims(gray_face, -1)
-        with graph.as_default():
-            emotion_prediction = emotion_classifier.predict(gray_face)
+
+        # with graph.as_default():
+        #     emotion_prediction = emotion_classifier.predict(gray_face)
+        app.logger.info(f"gray_face: {gray_face.shape}")
+        SERVER_URL = 'http://tfserving:8501/v1/models/emotion_model:predict'
+        response = requests.post(SERVER_URL, json={'instances': gray_face.tolist()})
+        response.raise_for_status()
+        emotion_predictions = response.json()['predictions']
+        app.logger.info(f"predictions: {emotion_predictions}")
         emotion_index = emotion_idx_lookup[current_emotion]
         # app.logger.debug("EMOTION INDEX: ", emotion_index)
-        emotion_score = emotion_prediction[0][emotion_index]
+        emotion_score = emotion_predictions[0][emotion_index]
         x, y, w, h = face_coordinates
         face_dict = {'left': x, 'top': y, 'right': x + w, 'bottom': y + h}
-        player_data.append({
-            'faceRectangle': face_dict,
-            'scores': emotion_prediction[0]
-        })
+        player_data.append(
+            {'faceRectangle': face_dict, 'scores': emotion_predictions[0]}
+        )
     return player_data
 
 
@@ -359,18 +346,20 @@ def update_spreadsheet(faces_with_scores):
 
 
 def send_pic(image_path, to):
+    app.logger.info("Sending {} to {}".format(image_path, to))
     url = 'https://api.mailgun.net/v3/{}/messages'.format('www.partypi.net')
-    auth = ('api', MAILGUN_API_KEY)
+    auth = ('api', os.environ['MAILGUN_API_KEY'])
     data = {
         'from': 'Peltarion Email <no-reply@{}>'.format('partypi.net'),
         'to': to,
-        'subject': 'Thanks for stopping by Peltarion\'s booth at ICML',
+        'cc': 'justin@peltarion.com',
+        'subject': 'Emotion Contest with Peltarion at TechFest',
         'text': 'Thanks for playing!',
-        'html': '<html>HTML <strong></strong></html>'
+        'html': '<html>Thanks for playing!<strong></strong></html>',
     }
-    files = [("attachment", open(image_path))]
-    with app.open_resource(img_path) as fp:
-        files = [("attachment", fp.read())]
+    files = {"attachment": ("techfest.jpg", open(image_path, 'rb'))}
+    with app.open_resource(image_path) as fp:
+        files = {"attachment": ("techfest.jpg", open(image_path, 'rb'))}
     response = requests.post(url, auth=auth, data=data, files=files)
     response.raise_for_status()
 
@@ -380,15 +369,12 @@ def send_simple_message():
         "https://api.mailgun.net/v3/sandboxb77d7a26ac594bf7a5f4e008acb62696.mailgun.org/messages",
         auth=("api", "cac4b86b5496062cd33ffc688abaff93-770f03c4-d4803e31"),
         data={
-            "from":
-            "Mailgun Sandbox <postmaster@sandboxb77d7a26ac594bf7a5f4e008acb62696.mailgun.org>",
-            "to":
-            "Justin Shenk <shenkjustin@gmail.com>",
-            "subject":
-            "Hello Justin Shenk",
-            "text":
-            "Congratulations Justin Shenk, you just sent an email with Mailgun!  You are truly awesome!"
-        })
+            "from": "Mailgun Sandbox <postmaster@sandboxb77d7a26ac594bf7a5f4e008acb62696.mailgun.org>",
+            "to": "Justin Shenk <shenkjustin@gmail.com>",
+            "subject": "Hello Justin Shenk",
+            "text": "Congratulations Justin Shenk, you just sent an email with Mailgun!  You are truly awesome!",
+        },
+    )
 
 
 @app.route('/image', methods=['POST', 'GET'])
@@ -421,40 +407,45 @@ def image():
             photo_path = 'static/images/{}.jpg'.format(str(uuid.uuid4()))
             cv2.imwrite(photo_path, photo)
             app.logger.info("Saved image to {}".format(photo_path))
-            addr = request.environ.get('HTTP_X_FORWARDED_FOR',
-                                       request.remote_addr)
-            message = "Look who's {} at ICML".format(emotion)
+            addr = request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
+            message = "Look who's {} at TechFest".format(emotion)
             try:
                 if form.get('canTweetPhoto') == 'true':
-                    tweet_image(photo_path, message)
+                    tweet_image(photo_path, message, public_account=True)
                 else:
                     showing = False
                     if emotion in ['fear', 'surprise']:
                         showing = True
-                    tweet_message("Someone is {}{} at {}".format(
-                        "showing " if showing else "", emotion, addr))
+                    tweet_message(
+                        "Someone is {}{} at {}".format(
+                            "showing " if showing else "", emotion, addr
+                        ),
+                        public_account=True,
+                    )
             except Exception as e:
-                print(e)
+                app.logger.error(f"ERROR {e}")
             return jsonify(
                 success=True,
                 photoPath=photo_path,
                 emotion=emotion,
                 facesWithScores=faces_with_scores,
-                addr=addr)
+                addr=addr,
+            )
             status_code = 200
         except Exception as e:
-            app.logger.error("ERROR:", e)
-            exc_type, exc_obj, exc_tb = sys.exc_info()
-            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-            app.logger.error(exc_type, fname, exc_tb.tb_lineno)
+            app.logger.error(f"{e}")
             return jsonify(success=False, photoPath='', statusCode=500)
         return make_response(response, status_code)
 
 
 @app.route('/singleplayer', methods=['POST', 'GET'])
 def singleplayer():
+    if 'credentials' not in flask.session:
+        return flask.redirect('authorize')
     if request.method == 'POST':
         app.logger.info("POST request")
+        emotion = 'angry'
+        player_name = 'Player Name'
         try:
             form = request.form
             image_b64 = form.get('imageBase64')
@@ -476,7 +467,13 @@ def singleplayer():
             faces = detect_faces(face_detector, gray_image)
             player_data = predict_emotions(faces, gray_image, emotion)
             photo, faces_with_scores, player_index = rank_players(
-                player_data, img, emotion, one_player=True)
+                player_data, img, emotion, one_player=True
+            )
+            response = get_player_contact()
+            try:
+                player_name = response[2]
+            except Exception as e:
+                app.logger.error(e)
             photo_path = 'static/images/{}.jpg'.format(str(uuid.uuid4()))
             if len(faces_with_scores) is 0:
                 app.logger.error("No face found")
@@ -486,7 +483,9 @@ def singleplayer():
                     emotion=emotion,
                     facesWithScores=[],
                     playerIndex=None,
-                    statusCode=500)
+                    playerName=player_name,
+                    statusCode=500,
+                )
             else:
                 cv2.imwrite(photo_path, photo)
                 app.logger.info("Saved image to {}".format(photo_path))
@@ -497,7 +496,9 @@ def singleplayer():
                     emotion=emotion,
                     facesWithScores=faces_with_scores,
                     playerIndex=player_index,
-                    statusCode=200)
+                    playerName=player_name,
+                    statusCode=200,
+                )
         except Exception as e:
             app.logger.error("ERROR:", e)
             exc_type, exc_obj, exc_tb = sys.exc_info()
@@ -506,29 +507,31 @@ def singleplayer():
             return jsonify(
                 success=False,
                 photoPath='',
-                emotion=emotion,
-                playerIndex=player_index,
-                facesWithScores=faces_with_scores,
-                statusCode=501)
+                emotion='',
+                playerIndex='',
+                facesWithScores='',
+                statusCode=501,
+            )
 
 
 def get_player_contact():
-    if 'credentials' not in flask.session:
-        return flask.redirect('authorize')
-
     # Load credentials from the session.
-    credentials = google.oauth2.credentials.Credentials(
-        **flask.session['credentials'])
+    credentials = google.oauth2.credentials.Credentials(**flask.session['credentials'])
 
     service = googleapiclient.discovery.build(
-        API_SERVICE_NAME, API_VERSION, credentials=credentials)
+        API_SERVICE_NAME, API_VERSION, credentials=credentials
+    )
     flask.session['credentials'] = credentials_to_dict(credentials)
-    result = service.spreadsheets().values().get(
-        spreadsheetId=SPREADSHEET_ID, range='ICML2018!A:Z').execute()
+    result = (
+        service.spreadsheets()
+        .values()
+        .get(spreadsheetId=SPREADSHEET_ID, range=RANGE_NAME)
+        .execute()
+    )
     values = result.get('values', [])
     try:
         recent_player = values[-1]
-        return recent_player[1:4]  # email, name, twitter
+        return recent_player
     except:
         return None
 
@@ -547,17 +550,26 @@ def email():
         return flask.redirect('authorize')
 
     # Load credentials from the session.
-    credentials = google.oauth2.credentials.Credentials(
-        **flask.session['credentials'])
+    credentials = google.oauth2.credentials.Credentials(**flask.session['credentials'])
 
     service = googleapiclient.discovery.build(
-        API_SERVICE_NAME, API_VERSION, credentials=credentials)
+        API_SERVICE_NAME, API_VERSION, credentials=credentials
+    )
     flask.session['credentials'] = credentials_to_dict(credentials)
-    result = service.spreadsheets().values().get(
-        spreadsheetId=SPREADSHEET_ID, range='ICML2018!A:Z').execute()
+    result = (
+        service.spreadsheets()
+        .values()
+        .get(spreadsheetId=SPREADSHEET_ID, range=RANGE_NAME)
+        .execute()
+    )
     values = result.get('values', [])
     recent_player = values[-1]
-    email, name, twitter = recent_player[1:4]  # email, name, twitter
+
+    email, name = recent_player[1:3]  # email, name, twitter
+    try:
+        twitter = recent_player[3]
+    except:
+        twitter = "My Name"
     with app.app_context():
         send_pic(img_path, email)
         # msg = Message(
@@ -570,6 +582,12 @@ def email():
     return jsonify(success=True, photoPath=img_path)
 
 
+def make_three(recent_player):
+    if len(recent_player) is 2:
+        recent_player.append('Player')
+    return recent_player
+
+
 @app.route('/tweet', methods=['GET', 'POST'])
 def tweet():
     form = request.form
@@ -578,64 +596,47 @@ def tweet():
         app.logger.error("No image in request.")
         return jsonify(success=False, photoPath='')
     img = data_uri_to_cv2_img(image_b64)
-    img_path = 'email.jpg'
+    img_path = 'tweet.jpg'
     cv2.imwrite(img_path, img)
     if 'credentials' not in flask.session:
         return flask.redirect('authorize')
 
     # Load credentials from the session.
-    credentials = google.oauth2.credentials.Credentials(
-        **flask.session['credentials'])
+    credentials = google.oauth2.credentials.Credentials(**flask.session['credentials'])
 
     service = googleapiclient.discovery.build(
-        API_SERVICE_NAME, API_VERSION, credentials=credentials)
+        API_SERVICE_NAME, API_VERSION, credentials=credentials
+    )
     flask.session['credentials'] = credentials_to_dict(credentials)
-    result = service.spreadsheets().values().get(
-        spreadsheetId=SPREADSHEET_ID, range='ICML2018!A:Z').execute()
+    result = (
+        service.spreadsheets()
+        .values()
+        .get(spreadsheetId=SPREADSHEET_ID, range=RANGE_NAME)
+        .execute()
+    )
     values = result.get('values', [])
     recent_player = values[-1]
-    email, name, twitter = recent_player[1:4]  # email, name, twitter
-    message = "{} at @Peltarion's Booth at #ICML".format(form.get('emotion'))
-    tweet_image(img_path, twitter, message)
+    email, name = recent_player[1:3]  # email, name, twitter
+    try:
+        twitter = recent_player[3]
+    except:
+        twitter = "My Name"
+    message = "{} at #TechFest2018 with @Peltarion_ai".format(form.get('emotion'))
+    app.logger.info("Tweeting {} {} {}".format(values, email, twitter))
+    tweet_image(img_path, message)
     return jsonify(success=True, photoPath='tweet.jpg')
 
 
-@app.route('/sign_s3/')
-def sign_s3():
-    S3_BUCKET = os.environ.get('S3_BUCKET')
-
-    file_name = request.args.get('file_name')
-    file_type = request.args.get('file_type')
-
-    s3 = boto3.client('s3')
-
-    presigned_post = s3.generate_presigned_post(
-        Bucket=S3_BUCKET,
-        Key=file_name,
-        Fields={
-            "acl": "public-read",
-            "Content-Type": file_type
-        },
-        Conditions=[{
-            "acl": "public-read"
-        }, {
-            "Content-Type": file_type
-        }],
-        ExpiresIn=3600)
-
-    return json.dumps({
-        'data':
-        presigned_post,
-        'url':
-        'https://%s.s3.amazonaws.com/%s' % (S3_BUCKET, file_name)
-    })
 
 
 @app.route('/')
 def index():
     try:
-        app.logger.info("Page accessed from {}".format(
-            request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)))
+        app.logger.info(
+            "Page accessed from {}".format(
+                request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
+            )
+        )
         return render_template('index.html')
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()
@@ -646,8 +647,11 @@ def index():
 @app.route('/v2')
 def v2():
     try:
-        app.logger.info("Page accessed from {}".format(
-            request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)))
+        app.logger.info(
+            "Page accessed from {}".format(
+                request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
+            )
+        )
         return render_template('index2.html')
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()
@@ -660,30 +664,48 @@ def v2():
 
 @app.errorhandler(404)
 def url_error(e):
-    return """
+    return (
+        """
     Wrong URL!
-    <pre>{}</pre>""".format(e), 404
+    <pre>{}</pre>""".format(
+            e
+        ),
+        404,
+    )
 
 
 @app.errorhandler(500)
 def server_error(e):
-    return """
+    return (
+        """
     An internal error occurred: <pre>{}</pre>
     See logs for full stacktrace.
-    """.format(e), 500
+    """.format(
+            e
+        ),
+        500,
+    )
 
 
 def get_spreadsheet(service):
-    result = service.spreadsheets().values().get(
-        spreadsheetId=SPREADSHEET_ID, range='ICML2018!A:Z').execute()
+    result = (
+        service.spreadsheets()
+        .values()
+        .get(spreadsheetId=SPREADSHEET_ID, range=RANGE_NAME)
+        .execute()
+    )
     values = result.get('values', [])
     return values
 
 
 def get_latest_entry(service):
     """Get last entry from spreadsheet"""
-    result = service.spreadsheets().values().get(
-        spreadsheetId=SPREADSHEET_ID, range=RANGE_NAME).execute()
+    result = (
+        service.spreadsheets()
+        .values()
+        .get(spreadsheetId=SPREADSHEET_ID, range=RANGE_NAME)
+        .execute()
+    )
     values = result.get('values', [])
     if not values:
         print('No data found.')
@@ -697,14 +719,18 @@ def add_score(score):
         return flask.redirect('authorize')
 
     # Load credentials from the session.
-    credentials = google.oauth2.credentials.Credentials(
-        **flask.session['credentials'])
+    credentials = google.oauth2.credentials.Credentials(**flask.session['credentials'])
 
     service = googleapiclient.discovery.build(
-        API_SERVICE_NAME, API_VERSION, credentials=credentials)
+        API_SERVICE_NAME, API_VERSION, credentials=credentials
+    )
     flask.session['credentials'] = credentials_to_dict(credentials)
-    result = service.spreadsheets().values().get(
-        spreadsheetId=SPREADSHEET_ID, range=RANGE_NAME).execute()
+    result = (
+        service.spreadsheets()
+        .values()
+        .get(spreadsheetId=SPREADSHEET_ID, range=RANGE_NAME)
+        .execute()
+    )
     values = result.get('values', [])
     print(len(values) - 1)
     last_row = len(values)
@@ -713,18 +739,20 @@ def add_score(score):
         next_col = "G"  # don't overwrite phone, etc.
     if next_col > "S":  # googleapiclient.errors.HttpError only to width of sheet
         return "Too many tries"
-    range_name = 'ICML2018!{}{}'.format(next_col, last_row)
-    values = [
-        [score],
-    ]
-    body = {
-        'values': values,
-    }
-    result = service.spreadsheets().values().update(
-        spreadsheetId=SPREADSHEET_ID,
-        range=range_name,
-        valueInputOption='USER_ENTERED',
-        body=body).execute()
+    range_name = '{}{}{}'.format(RANGE_PREFIX, next_col, last_row)
+    values = [[score]]
+    body = {'values': values}
+    result = (
+        service.spreadsheets()
+        .values()
+        .update(
+            spreadsheetId=SPREADSHEET_ID,
+            range=range_name,
+            valueInputOption='USER_ENTERED',
+            body=body,
+        )
+        .execute()
+    )
     response = 'Updated cells in {}'.format(result.get('updatedRange'))
     print(response)
     return jsonify(response)
@@ -736,14 +764,18 @@ def test_api_request():
         return flask.redirect('authorize')
 
     # Load credentials from the session.
-    credentials = google.oauth2.credentials.Credentials(
-        **flask.session['credentials'])
+    credentials = google.oauth2.credentials.Credentials(**flask.session['credentials'])
 
     service = googleapiclient.discovery.build(
-        API_SERVICE_NAME, API_VERSION, credentials=credentials)
+        API_SERVICE_NAME, API_VERSION, credentials=credentials
+    )
     flask.session['credentials'] = credentials_to_dict(credentials)
-    result = service.spreadsheets().values().get(
-        spreadsheetId=SPREADSHEET_ID, range='ICML2018!A:Z').execute()
+    result = (
+        service.spreadsheets()
+        .values()
+        .get(spreadsheetId=SPREADSHEET_ID, range=RANGE_NAME)
+        .execute()
+    )
     values = result.get('values', [])
     return jsonify(values)
 
@@ -755,7 +787,7 @@ def credentials_to_dict(credentials):
         'token_uri': credentials.token_uri,
         'client_id': credentials.client_id,
         'client_secret': credentials.client_secret,
-        'scopes': credentials.scopes
+        'scopes': credentials.scopes,
     }
 
 
@@ -784,10 +816,10 @@ def credentials_to_dict(credentials):
 def authorize():
     # Create flow instance to manage the OAuth 2.0 Authorization Grant Flow steps.
     # FIXME Remove statement
-    app.logger.info("REDIRECT URI",
-                    flask.url_for('oauth2callback', _external=True))
+    app.logger.info("/authorize accessed")
     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-        CLIENT_SECRETS_FILE, scopes=SCOPES)
+        CLIENT_SECRETS_FILE, scopes=SCOPES
+    )
 
     flow.redirect_uri = flask.url_for('oauth2callback', _external=True)
 
@@ -796,11 +828,11 @@ def authorize():
         # re-prompting the user for permission. Recommended for web server apps.
         access_type='offline',
         # Enable incremental authorization. Recommended as a best practice.
-        include_granted_scopes='true')
+        include_granted_scopes='true',
+    )
 
     # Store the state so the callback can verify the auth server response.
     flask.session['state'] = state
-
     return flask.redirect(authorization_url)
 
 
@@ -811,7 +843,8 @@ def oauth2callback():
     state = flask.session['state']
 
     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-        CLIENT_SECRETS_FILE, scopes=SCOPES, state=state)
+        CLIENT_SECRETS_FILE, scopes=SCOPES, state=state
+    )
     flow.redirect_uri = flask.url_for('oauth2callback', _external=True)
 
     # Use the authorization server's response to fetch the OAuth 2.0 tokens.
@@ -830,7 +863,13 @@ def oauth2callback():
 if __name__ == '__main__':
     if 'TRAVIS' in os.environ:
         sys.exit()
-    app.run(host='localhost', port=8080, threaded=False)
+    print("RUNNING APP")
+    app.run(
+        host='localhost',
+        ssl_context=('www.partypi.net.cert', 'www.partypi.net.key'),
+        port=8080,
+        threaded=False,
+    )
 
 if __name__ != '__main__':
     # Gunicorn running
