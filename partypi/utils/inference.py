@@ -38,18 +38,7 @@ def get_colors(num_classes):
 
 
 def get_labels():
-<<<<<<< HEAD
-    return {
-        0: 'angry',
-        2: 'fear',
-        3: 'happy',
-        4: 'sad',
-        5: 'surprise',
-        6: 'neutral'
-    }
-=======
     return {0: 'angry', 2: 'fear', 3: 'happy', 4: 'sad', 5: 'surprise', 6: 'neutral'}
->>>>>>> k8s
 
 
 def get_class_to_arg():
@@ -65,9 +54,5 @@ def get_class_to_arg():
         'euphoria': 3,
         'wonder': 2,
         'delighted': 3,
-<<<<<<< HEAD
-        'pro-wrestler': 0
-=======
         'pro-wrestler': 0,
->>>>>>> k8s
     }
