@@ -1,17 +1,18 @@
-FROM python:3.6 as partypi
+FROM tiangolo/meinheld-gunicorn-flask:python3.7 as partypi
 MAINTAINER Justin Shenk <shenkjustin@gmail.com>
 
-RUN mkdir -p /partypi
-WORKDIR /partypi
+RUN mkdir -p /app
+WORKDIR /app
 
-COPY requirements.txt /partypi
-RUN pip install --upgrade pip
+COPY ./app/requirements.txt /app
+#RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . /partypi
+#Install partypi
+#RUN pip install .
 
-# Install partypi
-RUN pip install .
-
+COPY ./gunicorn_conf.py /
+ENV MODULE_NAME="partypi.main" 
+#ENV GUNICORN_CMD_ARGS="chdir=/app/partypi/partypi"
 # Expose the web port
-EXPOSE 8000
+EXPOSE 80

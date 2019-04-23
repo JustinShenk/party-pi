@@ -1,18 +1,7 @@
-.DS_Store
-/extras
-update.py
-/build
-/dist
-*.egg-info
-img/
-lkface*
-*.pyc
-*.swp
-*.bak
-.env
-pyqt5
-secret.py
-README-pypi.rst
-register.py
-*/static/images/*
-credentials.py
+node_modules/
+<<<<<<< HEAD
+__pycache__/
+static/images/
+=======
+__py_cache__/
+>>>>>>> da653a1... Add gitignore
