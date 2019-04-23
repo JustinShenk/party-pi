@@ -2,12 +2,13 @@ version: '3'
 services:
   app:
     build: .
-    command: gunicorn --chdir /partypi/partypi/ main:app --bind 0.0.0.0:5000
+    command: gunicorn --config gunicorn.conf main:app
     volumes:
       - ./partypi/:/partypi/partypi/
       - static_volume:/static_volume
+      - /etc/letsencrypt:/etc/letsencrypt
     ports:
-      - 5000:5000
+      - 8000:8000
     env_file: config.env
     image: "gcr.io/${PROJECT_ID}/partypi:v1"
 
@@ -24,13 +25,8 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-            #- static_volume:/static_volume
-      - ./data/certbot/conf:/etc/letsencrypt
-      - ./data/certbot/www:/var/www/certbot
-  certbot:
-    image: certbot/certbot
-    volumes:
-      - ./data/certbot/conf:/etc/letsencrypt
+      - static_volume:/static_volume
+      - /etc/letsencrypt:/etc/letsencrypt
       - ./data/certbot/www:/var/www/certbot
 
 volumes:
