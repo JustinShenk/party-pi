@@ -3,6 +3,8 @@ RUN apk upgrade --update-cache --available && \
     apk add openssl && \
     rm -rf /var/cache/apk/*
 
+WORKDIR /tmp/
+
 # Generate self-signed certificate
 RUN openssl req \
     -new \
@@ -11,17 +13,13 @@ RUN openssl req \
     -nodes \
     -x509 \
     -subj "/C=US/ST=Denial/L=Springfield/O=Dis/CN=www.partypi.net" \
-    -keyout /www.partypi.net.key \
-    -out /www.partypi.net.cert
+    -keyout www.partypi.net.key \
+    -out www.partypi.net.cert
 
-FROM python:3.6
+FROM python:3.6 as partypi
 MAINTAINER Justin Shenk <shenkjustin@gmail.com>
 
-RUN apt-get update
-RUN rm -rf /var/lib/apt/lists*
-
 RUN mkdir -p /partypi
-
 WORKDIR /partypi
 
 COPY requirements.txt /partypi
@@ -36,5 +34,5 @@ RUN pip install .
 # Expose the web port
 EXPOSE 5000
 
-COPY --from=openssl /www.partypi.* /partypi/partypi/
-CMD ["gunicorn",  "-c", "gunicorn.conf", "main:app"]
+COPY --from=openssl /tmp/www.partypi.net.cert /static_volume/
+COPY --from=openssl /tmp/www.partypi.net.key /static_volume/
