@@ -24,49 +24,7 @@ Demo
 Play
 ====
 
-Visit https://partytest2.herokuapp.com with Desktop Chrome or Firefox.
-
-Run locally
-===========
-
-Clone repository:
-
-.. code-block:: bash
-
-    git clone https://github.com/JustinShenk/party-pi.git
-    cd party-pi
-
-Install dependencies:
-
-.. code-block:: bash
-
-    pip3 install -r requirements.txt
-
-If using Ubuntu, install tkinter with ``sudo apt-get install python3-tk``
-
-.. code-block:: bash
-
-    gunicorn -c gunicorn.conf main:app
-
-Open a browser to `https://localhost:5000`.
-
-Docker
-======
-
-Pull the docker image with `docker pull justinshenk/partypi:latest`.
-
-Run the server interactively with ``docker run -it -p 5000:5000 partypi`` and open a browser to https://localhost:5000.
-
-In Chrome (or Firefox), click Advanced and proceed past the warning.
-
-
-
-Raspberry Pi
-============
-
-Additional (optional)  arguments: ``--picam`` for piCamera module and ``--slow`` to slow down the countdown.
-
-Select Easy or Hard Mode (left or right arrow keys).
+Visit https://partypi.net with Desktop Chrome or Firefox.
 
 Awards, Press, Demos
 ====================
@@ -76,13 +34,6 @@ Awards, Press, Demos
 - The technology was demonstrated at Intel's AI booth at NIPS 2017
 - Party Pi was demoed for students and faculty at the 2016 and 2017 Osnabrück University Institute of Cognitive Science Christmas parties
 - Received the 2018 Open Source Software Prize from Intevation GmbH
-
-TODO
-====
-- Fix alignment of user interface elements
-- Fix display of elements
-- Fix mobile image processing
-- Test latest version on Raspberry Pi (support is deprecated)
 
 Author
 ======
