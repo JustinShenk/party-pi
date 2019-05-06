@@ -3,8 +3,8 @@ import tweepy
 
 import logging
 
-
 logger = logging.getLogger(__name__)
+
 
 def twitter_api(public_account=True):
     consumer_key = None

@@ -4,7 +4,6 @@ import os
 import re
 import sys
 
-
 VERSION = '0.2.1'  # x.y.z[-dev#]
 REPOSITORY = 'https://github.com/JustinShenk/party-pi'
 
@@ -31,24 +30,16 @@ print("Extra_files: ", extra_files)
 setup(
     name='partypi',
     version=VERSION,
-    description='Party Pi is a computer vision emotion detection game with OpenCV and Keras.',
+    description=
+    'Party Pi is a computer vision emotion detection game with OpenCV and Keras.',
     long_description=README,
     author='Justin Shenk',
     author_email='shenk.justin@gmail.com',
     packages=['partypi'],
     package_data={'': extra_files},
     install_requires=[
-        'opencv-contrib-python',
-        'pillow',
-        'Flask',
-        'gunicorn',
-        'itsdangerous',
-        'Jinja2',
-        'six',
-        'Werkzeug',
-        'tweepy',
-        'gevent',
-        'flask-cors'
+        'opencv-contrib-python', 'pillow', 'Flask', 'gunicorn', 'itsdangerous',
+        'Jinja2', 'six', 'Werkzeug', 'tweepy', 'gevent', 'flask-cors'
     ],
     url=REPOSITORY,
     download_url='{}/tarball/{}'.format(REPOSITORY, VERSION),
@@ -64,8 +55,5 @@ setup(
         'Topic :: Multimedia :: Video :: Display',
     ],
     license='MIT',
-    keywords=[
-        'OpenCV', 'computer', 'vision', 'emotion', 'detection', 'game'
-    ],
-    zip_safe = False
-)
+    keywords=['OpenCV', 'computer', 'vision', 'emotion', 'detection', 'game'],
+    zip_safe=False)
