@@ -12,15 +12,6 @@ Interactive game that ranks players by their ability to show an emotion (eg, "Sh
 
 Emotion detection is accomplished using an Inception-based neural network trained in TensorFlow on the FER2013 dataset. Face detection is accomplished using OpenCV's Haar cascade.
 
-Demo
-====
-
-`Pics from the first demo at the Institute of Cognitive Science 2016 Christmas Party <https://imgur.com/a/zzf6O>`_
-
-.. image:: screenshot.png
-   :scale: 70 %
-   :alt: screenshot of game
-
 Play
 ====
 
