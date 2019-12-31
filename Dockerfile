@@ -1,4 +1,5 @@
-FROM python:3.6 as partypi
+#FROM python:3.6 as partypi
+FROM tiangolo/uwsgi-nginx-flask:python3.7 as partypi
 MAINTAINER Justin Shenk <shenkjustin@gmail.com>
 
 RUN mkdir -p /partypi

@@ -10,10 +10,10 @@ REPOSITORY = 'https://github.com/JustinShenk/party-pi'
 PACKAGES = find_packages(where='partypi')
 
 README = ''
-with open('README.rst', 'r') as f:
-    README = f.read()
-README = re.sub(r' _(.+): ([^(http)].+)',
-                r' _\1: {}/blob/master/\2'.format(REPOSITORY), README)
+# with open('README.rst', 'r') as f:
+    # README = f.read()
+# README = re.sub(r' _(.+): ([^(http)].+)',
+                # r' _\1: {}/blob/master/\2'.format(REPOSITORY), README)
 
 
 def package_files(directory):
@@ -32,7 +32,7 @@ setup(
     version=VERSION,
     description=
     'Party Pi is a computer vision emotion detection game with OpenCV and Keras.',
-    long_description=README,
+    # long_description=README,
     author='Justin Shenk',
     author_email='shenk.justin@gmail.com',
     packages=['partypi'],

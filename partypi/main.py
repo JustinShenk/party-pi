@@ -30,14 +30,11 @@ app.config.update(dict(PREFERRED_URL_SCHEME='https'))
 app.config['GOOGLE_LOGIN_REDIRECT_SCHEME'] = "https"
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
-app.secret_key = os.environ["FLASK_SECRET_KEY"]
+app.secret_key = os.environ.get("FLASK_SECRET_KEY")
 
 app.logger.info("Game loaded")
 
 face_detector = load_detection_model()
-
-if not os.path.exists('static/images'):
-    os.mkdir('static/images')
 
 if os.environ.get("PARTYPI_VERSION") == 2:
     import google_auth_oauthlib
@@ -69,6 +66,10 @@ EMOTIONS = list(get_labels().values())
 def draw_logo(photo, logo="PartyPi.png"):
     """Draws logo on `photo` in bottom right corner."""
     logo = cv2.imread(logo, cv2.IMREAD_UNCHANGED)
+    if logo is None:
+        app.logger.error(os.listdir())
+        app.logger.error("No image found")
+        return
     photoRows, photoCols = photo.shape[:2]
     rows, cols = logo.shape[:2]
     y0, y1, x0, x1 = photoRows - rows, photoRows, 0, cols
