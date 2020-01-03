@@ -5,7 +5,6 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-
 def twitter_api(public_account=True):
     consumer_key = None
     consumer_secret = None
@@ -19,14 +18,6 @@ def twitter_api(public_account=True):
             access_token_secret = os.environ.get('TWITTER_TOKEN_SECRET_PUBLIC')
         except Exception as e:
             logger.error("No twitter auth found: {e}")
-    # else:  # Official/private Twitter account
-        # try:
-            # consumer_key = os.environ.get('TWITTER_KEY')
-            # consumer_secret = os.environ.get('TWITTER_SECRET')
-            # access_token = os.environ.get('TWITTER_TOKEN')
-            # access_token_secret = os.environ.get('TWITTER_TOKEN_SECRET')
-        # except Exception as e:
-            # logger.error(f"No twitter auth found: {e}")
     auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
     auth.set_access_token(access_token, access_token_secret)
     api = tweepy.API(auth)
