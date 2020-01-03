@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <meta name="google-site-verification" content="wrdp4U0mYFWUKePF4biGs2g8wEYHmrNJTXupi_RDB6U" />
+  <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  <!-- <script defer src="https://use.fontawesome.com/releases/v5.0.8/js/all.js"></script> -->
+  <script type="text/javascript" src="{{ url_for('static',filename='js/fontawesome-all.js') }}"></script>
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous" />
+  <link rel="stylesheet" href="{{ url_for('static',filename='css/main.css') }}" />
+  <!-- jQuery library -->
+  <script type="text/javascript" src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.3.1.min.js"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}"></script>
+  <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/adapter-latest.js') }}"></script>
+  <!-- <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap-filestyle.js') }}"></script> -->
+  <script type="text/javascript" src="{{ url_for('static', filename='js/exif.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/main.js') }}"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+  <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+  <script src="{{ url_for('static', filename='js/holder.min.js') }}"></script>
+  <script id="mcjs">
+    ! function(c, h, i, m, p) {
+      m = c.createElement(h), p = c.getElementsByTagName(h)[0], m.async = 1, m.src = i, p.parentNode.insertBefore(m, p)
+    }(document, "script", "https://chimpstatic.com/mcjs-connected/js/users/37227b4f5e1bbd80f404cfef6/ae35f9ecc36904532f0c06bb7.js");
+  </script>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-30504176-4"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag('js', new Date());
+
+    gtag('config', 'UA-30504176-4');
+  </script>
+
+  <link href="{{ url_for('static', filename='css/album.css') }}" rel="stylesheet" />
+
+  <title>Party Pi</title>
+
+</head>
+
+<body>
+  <header>
+    <div class="collapse bg-dark" id="navbarHeader">
+      <div class="container">
+        <div class="row">
+          <div class="select" style="display:none;">
+            <!-- <div class="g-signin2" data-onsuccess="onSignIn"></div> -->
+            <label for="videoSource">Video source: </label><select id="videoSource"></select>
+          </div>
+          <div class="col-sm-8 col-md-7 py-4">
+            <h4 class="text-white">About</h4>
+            <p class="text-muted">Computer vision game build with OpenCV and TensorFlow.</p>
+          </div>
+          <div class="col-sm-4 offset-md-1 py-4">
+            <h4 class="text-white">Contact</h4>
+            <ul class="list-unstyled">
+              <li><a href="https://github.com/justinshenk/party-pi" class="text-white">Get the code</a></li>
+              <li><a href="https://linkedin.com/in/justinshenk" class="text-white">Connect on LinkedIn</a></li>
+              <li><a href="mailto:shenk.justin@gmail.com?subject=Party-Pi" class="text-white">Email me</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="navbar navbar-dark bg-dark box-shadow">
+      <div class="container d-flex">
+        <a href="#" class="navbar-brand d-flex align-items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+          <strong>Party Pi</strong>
+        </a>
+        <label id='tweet-warning' class='checkbox-inline text-muted'>
+          <input id="mode-toggle" type="checkbox" data-toggle="toggle" data-on="<i class='fab fa-twitter'></i>" data-off="IP" data-onstyle="warning" data-style="ios">
+            Tweeting <span id="tweet-mode">your IP address</span> to <a href="https://twitter.com/playpartypi">@PlayPartyPi</a>
+        </label>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarHeader" aria-controls="navbarHeader" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main role="main">
+    <div class='top-section row'>
+      <!-- begin left column -->
+      <div class="col-sm-8">
+        <!-- Modal -->
+        <div id="gameInfoModal" class="modal fade" role="dialog">
+          <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">About Party Pi</h4>
+              </div>
+              <div class="modal-body">
+                <p>Emotion classification is performed with a neural network trained with Keras on the FER2013 dataset. The website runs with Flask on Heroku. Party Pi was developed by <a href="https://linkedin.com/in/justinshenk"><img alt="Justin Shenk" src="{{ url_for('static',filename='justin.png') }}" width=42 /></a>.</p>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="alert alert-warning browser-warning">
+          <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+          <strong>Warning</strong> Browser not supported. Use Safari for iOS or desktop Chrome for best results.
+        </div>
+        <div class="alert alert-danger privacy-warning">
+          <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+          <strong>Warning</strong> Your photos will be instantly shared via <a href="https://twitter.com/playpartypi">Twitter</a>.
+        </div>
+        <section id="jumbo" class="jumbotron text-center">
+
+          <!-- <img src="{{ url_for('static', filename='images/PartyPi.jpg') }}" width=100/> -->
+
+          <p class='lead text-muted'> Let's play Party Pi, a computer vision emotion detection <a href="#gameInfoModal" data-toggle="modal" data-target="#gameInfoModal">game.</a></br>
+            <div id="inputFile" class="row justify-content-md-center" style="display: none;">
+              <div class="col col-lg-2">
+              </div>
+              <div class="col-md-auto">
+                <span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="3.2"/>
+          <path d="M9 2l-1.83 2h-3.17c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2v-12c0-1.1-.9-2-2-2h-3.17l-1.83-2h-6zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
+          <path d="M0 0h24v24h-24z" fill="none"/>
+        </svg>
+      </span>
+                <input name="Select File" type="file" accept="image/*" capture="user" />
+              </div>
+              <div class="col col-lg-2">
+              </div>
+            </div>
+            <div id='output' class='container'>
+              <div class='img-overlay'>
+                <div class='row justify-content-center'>
+                  <p id="prompt">Show happiness_</p>
+                  <button id="play">Play</button>
+                </div>
+              </div>
+              <!-- <input id='imageInput' type="file" accept="image/*;" capture="camera" style="display: none"> -->
+              <!-- <div id='output' class='container'> -->
+              <div id='spinner'>
+              </div>
+              <video width='640' height='480' playsinline muted autoplay id="videoElement">Your browser does not support HTML5 video.</video>
+              <image id='placeholderImage' width='640' height='480' style='display: none; background-color: gray;'></image>
+              <div class='' id="photoCountdown" style='::after'>
+                <div id="countdownBar">
+                </div>
+              </div>
+              <img id="myImg" class="img-responsive" crossorigin="anonymous" src="" style="display:none;" />
+              <canvas id="myCanvas" hidden='true'></canvas>
+
+              <!-- <image id='placeholder' src="{{ url_for('static', filename='loading.jpg')}}" height="480px" width="640px"></image> -->
+              <div id='mobilePrompt' class='row justify-content-center lead'>
+              </div>
+            </div>
+        </section>
+
+        <div id='gallery' class="album py-5 bg-light" style="display: none;">
+          <div class="container">
+            <h1>Gallery</h1>
+            <br>
+            <div class='row' id='galleryImages'>
+              <canvas id="c" style="display:none" />
+              <!-- <p id='purchaseNote'></p>
+        <div id='secretImages'></div> -->
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- end left column -->
+      <div class="col-sm-3" id="leaderboard" style="background-color:#aaa;">
+        <h2>Leaderboard</h2>
+        <div id="leaderboardContent">
+          <div class="select" style="display:none;">
+            <label for="videoSource">Video source: </label><select id="videoSource"></select>
+            <span id="alpha"></span>
+          </div>
+          <div id='leaderboardHappy' style="display:none">
+            <h3>Happy</h3>
+            <div class="row">
+              <div id="happyPlace1" class="leaderCol">
+                <div class="overlay">
+                  <a href="#" class="icon" title="User Profile">
+                    <i class="fa fa-trophy"></i>
+                  </a>
+                </div>
+              </div>
+              <div id="happyPlace2" class="leaderCol"></div>
+              <div id="happyPlace3" class="leaderCol"></div>
+            </div>
+          </div>
+          <div id='leaderboardSurprise' style="display:none">
+            <h3>Surprise</h3>
+            <div class="row">
+              <div id="surprisePlace1" class="leaderCol">
+                <div class="overlay">
+                  <a href="#" class="icon" title="User Profile">
+                    <i class="fa fa-trophy"></i>
+                  </a>
+                </div>
+              </div>
+              <div id="surprisePlace2" class="leaderCol">
+              </div>
+              <div id="surprisePlace3" class="leaderCol"></div>
+            </div>
+          </div>
+          <div id='leaderboardAngry' style="display:none">
+            <h3>Angry</h3>
+            <div class="row">
+              <div id="angryPlace1" class="leaderCol">
+                <div class="overlay">
+                  <a href="#" class="icon" title="User Profile">
+                    <i class="fa fa-trophy"></i>
+                  </a>
+                </div>
+              </div>
+              <div id="angryPlace2" class="leaderCol"></div>
+              <div id="angryPlace3" class="leaderCol"></div>
+            </div>
+          </div>
+          <div id='leaderboardSad' style="display:none">
+            <h3>Sad</h3>
+            <div class="row">
+              <div id="sadPlace1" class="leaderCol">
+                <div class="overlay">
+                  <a href="#" class="icon" title="User Profile">
+                    <i class="fa fa-trophy"></i>
+                  </a>
+                </div>
+              </div>
+              <div id="sadPlace2" class="leaderCol"></div>
+              <div id="sadPlace3" class="leaderCol"></div>
+            </div>
+          </div>
+          <div id='leaderboardNeutral' style="display:none">
+            <h3>Neutral</h3>
+            <div class="row">
+              <div id="neutralPlace1" class="leaderCol">
+                <div class="overlay">
+                  <a href="#" class="icon" title="User Profile">
+                    <i class="fa fa-trophy"></i>
+                  </a>
+                </div></div>
+              <div id="neutralPlace2" class="leaderCol"></div>
+              <div id="neutralPlace3" class="leaderCol"></div>
+            </div>
+          </div>
+          <div id='leaderboardFear' style="display:none">
+            <h3>Fear</h3>
+            <div class="row">
+              <div id="fearPlace1" class="leaderCol">
+                <div class="overlay">
+                  <a href="#" class="icon" title="User Profile">
+                    <i class="fa fa-trophy"></i>
+                  </a>
+                </div>
+              </div>
+              <div id="fearPlace2" class="leaderCol"></div>
+              <div id="fearPlace3" class="leaderCol"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <!-- <script type="text/javascript" src="//downloads.mailchimp.com/js/signup-forms/popup/embed.js" data-dojo-config="usePlainJson: true, isDebug: false"></script>
+      <script type="text/javascript">
+        require(["mojo/signup-forms/Loader"], function(L) {
+          L.start({
+            "baseUrl": "mc.us12.list-manage.com",
+            "uuid": "37227b4f5e1bbd80f404cfef6",
+            "lid": "0229295406"
+          })
+        })
+      </script> -->
+    </div>
+  </main>
+
+  <footer class="text-muted">
+    <div class="container">
+      <p class="float-right">
+        <a href="#">Back to top</a>
+      </p>
+      <p>Party Pi is &copy; 2018 Justin Shenk</p>
+      <p>Want the code? <a href="https://github.com/justinshenk/partypi">Visit the GitHub repo</a>.</p>
+    </div>
+  </footer>
+
+  <script type="text/javascript">
+  // TODO: Scope variables properly
+    var isMobile;
+    var showGallery = false;
+    const emotionArray = [
+      'happy',
+      'angry',
+      'sad',
+      'fear',
+      'surprise',
+      'neutral'
+    ]
+    var captureImageTimerID;
+    var currentEmotion = 'happy';
+    var playButtonInitialized = false;
+    var countdownTimerID;
+    var isCaptureInProgress = false;
+
+    function saveMe(img_id) {
+      // Download image with `img_id`
+      if (!typeof img_id === 'string') {
+        img_id = img_id.id;
+      }
+      const img_src = $("#" + img_id).attr("src");
+      var a = document.createElement('a');
+      a.href = img_src;
+      const filename = "party_pi_" + String(img_id) + ".jpg";
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    /*
+     * Start webcam if possible, otherwise fallback on manual image upload.
+     * `videoMode` indicates if streaming should begin, otherwise video remains
+     * hidden.
+     */
+
+    function initPlayButton() {
+      // let the game begin!
+      console.log("begin games");
+      $("#play").click(function() {
+        playButtonInitialized = true;
+        $("#placeholderImage").hide();
+        $("#prompt").show();
+        $("#videoElement").show();
+        $("#photoCountdown").show();
+        if (showGallery) {
+          // move photo from main display to gallery
+          moveToGallery();
+        } else {
+          showGallery = true;
+        }
+
+        // Show and start webcam
+        $("#prompt").text("Show " + currentEmotion + "_");
+        // Hide play button
+        $(this).hide();
+        // Start timer
+        countdown();
+        // Capture image and load image
+        captureImageTimerID = setTimeout(captureImage, 3000);
+      });
+    }
+    /**
+     * Move current photo to gallery.
+     */
+    function moveToGallery() {
+      // Move current photo to gallery
+      $('#gallery').css("display", "block");
+      $('#output img:visible').each(function(i) {
+        // Create card for image
+        const img_src = $(this).attr('src');
+        $(this).remove();
+
+        const galleryLength = $(".card-img-top").length;
+        const img_filename = "img_" + galleryLength;
+        const download_button = '<button type="button" id="btn_' + galleryLength +
+        '" class="btn btn-sm btn-outline-secondary view-btn" onclick="saveMe(&apos;img_' + galleryLength + '&apos;)"><i class="fa fa-download"></i></button>'
+        const img = '<img id="' + img_filename + '" class="card-img-top" src="' + img_src +
+          '" alt="Card image cap">'
+        const myCard = $('<div class="col-md-4" style=""><div class="card mb-4 box-shadow">' +
+          img + '<div class="card-body"><div class="d-flex justify-content-between align-items-center"><div class="btn-group">' +
+          download_button + '</div><small class="text-muted"></small></div></div></div>');
+        myCard.prependTo('#galleryImages');
+      });
+    }
+
+    /*
+     * Fix orientation of image from EXIF metadatas and draw canvas.
+     */
+    function orientation(img, canvas) {
+      // Set variables
+      var ctx = canvas.getContext("2d");
+      var exifOrientation = '';
+      var width = img.width,
+        height = img.height;
+
+      // Check orientation in EXIF metadatas
+      EXIF.getData(img, function() {
+        var allMetaData = EXIF.getAllTags(this);
+        exifOrientation = allMetaData.Orientation;
+        console.log('Exif orientation: ' + exifOrientation);
+      });
+
+      // set proper canvas dimensions before transform & export
+      if (jQuery.inArray(exifOrientation, [5, 6, 7, 8]) > -1) {
+        canvas.width = height;
+        canvas.height = width;
+      } else {
+        canvas.width = width;
+        canvas.height = height;
+      }
+
+      // transform context before drawing image
+      switch (exifOrientation) {
+        case 2:
+          ctx.transform(-1, 0, 0, 1, width, 0);
+          break;
+        case 3:
+          ctx.transform(-1, 0, 0, -1, width, height);
+          break;
+        case 4:
+          ctx.transform(1, 0, 0, -1, 0, height);
+          break;
+        case 5:
+          ctx.transform(0, 1, 1, 0, 0, 0);
+          break;
+        case 6:
+          ctx.transform(0, 1, -1, 0, height, 0);
+          break;
+        case 7:
+          ctx.transform(0, -1, -1, 0, height, width);
+          break;
+        case 8:
+          ctx.transform(0, -1, 1, 0, 0, width);
+          break;
+        default:
+          ctx.transform(1, 0, 0, 1, 0, 0);
+      }
+
+      // Draw img into canvas
+      ctx.drawImage(img, 0, 0, width, height);
+    }
+
+    /*
+     * Send POST request with uploaded image in canvas to API.
+     */
+    function sendFile(canvas) {
+      var resizedCanvas = document.createElement("canvas");
+      var resizedContext = resizedCanvas.getContext("2d");
+
+      resizedCanvas.height = String(480 * canvas.width / canvas.height);
+      resizedCanvas.width = "480";
+
+      resizedContext.drawImage(canvas, 0, 0, resizedCanvas.width, resizedCanvas.height);
+      var dataURL = resizedCanvas.toDataURL('image/jpeg', 0.7);
+      var fd = new FormData(document.forms[0]);
+      fd.append("imageBase64", dataURL);
+      fd.append("emotion", currentEmotion);
+      $("#spinner").addClass('loader');
+      $("#placeholder").show();
+      // send image to API
+      $.ajax({
+        type: "POST",
+        url: "{{ url_for('image') }}",
+        data: fd,
+        async: true,
+        cache: false,
+        headers: {
+          "cache-control": "no-cache"
+        },
+        processData: false,
+        contentType: false,
+        timeout: 10000
+      }).done(function(data) {
+        // Add photo to top
+        var img = document.createElement('img');
+        img.setAttribute('id', 'photo');
+        img.src = data.photoPath;
+        img.classList.add("scoredImage");
+        $("#output").prepend(img);
+        $("#placeholderImage").hide();
+        $("#spinner").removeClass('loader');
+        var emotion = getRandomEmotion();
+        currentEmotion = emotion;
+        $("#mobilePrompt").text("Show " + currentEmotion + "_");
+      }).fail(function(data) {
+        console.log(data.responseCode);
+      });
+    }
+
+    /*
+     * Prepare input image and send it in POST request.
+     */
+    function postInputContents(input) {
+
+      if (input.files && input.files[0]) {
+        var reader = new FileReader();
+
+        reader.onloadend = function(e) {
+          var $myImg = $("#myImg");
+          $myImg.attr('src', e.target.result);
+          $myImg.show();
+          // Use EXIF library to handle the loaded image exif orientation
+          EXIF.getData(input.files[0], function() {
+            // Fetch image tag
+            var img = $myImg.get(0);
+            // Fetch canvas
+            var canvas = $("#myCanvas").get(0);
+            // run orientation on img in canvas
+            orientation(img, canvas);
+            sendFile(canvas);
+          });
+        };
+        reader.readAsDataURL(input.files[0]);
+      }
+    };
+
+    /*
+     * Get random emotion from `emotionArray`.
+     */
+    function getRandomEmotion() {
+      var randomNumber = Math.floor(Math.random() * emotionArray.length);
+      return emotionArray[randomNumber];
+    }
+
+    function errorMessage(message, e) {
+      console.error(message, typeof e == 'undefined' ? '' : e);
+    }
+
+    /*
+     * Show manual upload button and related stuff.
+     * NOTE: Not implemented
+     */
+
+    function showManualUpload() {
+      $("#inputFile").show();
+      var fileUpload = $("#imageInput");
+      fileUpload.show();
+      fileUpload.on('change', function() {
+        moveToGallery(); // move old images to gallery
+        postInputContents(this); // rotate and POST image
+      });
+      $('#videoElement').hide();
+      $('#play').hide();
+      $('#photoCoundown').hide();
+      $('#prompt').hide();
+      $('#mobilePrompt').show();
+      $("#mobilePrompt").text("Show " + currentEmotion + "_");
+    }
+
+
+    /*
+     * Capitalize first letter in string.
+     */
+    function capitalizeFirstLetter(string) {
+      return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+
+    /*
+     * Bump leaderboard cards so that three top players are in order.
+     *
+     */
+    function bumpLeaderboardCards(faceRank, rankedPlayers) {
+      $leaderboardPlace = $("#" + currentEmotion + "Place" + faceRank);
+      $firstPlace = $("#" + currentEmotion + "Place" + 1);
+      $secondPlace = $("#" + currentEmotion + "Place" + 2);
+      $thirdPlace = $("#" + currentEmotion + "Place" + 3);
+      if (faceRank === 3) { // third place
+        $leaderboardPlace.find('.leaderboardCard').remove();
+      } else if (faceRank === 2) { // second place
+        $leaderboardPlace.find('.leaderboardCard').remove();
+        $secondPlace.find('.leaderboardCard').prependTo($thirdPlace);
+      } else if (faceRank === 1) { // first place
+        $thirdPlace.find('.leaderboardCard').remove();
+        $secondPlace.find('.leaderboardCard').prependTo($thirdPlace);
+        $firstPlace.find('.leaderboardCard').prependTo($secondPlace);
+      }
+    }
+
+    /*
+     * Update the leaderboard with `facesWithScores`.
+     */
+    function updateLeaderboard(facesWithScores) {
+      console.log(facesWithScores);
+      $leaderboard = $("#leaderboardContent");
+      for (var i = 0; i < facesWithScores.length; i++) {
+        const faceURL = facesWithScores[i][0];
+        const score = parseInt(facesWithScores[i][1]);
+        const imgID = currentEmotion + score;
+        const capEmotion = capitalizeFirstLetter(currentEmotion)
+        const sectionID = "leaderboard" + capEmotion;
+        $leaderboardSection = $('#' + sectionID);
+        const sectionLength = $("#" + sectionID + " img").length;
+        if (sectionLength == 0) {
+          // Show if first image in section
+          $leaderboardSection.show();
+        }
+        // Sort faces in leaderboard section by score
+        var faceRank = 1; // initialize
+        var sameScores = 0;
+        $('#' + sectionID + ' img:visible').each(function(index, value) {
+          var leaderImgID = value.id;
+          // var leaderEmotion = leaderImgID.match(/[a-zA-Z]+/g)[0];
+          const leaderScore = parseInt(leaderImgID.match(/\d+/g)[0]);
+          if (leaderScore > score) {
+            faceRank += 1;
+          } else if (leaderScore === score) {
+            sameScores += 1;
+          }
+        });
+        faceRank += sameScores;
+        if (faceRank <= 3) {
+          $leaderboardPlace = $("#" + currentEmotion + "Place" + faceRank);
+
+          const rankedPlayers = $leaderboardPlace.find('img').length;
+          if (faceRank === 1 && rankedPlayers === 0) { // only when empty
+            // $firstPlace = $("#" + currentEmotion + "Place1");
+            // $firstplace.addClass('overlay');
+            // const trophy = '<i class="fa fa-trophy" style="font-size: 20px; color: gold"></i>'
+            // $leaderboardSection.prepend(trophy);
+          }
+
+          // Bump players down if rank <= number of rankedPlayers
+          bumpLeaderboardCards(faceRank, rankedPlayers);
+
+          var leaderboardCard = $('<div class="leaderboardCard col-md-4"><div class="card mb-4 box-shadow"><img id="' + imgID + '" class="card-img-top" src="' + faceURL +
+            '" alt="Card image cap"><div class="card-body" style="padding: 0.25rem"><div class="d-flex justify-content-between align-items-center"><div class="btn-group"></div><small class="text-muted">' + score + " points" +
+            '</small></div></div></div>');
+          $leaderboardPlace.append(leaderboardCard);
+        } else {
+          console.log("Try again! Score:" + score + ", Emotion: " + capEmotion);
+        }
+      }
+    }
+
+
+    /*
+     * Capture image from `#videoElement` and POST to `/image` endpoint.
+     */
+    function captureImage() {
+      if (isCaptureInProgress) {
+        console.log("Capture in progress, skipping");
+        return;
+      }
+      isCaptureInProgress = true;
+      var video = $("#videoElement").get(0);
+      var canvas = document.createElement("canvas");
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      var canvasContext = canvas.getContext('2d');
+      canvasContext.translate(video.videoWidth, 0);
+      canvasContext.scale(-1, 1);
+      canvasContext.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      const dataURL = canvas.toDataURL('image/jpeg', 1.0);
+      var fd = new FormData(document.forms[0]);
+      fd.append("imageBase64", dataURL);
+      fd.append("emotion", currentEmotion);
+      fd.append("canTweetPhoto", $("#mode-toggle").get(0).checked);
+      $("#placeholderImage").show();
+      $output = $("#output");
+      $("#spinner").addClass("loader");
+      video.style.display = 'none';
+      console.log('submitting');
+
+      $.ajax({
+        type: "POST",
+        url: "{{ url_for('image') }}",
+        data: fd,
+        processData: false,
+        contentType: false,
+        timeout: 10000
+      }).done(function(data) {
+        $("#placeholderImage").hide();
+        $("#spinner").removeClass("loader");
+        // Add photo to top
+        var img = document.createElement('img');
+        img.src = data.photoPath;
+        img.classList.add("scoredImage");
+        updateLeaderboard(data.facesWithScores);
+        $output.prepend(img);
+        if ($("#tweet-mode").text() === "your IP address") {
+          $("#tweet-mode").text(data.addr);
+        }
+        $("#photoCountdown").hide();
+        $("#play").show();
+        isCaptureInProgress = false;
+      }).fail(function(data) {
+        console.log(data.responseCode);
+        isCaptureInProgress = false;
+      });
+    };
+
+    /*
+     * Move countdown bar.
+     */
+    function countdown() {
+      var countdownBar = document.getElementById("countdownBar");
+      var width = 1;
+      countdownTimerID = setInterval(frame, 30);
+
+      function frame() {
+        if (width >= 100) {
+          clearInterval(countdownTimerID);
+        } else {
+          width++;
+          countdownBar.style.width = width + '%';
+        }
+      }
+    }
+
+    function startCamera() {
+
+        if ($("#videoElement").css('display') != 'none') { // camera visible
+          try {
+            // start camera again
+            // navigator.mediaDevices.getUserMedia(constraints).
+            //     then(handleSuccess).catch(handleError);
+            start(stopTracks = false);
+            clearTimeout(captureImageTimerID);
+            clearTimeout(countdownTimerID);
+            $("#photoCountdown").hide();
+            // If showing results, continue showing results, else stream video
+            var beginStreaming = $("#output .scoredImage").length === 0;
+          }
+          catch (err) {
+            console.log("Caught an exception: " + err);
+        }
+      }
+    }
+
+    function pauseCamera() {
+      try {
+        $("#videoElement").get(0).srcObject.getVideoTracks().forEach(track => track.enabled= false);
+        // var vid = document.getElementById("videoElement");
+        // vid.pause();
+      } catch {}
+    }
+
+    /*
+     * Start webcam and prepare app.
+     */
+    function initialize() {
+      if (location.protocol !== "https:") location.protocol = "https:";
+
+      // only Safari is supported on iOS
+      var ua = window.navigator.userAgent;
+      var iOS = !!ua.match(/iPad/i) || !!ua.match(/iPhone/i);
+      var webkit = !!ua.match(/WebKit/i);
+      var iOSNotSafari = iOS && webkit && ua.match(/CriOS/i);
+      if (iOSNotSafari) browserWarning();
+
+      // Active
+      window.addEventListener('focus', startCamera);
+
+      // Inactive
+      window.addEventListener('blur', pauseCamera);
+      start();
+      initPlayButton();
+
+      $('#mode-toggle').change(
+          function(){
+              if (this.checked) {
+                  $("#tweet-mode").text("your face");
+                  privacyWarning();
+              } else {
+                $("#tweet-mode").text("your IP address");
+                $(".privacy-warning").hide();
+              }
+      });
+    };
+
+    $(document).ready(function() {
+      "use strict";
+      initialize();
+    });
+  </script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/shuffler.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/video.js') }}"></script>
+</body>
+
+</html>

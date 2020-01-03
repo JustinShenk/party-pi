@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+  <meta name="google-site-verification" content="wrdp4U0mYFWUKePF4biGs2g8wEYHmrNJTXupi_RDB6U" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  <!-- <script defer src="https://use.fontawesome.com/releases/v5.0.8/js/all.js"></script> -->
+  <script type="text/javascript" src="{{ url_for('static',filename='js/fontawesome-all.js') }}"></script>
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous" />
+  <!-- <link rel="stylesheet" href="{{ url_for('static',filename='css/main.css') }}" /> -->
+  <!-- jQuery library -->
+  <script type="text/javascript" src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.3.1.min.js"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}"></script>
+  <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+  <!-- <script type="text/javascript" src="https://canvg.github.io/canvg/rgbcolor.js"></script>
+<script type="text/javascript" src="https://canvg.github.io/canvg/StackBlur.js"></script>
+<script type="text/javascript" src="https://canvg.github.io/canvg/canvg.js"></script> -->
+<script src="https://apis.google.com/js/platform.js" async defer></script>
+<meta name="google-signin-client_id" content="934923410863-j458sf3fbnka5ie0hds765gjtpteoptn.apps.googleusercontent.com">
+  <script type="text/javascript" src="{{ url_for('static', filename='js/adapter-latest.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/exif.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/main.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/html2canvas.min.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='node_modules/rasterizehtml/dist/rasterizeHTML.allinone.js') }}"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+  <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/style4.css') }}" rel="stylesheet">
+  <script src="{{ url_for('static', filename='js/GaugeMeter.js') }}"></script>
+  <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+  <script src="{{ url_for('static', filename='js/holder.min.js') }}"></script>
+  <script id="mcjs">
+    ! function(c, h, i, m, p) {
+      m = c.createElement(h), p = c.getElementsByTagName(h)[0], m.async = 1, m.src = i, p.parentNode.insertBefore(m, p)
+    }(document, "script", "https://chimpstatic.com/mcjs-connected/js/users/37227b4f5e1bbd80f404cfef6/ae35f9ecc36904532f0c06bb7.js");
+  </script>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-30504176-4"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag('js', new Date());
+
+    gtag('config', 'UA-30504176-4');
+  </script>
+
+  <link href="{{ url_for('static', filename='css/album.css') }}" rel="stylesheet" />
+
+  <title>Party Pi</title>
+
+</head>
+
+<body>
+  <div class="wrapper">
+
+    <!-- Page Content  -->
+    <div id="content">
+      <div class="container-fluid">
+        <div class="alert alert-info fade show alert-dismissible">
+          <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+          <strong>Information</strong> Links are not yet implemented.
+        </div>
+        <form enctype="multipart/form-data" action="{{url_for('static',filename='tweet') }}" method="post" style="display:none">
+            <input id="image-file" type="file" />
+        </form>
+        <div id="spinner"></div>
+        <button type="button" id="sidebarCollapse" class="navbar-btn">
+            <!-- <i class="fas fa-align-left"></i> -->
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+
+        <div id="startScreen">
+          <div id="startScreenLogo">
+          </div>
+          <div id="gameInfo">
+            <span>
+            Let's play Party Pi, a computer vision emotion game</br>
+            by Justin Shenk.
+            </span>
+          </div>
+          <div id="letsPlay">
+            <!-- <span>Let's play</span> -->
+            <button id="btn-letsPlay" onclick="startGame();" type="button" class="btn btn-light btn-lg btn-square">Let's play</button>
+          </div>
+        </div>
+        <div id="videoContainer" style='position:relative'>
+          {% with messages = get_flashed_messages() %}
+            {% if messages %}
+              <ul class=flashes>
+              {% for message in messages %}
+                <li>{{ message }}</li>
+              {% endfor %}
+              </ul>
+            {% endif %}
+          {% endwith %}
+          <!-- <img id="placeholder"></img> -->
+          <img onclick="selectDevice()" id="logo" src="{{ url_for('static',filename='Peltarion_logotype.png') }}"></img>
+          <video class="flipH" playsinline muted autoplay loop id="videoElement" style="display:none;"></video>
+
+          <div class="overlay" style="display:none">
+            <div class="score">
+              <p id="shareLinks">
+                <a href="#" onclick="tweetPic()"><i class="fab fa-twitter"> </i> Click here to share your score on Twitter</a>
+                <br/>
+                <a href="#" onclick="emailPic()"><i class="fa fa-envelope"> </i> Get an email with your score</a>
+              </p>
+            </div>
+            <button id="prompt" class="main-btn" onclick="takePhoto()" type="button" class="btn-outline-secondary btn-square" data-emotion="surprise">Show </button>
+            <button id="playAgain" class="main-btn" onclick="playAgain()" type="button" class="btn-outline-secondary btn-square">Let's play again</button>
+            <button id="retakePhoto" class="main-btn" onclick="playAgain()" type="button" class="btn-outline-secondary btn-square">No face found. Try again!</button>
+          </div>
+
+          <div id="photoCountdown">
+            <div id="countdownBar">
+            </div>
+          </div>
+        </div>
+      </div>
+      <canvas id="canvas" width="" height=""></canvas>
+      <img id="captured"/>
+    </div>
+
+    <!-- Sidebar  -->
+    <nav id="sidebar" class="active">
+      <div class="select" style="display:none;">
+        <!-- <div class="g-signin2" data-onsuccess="onSignIn"></div> -->
+        <label for="videoSource">Video source: </label><select id="videoSource"></select>
+        <div>
+          <span id="alpha"></span>
+        </div>
+        <div>
+          <button type="button" onclick="flipVideoV()" id="flipVideo" class="btn navbar-btn">FlipV</button>
+        </div>
+      </div>
+      <i id="sidebarTrophy" class="fa fa-trophy fa-5x"></i>
+
+      <ul class="list-unstyled leaderboard">
+        <!-- {% for n in range(1,6) %}
+        <li>
+          <div class="wideCircle" id="place{{n}}" data-rank={{n}}>
+            <div class="leaderboardPosition">
+              <span class="name"></span>
+              <span class="leaderboardScore"></span>
+            </div>
+            <span class="positionNumber">{{n}}</span>
+            <div class="leaderboardPortrait">
+              <img>
+            </div>
+          </div>
+        </li>
+        {% endfor %} -->
+      </ul>
+      <a id="#sidebarTweet" href="#" onclick="tweetPic()"><i class="fab fa-twitter"> </i> Click here to share your score on Twitter</a>
+    </nav>
+  </div>
+
+  <script type="text/javascript">
+    // TODO: Scope variables properly
+    var isMobile;
+    var showGallery = false;
+    const emotionArray = [
+      'happy',
+      'angry',
+      'sad',
+      'fear',
+      'surprise',
+      'neutral'
+    ]
+    var takePhotoTimerID;
+    var currentEmotion = 'surprise';
+    var currentPlayerName = 'My Name';
+    var playButtonInitialized = false;
+    var countdownTimerID;
+    var isCaptureInProgress = false;
+    var leaders = [
+      // ['Namn Namnsson', 0, ''],
+      // ['Namn Namnsson', 1, ''],
+      // ['Namn Namnsson', 2, ''],
+      // ['Namn Namnsson', 3, ''],
+      // ['Namn Namnsson', 4, '']
+    ];
+
+    function saveMe(img_id) {
+      // Download image with `img_id`
+      if (!typeof img_id === 'string') {
+        img_id = img_id.id;
+      }
+      const img_src = $("#" + img_id).attr("src");
+      var a = document.createElement('a');
+      a.href = img_src;
+      const filename = "party_pi_" + String(img_id) + ".jpg";
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    function sendPic(canvas, api) {
+      const dataURL = canvas.toDataURL('image/jpeg', 1.0);
+      var fd = new FormData(document.forms[0]);
+      fd.append("imageBase64", dataURL);
+      fd.append("emotion", currentEmotion);
+      let xhr = new XMLHttpRequest();
+      xhr.open("POST", "/"+api);
+      xhr.send(fd);
+    }
+
+    function getPhotoElem() {
+      $("video").removeClass("blur");
+      $("#shareLinks").hide();
+      $("#playAgain").hide();
+      $(".overlay").addClass('picture');
+      var photo = $("#videoContainer").get(0);
+      var video = $("video").get(0);
+      photo.style.backgroundImage = "url("+video.poster+")";
+      photo.style.backgroundSize = "cover";
+      return photo;
+    }
+
+    function tweetPic() {
+      var api = 'tweet';
+      var photo = getPhotoElem();
+
+      html2canvas(photo, {
+          allowTaint:true,
+          backgroundColor:null,
+          profile:true,
+          logging:true
+        }).then(function(canvas){
+          setTimeout(function() {
+            sendPic(canvas, api);
+          }, 2000);
+        });
+      setTimeout(removePhoto,2100);
+      setTimeout(playAgain,2500);
+    }
+
+    function emailPic() {
+      var api = 'email';
+      var photo = getPhotoElem();
+      html2canvas(photo, {
+          allowTaint:true,
+          backgroundColor:null,
+          profile:true,
+          logging:true
+        }).then(function(canvas){
+          setTimeout(function() {
+            sendPic(canvas, api);
+          }, 2000);
+        });
+      setTimeout(removePhoto,2100);
+      setTimeout(playAgain,2500);
+    }
+
+    function flipVideoV() {
+      $("video").toggleClass("flipV");
+    }
+
+    function initPlayButton() {
+      // let the game begin!
+      console.log("begin games");
+      $("#play").click(function() {
+        playButtonInitialized = true;
+
+        $("#prompt").css('display','inline-block');
+        $("#videoElement").show();
+        startCamera();
+        $("#photoCountdown").show();
+        if (showGallery) {
+          // move photo from main display to gallery
+          moveToGallery();
+        } else {
+          showGallery = true;
+        }
+
+        // Show and start webcam
+        $("#prompt").text("Show " + currentEmotion + "_");
+        // Hide play button
+        $(this).hide();
+        // Start timer
+        countdown();
+        // Capture image and load image
+        takePhotoTimerID = setTimeout(takePhoto, 3000);
+      });
+    }
+    /**
+     * Move current photo to gallery.
+     */
+    function moveToGallery() {
+      // Move current photo to gallery
+      $('#gallery').css("display", "block");
+      $('#output img:visible').each(function(i) {
+        // Create card for image
+        const img_src = $(this).attr('src');
+        $(this).remove();
+
+        const galleryLength = $(".card-img-top").length;
+        const img_filename = "img_" + galleryLength;
+        const download_button = '<button type="button" id="btn_' + galleryLength +
+          '" class="btn btn-sm btn-outline-secondary view-btn btn-square" onclick="saveMe(&apos;img_' + galleryLength + '&apos;)"><i class="fa fa-download"></i></button>'
+        const img = '<img id="' + img_filename + '" class="card-img-top" src="' + img_src +
+          '" alt="Card image cap">'
+        const myCard = $('<div class="col-md-4" style=""><div class="card mb-4 box-shadow">' +
+          img + '<div class="card-body"><div class="d-flex justify-content-between align-items-center"><div class="btn-group">' +
+          download_button + '</div><small class="text-muted"></small></div></div></div>');
+        myCard.prependTo('#galleryImages');
+      });
+    }
+
+    /*
+     * Fix orientation of image from EXIF metadatas and draw canvas.
+     */
+    function orientation(img, canvas) {
+      // Set variables
+      var ctx = canvas.getContext("2d");
+      var exifOrientation = '';
+      var width = img.width,
+        height = img.height;
+
+      // Check orientation in EXIF metadatas
+      EXIF.getData(img, function() {
+        var allMetaData = EXIF.getAllTags(this);
+        exifOrientation = allMetaData.Orientation;
+        console.log('Exif orientation: ' + exifOrientation);
+      });
+
+      // set proper canvas dimensions before transform & export
+      if (jQuery.inArray(exifOrientation, [5, 6, 7, 8]) > -1) {
+        canvas.width = height;
+        canvas.height = width;
+      } else {
+        canvas.width = width;
+        canvas.height = height;
+      }
+
+      // transform context before drawing image
+      switch (exifOrientation) {
+        case 2:
+          ctx.transform(-1, 0, 0, 1, width, 0);
+          break;
+        case 3:
+          ctx.transform(-1, 0, 0, -1, width, height);
+          break;
+        case 4:
+          ctx.transform(1, 0, 0, -1, 0, height);
+          break;
+        case 5:
+          ctx.transform(0, 1, 1, 0, 0, 0);
+          break;
+        case 6:
+          ctx.transform(0, 1, -1, 0, height, 0);
+          break;
+        case 7:
+          ctx.transform(0, -1, -1, 0, height, width);
+          break;
+        case 8:
+          ctx.transform(0, -1, 1, 0, 0, width);
+          break;
+        default:
+          ctx.transform(1, 0, 0, 1, 0, 0);
+      }
+
+      // Draw img into canvas
+      ctx.drawImage(img, 0, 0, width, height);
+    }
+
+    /*
+     * Get random emotion from `emotionArray`.
+     */
+    function getRandomEmotion() {
+      var randomNumber = Math.floor(Math.random() * emotionArray.length);
+      return emotionArray[randomNumber];
+    }
+
+    function errorMessage(message, e) {
+      console.error(message, typeof e == 'undefined' ? '' : e);
+    }
+
+    function notImplemented() {
+
+    }
+
+    /*
+     * Capitalize first letter in string.
+     */
+    function capitalizeFirstLetter(string) {
+      return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+
+    /*
+     * Bump leaderboard cards so that three top players are in order.
+     *
+     */
+    function bumpLeaderboardCards(faceRank, rankedPlayers) {
+      $leaderboardPlace = $("#" + currentEmotion + "Place" + faceRank);
+      $firstPlace = $("#" + currentEmotion + "Place" + 1);
+      $secondPlace = $("#" + currentEmotion + "Place" + 2);
+      $thirdPlace = $("#" + currentEmotion + "Place" + 3);
+      if (faceRank === 3) { // third place
+        $leaderboardPlace.find('.leaderboardCard').remove();
+      } else if (faceRank === 2) { // second place
+        $leaderboardPlace.find('.leaderboardCard').remove();
+        $secondPlace.find('.leaderboardCard').prependTo($thirdPlace);
+      } else if (faceRank === 1) { // first place
+        $thirdPlace.find('.leaderboardCard').remove();
+        $secondPlace.find('.leaderboardCard').prependTo($thirdPlace);
+        $firstPlace.find('.leaderboardCard').prependTo($secondPlace);
+      }
+    }
+
+    function retakePhoto(video, dataURL) {
+      blurImage(video, dataURL);
+      $("#retakePhoto").show();
+    }
+
+    function hideButtons() {
+      $(".overlay button").each(function(index) {
+        $(this).hide();
+      })
+    }
+
+
+    /*
+     * Capture image from `#videoElement` and POST to ``/image` endpoint.
+     */
+    function takePhoto() {
+      hideButtons();
+      if (isCaptureInProgress) {
+        console.log("Capture in progress, skipping");
+        return;
+      }
+      isCaptureInProgress = true;
+      var video = $("#videoElement").get(0);
+      var canvas = document.createElement("canvas");
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      var canvasContext = canvas.getContext('2d');
+      canvasContext.translate(video.videoWidth, 0);
+      canvasContext.scale(-1, 1);
+      canvasContext.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      var dataURL = canvas.toDataURL('image/jpeg', 1.0);
+      var fd = new FormData(document.forms[0]);
+      fd.append("imageBase64", dataURL);
+      fd.append("emotion", currentEmotion);
+      // fd.append("canTweetPhoto", $("#mode-toggle").get(0).checked);
+      // $output = $("#output");
+      $("#spinner").addClass("loader");
+      // video.style.display = 'none';
+      console.log('submitting');
+
+      $.ajax({
+        type: "POST",
+        url: "{{ url_for('singleplayer') }}",
+        data: fd,
+        processData: false,
+        contentType: false,
+        timeout: 10000
+      }).done(function(data) {
+        isCaptureInProgress = false;
+        $("#spinner").removeClass("loader");
+        // Show original photo and add to leaderboard
+        const playerCount = data.facesWithScores.length;
+        if (playerCount === 0 | playerCount === undefined) {
+          retakePhoto(video, dataURL);
+          return;
+        }
+        const faceWithScore = data.facesWithScores[data.playerIndex];
+        const playerFaceURL = faceWithScore[0];
+        currentPlayerName = data.playerName;
+        var score = faceWithScore[1];
+        var newScoreAndPosition = showRank(video, dataURL, score, currentEmotion);
+        var newScore = newScoreAndPosition[0];
+        var position = newScoreAndPosition[1];
+        leaders.push([currentPlayerName, newScore, playerFaceURL]);
+        updateLeaderboard(playerFaceURL, position, newScore);
+        $("#prompt").hide();
+        $("#playAgain").show();
+        $("#sidebarTweet").show();
+        $(".overlay .score").show();
+        $("#shareLinks").show();
+        // var img = document.createElement('img');
+        // img.src = data.photoPath;
+        // img.classList.add("scoredImage");
+        // updateLeaderboard(data.facesWithScores);
+        // $output.prepend(img);
+        // if ($("#tweet-mode").text() === "your IP address") {
+        //   $("#tweet-mode").text(data.addr);
+        // }
+        // $("#photoCountdown").hide();
+        // $("#play").show();
+      }).fail(function(data, textStatus, xhr) {
+        console.log(textStatus);
+        isCaptureInProgress = false;
+      });
+    };
+
+    /*
+     * Move countdown bar.
+     */
+    function countdown() {
+      var countdownBar = document.getElementById("countdownBar");
+      var width = 1;
+      countdownTimerID = setInterval(frame, 30);
+
+      function frame() {
+        if (width >= 100) {
+          clearInterval(countdownTimerID);
+        } else {
+          width++;
+          countdownBar.style.width = width + '%';
+        }
+      }
+    }
+
+    function startCamera() {
+      // if ($("#videoElement").css('display') === 'block') { // camera visible
+      try {
+          // start camera again
+          // $("#videoElement").css('visibility','visible');
+          $("#videoElement").addClass("flipH");
+          start(stopTracks = false);
+          clearTimeout(takePhotoTimerID);
+          clearTimeout(countdownTimerID);
+          $("#photoCountdown").hide();
+          // If showing results, continue showing results, else stream video
+          var beginStreaming = $("#output .scoredImage").length === 0;
+        } catch (err) {
+          console.log("Caught an exception: " + err);
+        }
+    }
+
+    function pauseCamera() {
+      try {
+        $("#videoElement").get(0).srcObject.getVideoTracks().forEach(track => track.enabled = false);
+        // var vid = document.getElementById("videoElement");
+        // vid.pause();
+      } catch {}
+    }
+
+    function showPrompt() {
+      $('#prompt').css('display','inline-block');
+    }
+
+    function startGame() {
+      $("#startScreen").hide();
+      $("#videoElement").css('visibility', 'visible');
+      $("#videoElement").addClass('flipH');
+      startCamera();
+      $(".overlay").show();
+      showPrompt();
+    }
+
+    function sortPlayers() {
+      leaders.sort(function(a, b) {
+        return parseInt(b[1], 10 - parseInt(a[1], 10));
+      })
+    }
+
+    function sortLeaderboard(ul) {
+      var new_ul = ul.cloneNode(false);
+
+      var lis = [];
+      for (var i = ul.children.length; i--;) {
+        if (ul.children[i].nodeName === 'LI')
+          lis.push(ul.children[i]);
+      }
+
+      lis.sort(function(a, b) {
+        return parseInt(a.children[0].dataset.rank, 10) -
+          parseInt(b.children[0].dataset.rank, 10);
+      });
+
+      for (var i = 0; i < lis.length; i++)
+        new_ul.appendChild(lis[i]);
+      ul.parentNode.replaceChild(new_ul, ul);
+    }
+
+    function removePhoto() {
+      $("#videoContainer").css('backgroundImage','');
+      $(".overlay").removeClass('picture');
+      // $(".score").css('transform', 'scale(1,1)');
+    }
+
+    function resetLeaderboard() {
+      $(".leaderboard div").removeClass("activePlace");
+      $(".leaderboard").removeClass("lowRanking");
+    }
+
+    function playAgain() {
+      $("#sidebarTweet").hide();
+      hideButtons();
+      $("#prompt").css('display','inline-block');
+      $("#videoElement").removeClass('blur');
+      $("#videoElement").css('visibility', 'visible')
+      $(".GaugeMeter").remove();
+      $(".score").hide();
+      resetLeaderboard();
+      startCamera();
+    }
+
+    function rankPlayer(score, ranking = "ordinal") {
+      var scores = [];
+      leaders.forEach(function(player) {
+        scores.push(parseInt(player[1]));
+      });
+      // const sorted = scores.slice().sort(function(a,b){ return b-a });
+      // const ranks = scores.slice().map(function(v){ return sorted.indexOf(v)+1 });
+      var position = 1;
+
+      for (var i = 0; i < scores.length; i++) {
+        if (ranking === "ordinal") {
+          if (scores[i] > score) {
+            position++;
+          } else if (scores[i] == score) {
+            score--;
+            position++;
+          }
+        }
+      }
+      console.log("scores:" + scores + " " + score + " position" + position);
+      return [score, position];
+    }
+
+    function bumpPlayers(leaderboardItem, position) {
+      if (position > 5) { // hide 5th player and add current player
+        $(".leaderboard li").get(4).style.display = "none";
+        $(".leaderboard").after('<ul class="list-unstyled">' + leaderboardItem + '</ul>');
+      }
+      // shift lower ranks down
+      var leaderboardCount = $(".leaderboard li").length;
+      for (var i = leaderboardCount; i >= position; i--) {
+        if (i == 5) {
+          $(".leaderboard li").get(4).remove();
+        } else {
+          console.log("i:" + i + " position:" + position + $(".leaderboard li").length)
+          var currItem = $(".leaderboard li").get(i - 1);
+          var wideCircle = currItem.children[0]; // wideCircle
+          wideCircle.dataset.rank = i + 1;
+          wideCircle.children[1].textContent = i + 1; // positionNumber
+        }
+      }
+      if (position <= 5) {
+        $(".leaderboard").append(leaderboardItem);
+      }
+      var leaderboard = $("ul.leaderboard").get(0);
+      sortLeaderboard(leaderboard);
+    }
+
+    function resetLeaderboard() {
+      try {
+        var leaderCount = $(".leaderboard li").length;
+        if (leaderCount == 5) {
+          $(".leaderboard li").get(4).style.display = ""; // show 5th player
+        }
+        var listCount = $("#sidebar ul").length;
+        if (listCount > 1) {
+          $("#sidebar ul").get(1).remove(); // remove low-rank player from bottom\
+        }
+      } catch {
+        console.log("caught error restoring 5th player");
+      }
+    }
+
+    function updateLeaderboard(playerFaceURL, position, score) {
+      extraClass = ""
+      if (position > 1) {
+        extraClass = "activePlace"
+      }
+      var leaderboardItem = '<li><div class="wideCircle ' + extraClass + '" data-rank=' + position + '><div class="leaderboardPosition"><span class="name">' + currentPlayerName + '</span><span class="leaderboardScore">' + score +
+        'p</span></div><span class="positionNumber">' + position + '</span><div class="leaderboardPortrait"><img src=' + playerFaceURL + '></div></div></li>'
+      // add player to leaderboard
+      if (position > 5) {
+        $(".leaderboard").addClass("lowRanking"); // draw line between players
+      }
+      bumpPlayers(leaderboardItem, position);
+    }
+
+    function emotion2adj(emotion) {
+      if (emotion === "surprise") {
+        return "surprised"
+      } else if (emotion === "fear") {
+        return "afraid"
+      }
+      return emotion;
+    }
+
+    function blurImage(video, dataURL) {
+      video.src = '';
+      video.setAttribute('poster', dataURL);
+      video.classList.remove('flipH');
+      video.classList.add('blur');
+    }
+
+
+    function initializeLeaderboard() {
+      const defaultImagePath = "{{ url_for('static',filename='playerFace.png') }}";
+      $(".leaderboard li").each(function(index) {
+        $('.name', this).text(leaders[index][0]);
+        $('.leaderboardScore', this).text(leaders[index][1]);
+        $('.leaderboardPortrait img', this).attr('src', defaultImagePath);
+      })
+    }
+
+    function showRank(video, dataURL, score, currentEmotion) {
+      blurImage(video, dataURL);
+      $(".overlay .score").show();
+      var newScoreAndPosition = rankPlayer(score);
+      var newScore = newScoreAndPosition[0];
+      var position = newScoreAndPosition[1];
+      const emotion = emotion2adj(currentEmotion);
+      $(".Gaugemeter").remove();
+      console.log("pos" + position);
+      var gauge = '<div class="GaugeMeter" id="GaugeMeter_1" data-percent="' + newScore +
+        '" data-append="%" data-size="350" data-color="#f7b35b" data-style="Arch" data-back="RGBa(255,255,255,1)" data-width="40" data-animate_text_colors="true" data-label="' + emotion + '" data-label_color="#FFF"></div>'
+      var gaugeTrophy = '<span class="overlayTrophy fa-layers fa-fw"><i class="fa fa-trophy fa-3x"></i><span class="fa-layers-text" data-fa-transform="right-7 grow-6"></span></span>'
+      gauge = gauge.concat(gaugeTrophy);
+      $(".overlay .score").prepend(gauge);
+      $(".fa-layers-text").text(position);
+      $(".GaugeMeter").gaugeMeter();
+      return [newScore, position];
+    }
+
+    function notImplementedWarning() {
+      $(".alert").show();
+      setTimeout(function() {
+        $(".alert").hide();
+      }, 2000);
+    }
+
+    /*
+     * Start webcam and prepare app.
+     */
+    function initialize() {
+      if (location.protocol !== "https:") location.protocol = "https:";
+
+      // only Safari is supported on iOS
+      var ua = window.navigator.userAgent;
+      var iOS = !!ua.match(/iPad/i) || !!ua.match(/iPhone/i);
+      var webkit = !!ua.match(/WebKit/i);
+      var iOSNotSafari = iOS && webkit && ua.match(/CriOS/i);
+      if (iOSNotSafari) browserWarning();
+
+      initializeLeaderboard();
+      startCamera();
+      $('#sidebarCollapse').on('click', function() {
+        $('#sidebar').toggleClass('active');
+        $(this).toggleClass('active');
+      })
+
+      //   // Active
+      //   window.addEventListener('focus', startCamera);
+      //
+      //   // Inactive
+      //   window.addEventListener('blur', pauseCamera);
+      //
+      //   $('#mode-toggle').change(
+      //       function(){
+      //           if (this.checked) {
+      //               $("#tweet-mode").text("your face");
+      //               privacyWarning();
+      //           } else {
+      //             $("#tweet-mode").text("your IP address");
+      //             $(".privacy-warning").hide();
+      //           }
+      //   });
+      // };
+    }
+    $(document).ready(function() {
+      "use strict";
+      initialize();
+    });
+  </script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/video.js') }}"></script>
+</body>
+
+</html>
