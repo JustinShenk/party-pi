@@ -1,4 +1,3 @@
-#FROM tiangolo/uwsgi-nginx-flask:python3.7 as partypi
 FROM tiangolo/meinheld-gunicorn-flask:python3.7 as partypi
 MAINTAINER Justin Shenk <shenkjustin@gmail.com>
 
@@ -6,7 +5,6 @@ RUN mkdir -p /app
 WORKDIR /app
 
 COPY ./app/requirements.txt /app
-#RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
 #Install partypi
