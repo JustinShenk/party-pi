@@ -1,7 +1,3 @@
 node_modules/
-<<<<<<< HEAD
 __pycache__/
-static/images/
-=======
-__py_cache__/
->>>>>>> da653a1... Add gitignore
+*/static/images/*
